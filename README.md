@@ -1,0 +1,350 @@
+# Finance Close Control Agent
+
+An evidence-based, auditable control assistant for month-end close exceptions, portable across enterprise model providers.
+
+---
+
+## Why this exists
+
+Every month, a group finance function raises more close exceptions than it has reviewer hours: unsupported manual
+entries, late postings, reconciliation differences, suspected duplicates, postings to high-risk accounts. Most are
+benign. A few are not. The scarce resource is not analysis — it is the attention of the people qualified to decide.
+
+Triage is therefore an obvious candidate for automation, and an obviously dangerous one. A control process has
+requirements that a helpful summary does not meet: the same checks must run on every item, the reasoning must rest on
+a policy someone can open and read, high-risk items must reach a person regardless of how confident the software is,
+and six months later an auditor must be able to reconstruct what the system knew when it made a recommendation.
+
+This project explores a narrower question than "can AI do finance": **can a finance-control workflow stay
+evidence-based, auditable and portable across enterprise model providers?** It is a prototype built to be discussed,
+challenged, and — where it falls short — to say clearly where.
+
+## What it does
+
+For one close exception, the system:
+
+1. runs 18 deterministic control checks over the ledger in DuckDB (materiality, approval, segregation of duties,
+   timeliness, duplicates, reconciliation status, variance, …);
+2. retrieves the governing policy sections through LlamaIndex, with document, section and chunk id preserved;
+3. asks a language model — reached through a provider abstraction, not an SDK — to classify, rate and recommend,
+   returning a validated Pydantic object rather than prose;
+4. checks every citation the model made against what was actually retrieved, and strips the ones that were not;
+5. applies a deterministic review gate that decides whether a person must look at the case;
+6. writes an audit record from which the whole decision can be reconstructed.
+
+It never posts, reverses or modifies a ledger entry. It recommends; a named person decides.
+
+## Architecture
+
+```mermaid
+flowchart TD
+    A["Synthetic ERP extract<br/>861 entries · 120 reconciliations · 60 exceptions"] --> B
+
+    subgraph DET["Deterministic layer — no model involved"]
+        B["DuckDB analytics<br/>duplicates · variance · history"] --> C["18 control checks<br/>typed, thresholded signals"]
+    end
+
+    C --> D["LlamaIndex policy retrieval<br/>6 policies · 63 sections<br/>query expanded from fired signals"]
+    C --> E
+    D --> E["LangChain workflow<br/>fixed six-stage pipeline"]
+
+    E --> F["Provider abstraction<br/>get_llm(provider, model)"]
+    F --> G["mock<br/>local, free"]
+    F --> H["AWS Bedrock<br/>ChatBedrockConverse"]
+    F --> I["Vertex AI<br/>ChatVertexAI"]
+
+    G --> J["Structured decision<br/>Pydantic ControlDecision"]
+    H --> J
+    I --> J
+
+    J --> K["Citation grounding<br/>not retrieved → stripped"]
+    K --> L{"Review gate<br/>deterministic"}
+    L -->|"clean · confident · evidenced"| M["Auto recommendation"]
+    L -->|"anything else"| N["Human review"]
+    M --> O["Audit trail (SQLite)<br/>signals · evidence · raw output · thresholds"]
+    N --> O
+```
+
+The load-bearing idea is the boundary inside that diagram. Everything before the model is deterministic and
+reproducible; the model interprets facts it did not compute, against policy it did not choose, and its output is
+constrained, grounded and gated on the way out.
+
+## Example
+
+```
+$ fcca run-case --exception EXC-0001 --provider mock
+
+Exception EXC-0001  ·  missing supporting documentation  ·  NL30  ·  period 2026-07
+Manual journal entry above group materiality posted without a supporting document reference.
+
+ journal entry  JE-202607-X0001   SA
+       account  600000  Personnel expenses
+   cost center  CC-1000
+        amount  EUR 434,538.11
+        posted  2026-07-15 16:29 by u.jansen
+ document date  2026-07-15  (0 days to post)
+       support  none
+      approver  u.devries
+reconciliation  not_applicable
+
+Deterministic controls — 4 of 18 triggered
+check                            severity  observed      detail
+CHK-01 supporting_documentation  CRITICAL  none          Manual posting carries no supporting document reference;
+                                                         amount is at or above the clearly trivial threshold.
+CHK-09 narrative_quality         WARNING   As discussed  Description does not allow an independent reviewer to
+                                                         understand the business event.
+CHK-13 materiality_assessment    CRITICAL  434538.11     At or above group materiality; reportable to Group
+                                                         Accounting. Band: material.
+CHK-17 account_variance          WARNING   447791.31     Account movement of 447,791 reporting currency (858.9%)
+                                                         versus the prior-period average exceeds the variance
+                                                         escalation trigger.
+
+Risk        HIGH    confidence 0.87    classification missing_supporting_documentation
+Finding     Missing supporting documentation: supporting documentation breached and 3 further indicator(s).
+Action      Escalate to the entity Financial Controller before entity sign-off.
+Disposition HUMAN REVIEW REQUIRED
+  · Deterministic mandatory escalation trigger(s): CHK-01 supporting_documentation; CHK-13 materiality_assessment
+  · Risk rated high; policy reserves high-rated items for human review.
+  · Recommended action 'escalate_to_financial_controller' requires a named person to act.
+
+Policy evidence
+  > Supporting Documentation Standard §4.2 Escalation   relevance 1.00   policies/supporting_documentation_standard.md
+  > Supporting Documentation Standard §4.1 Standard treatment   relevance 0.87
+    Materiality and Escalation Policy §3.3 Variance escalation   relevance 0.74
+    Journal Entry Policy §3. Documentation requirement   relevance 0.61
+
+mock:deterministic-stub-v1  ·  1 parse attempt(s)  ·  mode json_schema_prompt  ·  prompt 2b5c4bd71a89
+```
+
+`>` marks the sections the decision actually cited. Everything shown here is also written to the audit trail.
+
+## Multi-cloud design
+
+Nothing in the workflow imports a cloud SDK. One factory returns a `BaseChatModel`:
+
+```python
+from fcca.providers import get_llm
+
+model = get_llm(provider="bedrock", model_name="eu.anthropic.claude-sonnet-4-5-20250929-v1:0")
+model = get_llm(provider="vertex", model_name="gemini-2.5-flash")
+model = get_llm(provider="mock")  # local, deterministic, free
+```
+
+No model id appears anywhere outside [`src/fcca/config.py`](src/fcca/config.py). Bedrock uses
+`ChatBedrockConverse` — the Converse API rather than a model-specific invoke API — so changing `BEDROCK_MODEL_ID`
+from an Anthropic model to a Nova, Llama or Mistral model changes no code. Vertex uses `ChatVertexAI`. Both are
+optional installs; neither is needed to run, test or demonstrate the project.
+
+Why this matters outside an architecture diagram: enterprise model access is decided by procurement, data residency
+and an existing cloud agreement, not by the engineering team. A finance workflow that can only run on one provider may
+not be deployable at all. The portability claim here is enforced by a test
+([`tests/test_workflow.py`](tests/test_workflow.py)) that runs the entire pipeline against a second, unrelated chat
+model and asserts the behaviour is unchanged.
+
+Structured output has two modes, both producing a validated `ControlDecision`: `json_schema_prompt` (default,
+identical on every provider) and `native_tools` (delegates to the provider's own structured-output API). The portable
+one is the default deliberately — a prototype that only works where tool calling is good has not demonstrated
+portability.
+
+## Auditability and human review
+
+**Grounding.** The model may cite only from the list of retrieved sections supplied with the case, and it never
+supplies policy text — passages come from the retriever. Citations are matched against what was retrieved; unmatched
+ones are stripped from the decision and recorded as ungrounded. That turns "the system cited a policy" into "the
+recommendation is traceable to a passage a reviewer can open".
+
+**The gate is deterministic and it always wins.** Auto-recommendation requires *all* of: no mandatory escalation
+trigger, risk not `high`, confidence at or above threshold, enough grounded evidence, no ungrounded citations, and a
+remediation that carries no external consequence. Everything else is an explicit `human_review` state with the reasons
+recorded. A model that is certain an unsupported material entry is fine cannot clear it — the control layer overrides
+the model, not the other way round. A case the system *fails* on is not a pass either: it becomes a human-review item
+with the failure logged.
+
+**Reconstruction.** `fcca audit --exception EXC-0001` returns everything the decision rested on:
+
+```json
+{
+  "exception_id": "EXC-0001", "status": "decided",
+  "provider": "mock", "model": "deterministic-stub-v1",
+  "structured_output_mode": "json_schema_prompt", "code_revision": "a1b2c3d",
+  "confidence": 0.87, "human_review_required": 1, "parse_attempts": 1,
+  "prompt_sha256": "2b5c4bd71a893be5ccf44ea80d6f6087",
+  "deterministic_checks": "… 18 signals with observed values and thresholds …",
+  "policy_evidence": [
+    {"document": "Supporting Documentation Standard", "section": "4.2 Escalation",
+     "node_id": "pol-a0e5377dc28c", "score": 1.0, "passage_sha256": "2468f9048a52120d"}
+  ],
+  "llm_raw_output": "… the unvalidated response, kept alongside the validated decision …",
+  "gate": {"disposition": "human_review", "reasons": ["…"]},
+  "settings_snapshot": {"materiality_group": 250000.0, "journal_approval_threshold": 50000.0,
+                        "auto_approve_min_confidence": 0.8}
+}
+```
+
+The thresholds in force are stored with each decision, so a recommendation can be reread against the policy
+configuration of the month it was made. Credentials never appear: only a non-secret settings snapshot is persisted,
+and a test asserts it. `fcca review --exception EXC-0001 --action approved --reviewer u.klein` closes the loop by
+appending the human disposition to the same record.
+
+## Evaluation
+
+60 labelled exceptions across 20 scenarios, spanning all three risk ratings and both dispositions. Labels are ground
+truth **by construction** — each exception is generated from a named scenario whose expected outcome follows from the
+policy set — not human annotations of production data. That is a real limitation, stated here rather than buried.
+
+```bash
+python -m fcca.evaluate --provider mock
+python -m fcca.evaluate --compare
+```
+
+Current [`results/benchmark.csv`](results/benchmark.csv):
+
+| provider | model | status | cases | risk acc | esc prec | esc rec | cite acc | valid out |
+|---|---|---|---|---|---|---|---|---|
+| mock | deterministic-stub-v1 | ok | 60 | 1.00 | 1.00 | 1.00 | 0.95 | 1.00 |
+| bedrock | *(configurable)* | **not_run** | not_run | not_run | not_run | not_run | not_run | not_run |
+| vertex | *(configurable)* | **not_run** | not_run | not_run | not_run | not_run | not_run | not_run |
+
+**Read that table carefully, because two of its three rows are the honest part.**
+
+The mock provider is a rule engine wearing a chat-model interface: it reads the control signals out of the prompt and
+applies the policy rubric in Python. Its perfect scores measure *pipeline integrity* — that signals reach the
+decision, that every output validates, that citations ground, that the gate behaves, that the audit record is
+complete — and say **nothing whatsoever** about how a real model performs. The row is labelled as a stub in the CSV
+for that reason.
+
+The Bedrock and Vertex rows read `not_run` because this repository has never called those endpoints. The adapters are
+implemented and importable; nobody has spent the credits. No number is estimated, defaulted or inferred — a cell is
+either a measurement or the word `not_run`. Run them with your own account and the same command fills the row in.
+
+Metrics collected: risk accuracy, action-category accuracy, escalation precision / recall / F1, retrieval recall
+(did the retriever surface the governing document?) reported separately from citation accuracy (did the decision cite
+it?), structured-output validity, ungrounded-citation rate, unsupported-recommendation rate, latency percentiles, and
+cost per case when the provider reports token usage and prices are configured. Escalation recall and precision are the
+two that matter operationally: recall is missed escalations, precision is wasted reviewer time. The metric functions
+are tested against deliberately wrong answers, not only correct ones.
+
+## Run it locally
+
+No cloud account, no API key, no cost.
+
+```bash
+git clone https://github.com/morichtereur/finance-close-control-agent
+cd finance-close-control-agent
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+
+python -m fcca.generate_data        # seeded synthetic ledger + labelled exception set
+python -m fcca.ingest_policies      # chunk and index the policy knowledge base
+python -m fcca.run_case --exception EXC-0001 --provider mock
+python -m fcca.evaluate --provider mock
+python -m fcca.cli audit --exception EXC-0001
+```
+
+Requires Python 3.12+. Every command is also available as `fcca <subcommand>` after installation, and `fcca info`
+prints the active provider, thresholds, dataset shape and index size.
+
+## Run it on AWS Bedrock
+
+```bash
+pip install -e ".[bedrock]"
+aws sso login                        # or any standard AWS credential source
+export LLM_PROVIDER=bedrock
+export AWS_REGION=eu-central-1
+export BEDROCK_MODEL_ID=eu.anthropic.claude-sonnet-4-5-20250929-v1:0
+python -m fcca.run_case --exception EXC-0001
+python -m fcca.evaluate --provider bedrock
+```
+
+Any chat model enabled in your account works; model access must be granted in the Bedrock console first.
+Authentication uses the standard AWS credential chain — this project never reads, stores or logs a key.
+
+## Run it on Google Vertex AI
+
+```bash
+pip install -e ".[vertex]"
+gcloud auth application-default login
+export LLM_PROVIDER=vertex
+export GOOGLE_CLOUD_PROJECT=your-project-id
+export VERTEX_LOCATION=europe-west4
+export VERTEX_MODEL_NAME=gemini-2.5-flash
+python -m fcca.evaluate --provider vertex
+```
+
+Authentication uses Application Default Credentials or an attached service account.
+
+## Tests
+
+```bash
+pytest          # 107 tests, mock provider only, no network calls
+ruff check .
+mypy
+```
+
+Coverage spans the finance rules at their thresholds, retrieval (does the right section come back?), structured-output
+validation and its failure modes, the review gate including the deterministic override, provider substitution, audit
+completeness and secret-freedom, evaluation metrics against wrong answers, and data-generation reproducibility.
+
+## Repository structure
+
+```
+policies/            six illustrative finance policies — the RAG knowledge base
+src/fcca/
+  config.py          every threshold, path and model id; nothing hard-coded elsewhere
+  models.py          Pydantic contracts: facts, signals, decisions, evidence
+  masterdata.py      synthetic entities, accounts, cost centres, users
+  generate_data.py   seeded generator: ledger, reconciliations, exceptions, labels
+  analytics.py       DuckDB queries — duplicates, variance, history, reconciliations
+  controls/          18 deterministic checks (materiality, journal, reconciliation)
+  retrieval/         LlamaIndex index build + retriever with source attribution
+  providers/         get_llm factory · mock · bedrock · vertex
+  workflow/          LangChain pipeline, prompts, structured output, grounding, gate, tools
+  audit/             SQLite decision log and reconstruction
+  evaluation/        metrics and the multi-provider benchmark
+  cli.py             fcca generate-data | ingest-policies | run-case | evaluate | audit | review | info
+tests/               107 tests, mock provider only
+docs/                architecture.md · portfolio-copy.md
+results/             benchmark.csv and per-provider run detail
+```
+
+## Design decisions worth arguing with
+
+**Retrieval is lexical (BM25), not embeddings.** The corpus is six short, controlled, jargon-dense documents where the
+decisive tokens are exact — *materiality*, *suspense*, *segregation*, *50,000*. Lexical matching handles those
+precisely, needs no embedding provider (so the repository runs free), and is deterministic, which makes retrieval
+itself unit-testable and the audit trail reproducible. The retriever is a LlamaIndex `BaseRetriever`, so a vector or
+hybrid index is a constructor change in one module. On a corpus of 500 policies across a group's jurisdictions that
+swap is the right call — at six, it would be complexity without benefit.
+
+**Tools exist but no agent drives them.** The capabilities are real typed LangChain tools (`calculate_materiality`,
+`retrieve_policy`, `get_account_risk`, …), invoked deterministically by the orchestrator. In a close, the sequence of
+checks *is* the control design: every exception must receive the same checks in the same order, or the population is
+no longer comparable and the close is not auditable. An agent that plans its own path produces a different audit trail
+for every case. LangGraph was considered and left out — the workflow has no cycles, no branching state machine and no
+need for one.
+
+**The policy documents do not drive the thresholds.** Retrieved policy text informs the model's reasoning; the numeric
+thresholds live in configuration. Parsing enforceable limits out of prose would be the more impressive demo and the
+worse control: a control threshold must be explicit, versioned and testable. The cost is that a policy edit and a
+configuration change have to be made together, which is honest about what would need governance in production.
+
+## Limitations
+
+- **Synthetic data.** No real entity, account, employee, amount or policy appears anywhere in this repository. The
+  policies are illustrative documents written for the prototype, not accounting guidance.
+- **Labels are ground truth by construction**, derived from the scenario definitions, not from human review of
+  production exceptions. They validate the pipeline, not the finance judgement.
+- **Mock results measure the harness, not a model.** See the evaluation section.
+- **Bedrock and Vertex have not been executed here.** The adapters are implemented; the benchmark rows read `not_run`
+  until someone runs them with their own credentials.
+- **Prototype, not production.** No authentication, no multi-tenancy, no ERP integration, no retention policy, no
+  monitoring, no change control over the policy corpus. [`docs/architecture.md`](docs/architecture.md) lists what
+  would have to change first.
+- **Decision support only.** Nothing here posts to a ledger, and no path in the code can. It is not financial,
+  accounting or audit advice.
+- **Not certified against anything.** No SOX, ISAE, ISO or GDPR claim is made or implied.
+
+## Licence
+
+MIT. See [`docs/architecture.md`](docs/architecture.md) for the design rationale and
+[`docs/portfolio-copy.md`](docs/portfolio-copy.md) for a short case-study write-up.

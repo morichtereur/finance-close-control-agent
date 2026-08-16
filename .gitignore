@@ -1,0 +1,31 @@
+# Environments and secrets
+.env
+.venv/
+venv/
+*.pem
+*.json.key
+credentials.json
+service-account*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Generated artefacts (reproducible via `fcca generate-data` / `fcca ingest-policies`)
+data/raw/
+data/processed/
+data/evaluation/
+audit.db
+
+# Audit exports may contain full case detail; benchmark results are committed on
+# purpose so the comparison table travels with the repository.
+results/*.jsonl
+
+# OS
+.DS_Store
