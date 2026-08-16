@@ -186,6 +186,27 @@ configuration of the month it was made. Credentials never appear: only a non-sec
 and a test asserts it. `fcca review --exception EXC-0001 --action approved --reviewer u.klein` closes the loop by
 appending the human disposition to the same record.
 
+## Security and governance
+
+- **Credentials never enter the project.** AWS uses its standard credential chain, Vertex uses Application Default
+  Credentials. Nothing here reads, stores, prints or logs a key, and `.env` is git-ignored.
+- **Only a non-secret settings snapshot is persisted.** A test asserts no audit field name matches
+  `key|secret|token|password|credential`.
+- **Minimum necessary context leaves the boundary.** One entry, its 18 control signals, the retrieved passages. No
+  unrelated postings, no counterparty master data, no customer records — and the exact payload is reproduced in the
+  audit trail, so what was sent is not a matter of trust.
+- **Synthetic data only.** No real entity, account, employee or amount appears in this repository.
+- **Retrieved text is data, not instruction.** Policy passages and free-text entry descriptions are treated as
+  untrusted input. The defence is layered: the output vocabulary is closed, there is no write path in the codebase,
+  and the escalation gate never reads model output — so a successful injection cannot clear a flagged item. The system
+  prompt also says to ignore embedded instructions, which is the weakest of the three and listed last for that reason.
+- **Tool capability is bounded.** Six typed, read-only tools. None of them writes anywhere.
+- **Provider and model are recorded per decision**, alongside the code revision and the thresholds in force — a model
+  change is a change to a control, and the record shows which one made each recommendation.
+- **No compliance claim.** This is a prototype. Nothing here is certified against SOX, ISAE, ISO or GDPR, and
+  [`docs/architecture.md`](docs/architecture.md) §10 lists what would have to change before it went near a real
+  ledger.
+
 ## Evaluation
 
 60 labelled exceptions across 20 scenarios, spanning all three risk ratings and both dispositions. Labels are ground
@@ -199,19 +220,21 @@ python -m fcca.evaluate --compare
 
 Current [`results/benchmark.csv`](results/benchmark.csv):
 
-| provider | model | status | cases | risk acc | esc prec | esc rec | cite acc | valid out |
-|---|---|---|---|---|---|---|---|---|
-| mock | deterministic-stub-v1 | ok | 60 | 1.00 | 1.00 | 1.00 | 0.95 | 1.00 |
-| bedrock | *(configurable)* | **not_run** | not_run | not_run | not_run | not_run | not_run | not_run |
-| vertex | *(configurable)* | **not_run** | not_run | not_run | not_run | not_run | not_run | not_run |
+| provider | model | status | cases | risk acc | action acc | esc prec | esc rec | cite acc | valid out |
+|---|---|---|---|---|---|---|---|---|---|
+| mock | deterministic-stub-v1 | ok | 60 | 1.00 | 0.90 | 1.00 | 1.00 | 0.95 | 1.00 |
+| bedrock | *(configurable)* | **not_run** | not_run | not_run | not_run | not_run | not_run | not_run | not_run |
+| vertex | *(configurable)* | **not_run** | not_run | not_run | not_run | not_run | not_run | not_run | not_run |
 
 **Read that table carefully, because two of its three rows are the honest part.**
 
 The mock provider is a rule engine wearing a chat-model interface: it reads the control signals out of the prompt and
-applies the policy rubric in Python. Its perfect scores measure *pipeline integrity* — that signals reach the
-decision, that every output validates, that citations ground, that the gate behaves, that the audit record is
-complete — and say **nothing whatsoever** about how a real model performs. The row is labelled as a stub in the CSV
-for that reason.
+applies the policy rubric in Python. Its scores measure *pipeline integrity* — that signals reach the decision, that
+every output validates, that citations ground, that the gate behaves, that the audit record is complete — and say
+**nothing whatsoever** about how a real model performs. The row is labelled as a stub in the CSV for that reason. Even
+so it does not score 1.00 everywhere: six cases pick a defensible-but-different remediation (`route_to_preparer`
+instead of `no_action` on a flagged-but-compliant item) and three cite a neighbouring policy section rather than the
+governing one. Those are the metrics doing their job, not noise to be tuned away.
 
 The Bedrock and Vertex rows read `not_run` because this repository has never called those endpoints. The adapters are
 implemented and importable; nobody has spent the credits. No number is estimated, defaulted or inferred — a cell is

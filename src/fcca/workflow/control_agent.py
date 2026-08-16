@@ -20,7 +20,6 @@ from __future__ import annotations
 
 import hashlib
 import logging
-from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any
 
@@ -46,13 +45,6 @@ from fcca.workflow.prompts import build_messages
 from fcca.workflow.structured import invoke_structured
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class _Stage:
-    """Marker used to attribute a failure to the pipeline step that raised it."""
-
-    name: str
 
 
 class ControlAgent:

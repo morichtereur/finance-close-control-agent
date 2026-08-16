@@ -167,6 +167,23 @@ def _info(argv: list[str]) -> int:
         )
     except FCCAError as exc:
         con.print(f"Policy index  {exc}", style="yellow")
+    con.print()
+
+    con.print("Control tools", style="bold")
+    con.print("  invoked deterministically by the workflow, not selected by a model", style="dim")
+    try:
+        from fcca.analytics import CloseAnalytics
+        from fcca.retrieval.retriever import PolicyRetrievalService
+        from fcca.workflow.tools import build_control_tools, tool_catalogue
+
+        with CloseAnalytics(settings) as analytics:
+            tools = build_control_tools(analytics, PolicyRetrievalService(settings), settings)
+            for entry in tool_catalogue(tools):
+                con.print(
+                    f"  {entry['name']:28s} {entry['description'].splitlines()[0]}", style="dim"
+                )
+    except FCCAError as exc:
+        con.print(f"  unavailable: {exc}", style="yellow")
     return 0
 
 
