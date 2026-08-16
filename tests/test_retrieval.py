@@ -4,12 +4,11 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from tests.conftest import make_entry, make_exception
-
 from fcca.config import Settings
 from fcca.controls import journal_checks as jc
 from fcca.retrieval.index import load_policy_nodes, policy_index_manifest
 from fcca.retrieval.retriever import PolicyRetrievalService, tokenize
+from tests.conftest import make_entry, make_exception
 
 
 def test_index_covers_every_policy_document(settings: Settings) -> None:
