@@ -1,0 +1,83 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "finance-close-control-agent"
+version = "0.1.0"
+description = "Evidence-based, auditable control assistant for month-end close exceptions, portable across enterprise model providers."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Moritz Richter" }]
+keywords = [
+    "finance-transformation",
+    "month-end-close",
+    "internal-controls",
+    "rag",
+    "langchain",
+    "llamaindex",
+    "bedrock",
+    "vertex-ai",
+]
+
+dependencies = [
+    "pydantic>=2.7",
+    "pydantic-settings>=2.2",
+    "langchain-core>=1.0",
+    "llama-index-core>=0.12",
+    "duckdb>=1.0",
+    "rich>=13.7",
+]
+
+[project.optional-dependencies]
+# Cloud adapters are deliberately optional: the repository must be runnable,
+# testable and demonstrable without any cloud account.
+bedrock = ["langchain-aws>=1.0", "boto3>=1.34"]
+vertex = ["langchain-google-vertexai>=3.0"]
+dev = ["pytest>=8.0", "ruff>=0.6", "mypy>=1.11"]
+
+[project.scripts]
+fcca = "fcca.cli:main"
+
+[project.urls]
+Repository = "https://github.com/morichtereur/finance-close-control-agent"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/fcca"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # bugbear
+    "UP",  # pyupgrade
+    "SIM", # simplify
+    "RUF",
+]
+ignore = [
+    "E501",  # line length is handled by the formatter
+    "B008",  # function call in default argument (used by CLI wiring)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["E402"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.mypy]
+python_version = "3.12"
+packages = ["fcca"]
+mypy_path = "src"
+ignore_missing_imports = true
+warn_unused_ignores = false
+disallow_untyped_defs = false

@@ -1,0 +1,59 @@
+name: ci
+
+# The whole pipeline runs on the deterministic local provider, so CI needs no
+# cloud account, no credentials and costs nothing. No job here can make a paid
+# API call.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.12", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install
+        run: pip install -e ".[dev]"
+
+      - name: Lint
+        run: ruff check .
+
+      - name: Format check
+        run: ruff format --check .
+
+      - name: Type check
+        run: mypy
+
+      - name: Tests
+        env:
+          LLM_PROVIDER: mock
+        run: pytest -q
+
+      - name: End-to-end demo (mock provider)
+        env:
+          LLM_PROVIDER: mock
+        run: |
+          python -m fcca.generate_data
+          python -m fcca.ingest_policies --quiet
+          python -m fcca.run_case --exception EXC-0001 --provider mock
+          python -m fcca.evaluate --provider mock --quiet
+
+      - name: Benchmark artefact
+        if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark
+          path: results/
