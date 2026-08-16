@@ -25,7 +25,6 @@ from fcca.controls.materiality import amount_in_reporting_currency
 from fcca.models import (
     ActionCategory,
     CloseException,
-    ControlDecision,
     ControlSignal,
     ExceptionClassification,
     JournalEntry,
@@ -203,6 +202,3 @@ def repair_message(error: str) -> BaseMessage:
             "Return the corrected JSON object only, with no surrounding text."
         )
     )
-
-
-DECISION_SCHEMA_KEYS = tuple(ControlDecision.model_fields)

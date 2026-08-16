@@ -107,11 +107,3 @@ def mandatory_escalation_triggers(signals: list[ControlSignal]) -> list[str]:
         )
 
     return reasons
-
-
-def signals_digest(signals: list[ControlSignal]) -> str:
-    """Compact, model-readable rendering of the control results."""
-    lines = [s.as_prompt_line() for s in signals if s.triggered]
-    if not lines:
-        return "No deterministic control check was triggered for this entry."
-    return "\n".join(f"- {line}" for line in lines)

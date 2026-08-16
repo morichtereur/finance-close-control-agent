@@ -3,7 +3,7 @@
   "model": "deterministic-stub-v1",
   "status": "ok",
   "note": "deterministic stub; measures pipeline integrity, not model quality",
-  "run_at": "2026-08-16T20:51:56+00:00",
+  "run_at": "2026-08-16T20:53:18+00:00",
   "metrics": {
     "n_cases": 60,
     "n_decided": 60,

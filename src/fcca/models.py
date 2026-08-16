@@ -127,15 +127,6 @@ class ControlSignal(BaseModel):
     observed_value: int | float | str | None = None
     threshold: int | float | str | None = None
 
-    def as_prompt_line(self) -> str:
-        parts = [f"{self.check_id} ({self.name}): {'TRIGGERED' if self.triggered else 'clear'}"]
-        if self.observed_value is not None:
-            parts.append(f"observed={self.observed_value}")
-        if self.threshold is not None:
-            parts.append(f"threshold={self.threshold}")
-        parts.append(self.detail)
-        return " | ".join(str(p) for p in parts)
-
 
 class PolicyEvidence(BaseModel):
     """A retrieved policy passage, with everything needed to find it again."""
@@ -248,10 +239,6 @@ class GroundingReport(BaseModel):
     @property
     def is_fully_grounded(self) -> bool:
         return not self.ungrounded_citations
-
-    @property
-    def has_any_evidence(self) -> bool:
-        return self.grounded_citations > 0
 
 
 class RunMetadata(BaseModel):
