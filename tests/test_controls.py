@@ -9,7 +9,6 @@ from __future__ import annotations
 from datetime import date, datetime
 
 import pytest
-from tests.conftest import make_entry
 
 from fcca.analytics import VarianceResult
 from fcca.config import Settings
@@ -26,6 +25,7 @@ from fcca.controls.reconciliation import (
     check_reconciliation_status,
     check_suspense_cleared,
 )
+from tests.conftest import make_entry
 
 
 # --------------------------------------------------------------------- materiality
