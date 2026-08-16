@@ -10,19 +10,18 @@ from __future__ import annotations
 
 import os
 import shutil
-import sys
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
 
 import pytest
 
-ROOT = Path(__file__).resolve().parents[1]
-if str(ROOT / "src") not in sys.path:
-    sys.path.insert(0, str(ROOT / "src"))
-
 from fcca.config import Settings, get_settings, reset_settings_cache
 from fcca.models import CloseException, JournalEntry
+
+# Import paths come from `pythonpath` in pyproject.toml, so the suite runs the
+# same way whether or not the package is installed, and however pytest is invoked.
+ROOT = Path(__file__).resolve().parents[1]
 
 
 @pytest.fixture(scope="session", autouse=True)
