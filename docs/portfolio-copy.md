@@ -33,11 +33,12 @@ Python 3.12 · LangChain · LlamaIndex · AWS Bedrock · Google Vertex AI · Pyd
 
 ## Outcome
 
-A working prototype with a benchmark harness rather than a benchmark result. The 60-case labelled evaluation runs
-end to end on the deterministic local provider with complete structured-output validity, correct escalation gating and
-a full audit record for every case — which measures pipeline integrity, not model quality. The Bedrock and Vertex
-adapters are implemented but have not been run against live endpoints, so those rows of the comparison table read
-`not_run`. The point of the harness is that filling them in is one command with an account attached.
+Benchmarked on AWS Bedrock over 60 labelled exceptions: escalation recall 1.00 with zero missed, precision 0.87,
+structured output valid on every case, no ungrounded citations, $0.016 per case. The direction of the error is the
+result worth quoting — the seven false escalations cost reviewer time, and nothing that required review was cleared.
+Action-category accuracy is 0.63 and stays unfixed on purpose: twelve of twenty-two disagreements are the model
+escalating where a specific remedy was expected, and tuning a model against labels the project wrote itself would
+raise the number without meaning anything. Vertex remains `not_run`.
 
 ## So what
 
@@ -71,5 +72,6 @@ trail and a labelled evaluation harness.
   and it changes. The portability is enforced by a test that runs the whole pipeline against a second chat model.
 - **Why no autonomous agent?** In a close, the sequence of checks *is* the control design. An agent that plans its own
   path produces a different audit trail for every case, and a missed check becomes invisible.
-- **What's the weakest part?** No live cloud benchmark yet, and labels that are ground truth by construction rather
-  than by controller review. Both are stated in the README rather than papered over.
+- **What's the weakest part?** One benchmark run rather than several, so the spread between runs is unknown, and
+  labels that are ground truth by construction rather than by controller review. Both are stated in the README
+  rather than papered over.
