@@ -71,6 +71,13 @@ def _literal_values(annotation: object) -> list[str]:
 def decision_output_contract() -> str:
     """Render the required output shape from the Pydantic model itself.
 
+    Note what is *not* stated: the rationale's character cap. A stated maximum
+    is read as a target — the first live model wrote 2,003 characters against a
+    2,000-character limit, and had written 1,2xx against the previous 1,200.
+    Raising the number moves the target. Asking for a sentence count instead
+    decouples the request from the schema's backstop, which is there to catch a
+    model that wanders, not to shape a normal answer.
+
     Generated rather than hand-written so the prompt cannot drift away from
     :class:`~fcca.models.ControlDecision`.
     """
@@ -84,7 +91,7 @@ def decision_output_contract() -> str:
         '  "requires_human_review": boolean',
         '  "confidence": number between 0 and 1',
         '  "policy_citations": [{"document": string, "section": string}]  // from available_citations only',
-        '  "rationale": string  // why the signals and policy imply this, max 1200 chars',
+        '  "rationale": string  // at most 5 sentences on why the signals and policy imply this',
     ]
     return "{\n" + ",\n".join(lines) + "\n}"
 
