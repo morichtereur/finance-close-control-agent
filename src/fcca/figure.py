@@ -140,13 +140,82 @@ def render(provider: str = "bedrock", settings: Settings | None = None) -> Path:
     return destination
 
 
+#: Colour per line, mirroring what the CLI prints in a terminal. Keyed on
+#: content rather than on ANSI codes: the fixture is captured through a pipe,
+#: where rich correctly emits no colour at all.
+def _line_colour(line: str) -> tuple[str, bool]:
+    stripped = line.strip()
+    if "CRITICAL" in line or stripped.startswith("Disposition") or "HUMAN REVIEW REQUIRED" in line:
+        return WARN, True
+    if stripped.startswith(">"):
+        return ACCENT, False
+    if "WARNING" in line:
+        return "#8a6a3a", False
+    if stripped.startswith(("Exception ", "Risk ", "Deterministic controls", "Policy evidence")):
+        return INK, True
+    if stripped.startswith(("Finding", "Action", "Rationale")):
+        return INK, False
+    if line.startswith("bedrock:") or line.startswith("mock:"):
+        return MUTED, False
+    return MUTED if line.startswith(" ") else INK, False
+
+
+def render_review(source: Path | None = None, settings: Settings | None = None) -> Path:
+    """Typeset a captured control review as an image.
+
+    The text is the tool's own output, committed at ``docs/example-review.txt``
+    and reproduced verbatim apart from one marked abridgement. It is typeset
+    rather than photographed because a terminal screenshot carries whatever
+    font, theme and window chrome the machine happened to have, none of which
+    is part of the work.
+    """
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    settings = settings or get_settings()
+    source = source or (settings.base_dir / "docs" / "example-review.txt")
+    lines = source.read_text(encoding="utf-8").rstrip("\n").split("\n")
+
+    char_w, line_h, size = 0.0088, 0.019, 10.5
+    width = max(len(line) for line in lines) * char_w + 0.06
+    height = len(lines) * line_h + 0.06
+
+    fig = plt.figure(figsize=(width * 10, height * 10), dpi=140)
+    fig.patch.set_facecolor(BACKGROUND)
+
+    for index, line in enumerate(lines):
+        colour, bold = _line_colour(line)
+        fig.text(
+            0.03,
+            1 - 0.03 - (index + 0.8) * (line_h / height),
+            line.rstrip(),
+            family="monospace",
+            fontsize=size,
+            color=colour,
+            fontweight="bold" if bold else "normal",
+            va="top",
+            ha="left",
+        )
+
+    destination = settings.results_dir / "example_review.png"
+    settings.results_dir.mkdir(parents=True, exist_ok=True)
+    fig.savefig(destination, facecolor=BACKGROUND)
+    plt.close(fig)
+    return destination
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="fcca figure", description="Render the escalation outcome of a benchmark run."
+        prog="fcca figure", description="Render a figure from a recorded run."
     )
     parser.add_argument("--provider", default="bedrock", help="Which recorded run to render.")
+    parser.add_argument(
+        "--review", action="store_true", help="Render the captured control review instead."
+    )
     args = parser.parse_args(argv)
-    print(render(args.provider))
+    print(render_review() if args.review else render(args.provider))
     return 0
 
 
