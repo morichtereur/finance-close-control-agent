@@ -77,6 +77,6 @@ trail and a labelled evaluation harness.
   because a deterministic gate decides that, not the model.
 - **Why no autonomous agent?** In a close, the sequence of checks *is* the control design. An agent that plans its own
   path produces a different audit trail for every case, and a missed check becomes invisible.
-- **What's the weakest part?** One benchmark run rather than several, so the spread between runs is unknown, and
-  labels that are ground truth by construction rather than by controller review. Both are stated in the README
-  rather than papered over.
+- **What's the weakest part?** Labels that are ground truth by construction rather than by controller review — the
+  benchmark validates the pipeline, not the finance judgement. Run-to-run drift is at least bounded: the same model
+  run twice moved one case of sixty, and moved it toward more review rather than less.

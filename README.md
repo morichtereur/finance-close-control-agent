@@ -260,6 +260,17 @@ escalated unnecessarily, 5 cleared correctly, none missed.](results/escalation_o
 Regenerate with `python -m fcca.figure --provider bedrock --model <id>`. It reads the recorded run
 rather than taking numbers as arguments, so the picture cannot drift from the table above it.
 
+**How much does one run move?** Sonnet was run twice over the same 60 cases at temperature 0.
+**One case of sixty changed.** Risk accuracy, action accuracy, citation accuracy, escalation recall
+and structured-output validity were identical to four decimals; escalation precision moved 0.873 to
+0.857, because a single benign item that was cleared in the first pass was escalated in the second.
+`fn` stayed at 0 in both.
+
+That is a stability figure, not a guarantee — two passes bound nothing tightly, and the one case
+that moved is exactly the kind that sits near a boundary. It is worth stating because the direction
+matters: the flip added review rather than removing it. Both passes are kept in `results/`; the
+comparison table shows the most recent per model.
+
 **On the labels.** They are ground truth by construction, so a disagreement is not automatically a
 model error. Whether an uncleared duplicate should be routed for a correcting entry or escalated
 outright is a matter a real controller would rule on, and this repository is not that controller.
@@ -395,10 +406,10 @@ configuration change have to be made together, which is honest about what would 
 - **Labels are ground truth by construction**, derived from the scenario definitions, not from human review of
   production exceptions. They validate the pipeline, not the finance judgement.
 - **Mock results measure the harness, not a model.** See the evaluation section.
-- **Bedrock has been run on two models; Vertex has not been run at all.** Each Bedrock row is a single pass, not a
-  track record — the same model run twice would land differently, and no confidence interval is claimed from one
-  pass each. The Vertex adapter is implemented and its row reads `not_run` until someone runs it with their own
-  project.
+- **Bedrock has been run on two models; Vertex has not been run at all.** Sonnet was run twice and moved one case of
+  sixty, which bounds run-to-run drift loosely rather than establishing a confidence interval — two passes is not a
+  sample. Haiku was run once. The Vertex adapter is implemented and its row reads `not_run` until someone runs it
+  with their own project.
 - **Prototype, not production.** No authentication, no multi-tenancy, no ERP integration, no retention policy, no
   monitoring, no change control over the policy corpus. [`docs/architecture.md`](docs/architecture.md) lists what
   would have to change first.
