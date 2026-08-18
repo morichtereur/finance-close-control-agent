@@ -3,32 +3,32 @@
   "model": "eu.anthropic.claude-sonnet-4-5-20250929-v1:0",
   "status": "ok",
   "note": "",
-  "run_at": "2026-08-18T21:08:29+00:00",
+  "run_at": "2026-08-18T06:59:22+00:00",
   "metrics": {
     "n_cases": 60,
     "n_decided": 60,
     "n_failed": 0,
     "risk_accuracy": 0.8667,
     "action_category_accuracy": 0.6333,
-    "escalation_precision": 0.8571,
+    "escalation_precision": 0.8727,
     "escalation_recall": 1.0,
-    "escalation_f1": 0.9231,
+    "escalation_f1": 0.932,
     "retrieval_recall": 0.9833,
     "citation_accuracy": 0.9667,
     "structured_output_success": 1.0,
     "ungrounded_citation_rate": 0.0,
     "unsupported_recommendation_rate": 0.0,
-    "auto_recommendation_rate": 0.0667,
-    "median_latency_ms": 8582.0,
-    "p95_latency_ms": 10020.0,
+    "auto_recommendation_rate": 0.0833,
+    "median_latency_ms": 8675.0,
+    "p95_latency_ms": 10096.0,
     "total_input_tokens": 188812,
-    "total_output_tokens": 27081,
-    "total_cost_usd": 0.972651,
-    "cost_per_case_usd": 0.016211,
+    "total_output_tokens": 27155,
+    "total_cost_usd": 0.973761,
+    "cost_per_case_usd": 0.016229,
     "confusion": {
       "tp": 48,
-      "fp": 8,
-      "tn": 4,
+      "fp": 7,
+      "tn": 5,
       "fn": 0
     },
     "per_scenario_risk_accuracy": {
@@ -71,7 +71,7 @@
       "cited_expected_document": true,
       "grounded_citations": 4,
       "ungrounded_citations": 0,
-      "latency_ms": 8679,
+      "latency_ms": 9655,
       "error": null
     },
     {
@@ -90,7 +90,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 8217,
+      "latency_ms": 8577,
       "error": null
     },
     {
@@ -109,7 +109,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 7793,
+      "latency_ms": 8294,
       "error": null
     },
     {
@@ -128,7 +128,7 @@
       "cited_expected_document": true,
       "grounded_citations": 1,
       "ungrounded_citations": 0,
-      "latency_ms": 8715,
+      "latency_ms": 8747,
       "error": null
     },
     {
@@ -147,7 +147,7 @@
       "cited_expected_document": true,
       "grounded_citations": 1,
       "ungrounded_citations": 0,
-      "latency_ms": 7317,
+      "latency_ms": 7664,
       "error": null
     },
     {
@@ -166,7 +166,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 9083,
+      "latency_ms": 8899,
       "error": null
     },
     {
@@ -185,7 +185,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 8828,
+      "latency_ms": 8722,
       "error": null
     },
     {
@@ -204,7 +204,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 9328,
+      "latency_ms": 8478,
       "error": null
     },
     {
@@ -223,7 +223,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 9006,
+      "latency_ms": 9616,
       "error": null
     },
     {
@@ -242,7 +242,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 7299,
+      "latency_ms": 8690,
       "error": null
     },
     {
@@ -261,7 +261,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 8537,
+      "latency_ms": 8635,
       "error": null
     },
     {
@@ -280,7 +280,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 8940,
+      "latency_ms": 8717,
       "error": null
     },
     {
@@ -299,7 +299,7 @@
       "cited_expected_document": true,
       "grounded_citations": 4,
       "ungrounded_citations": 0,
-      "latency_ms": 10062,
+      "latency_ms": 10346,
       "error": null
     },
     {
@@ -318,7 +318,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 7882,
+      "latency_ms": 8673,
       "error": null
     },
     {
@@ -337,7 +337,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 9195,
+      "latency_ms": 9132,
       "error": null
     },
     {
@@ -356,7 +356,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 7720,
+      "latency_ms": 9315,
       "error": null
     },
     {
@@ -375,7 +375,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 9442,
+      "latency_ms": 10413,
       "error": null
     },
     {
@@ -394,7 +394,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 10020,
+      "latency_ms": 9998,
       "error": null
     },
     {
@@ -413,7 +413,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 8355,
+      "latency_ms": 8463,
       "error": null
     },
     {
@@ -424,15 +424,15 @@
       "actual_risk": "low",
       "risk_correct": true,
       "expected_review": false,
-      "actual_review": true,
+      "actual_review": false,
       "expected_action": "no_action",
-      "actual_action": "route_to_preparer",
+      "actual_action": "request_justification",
       "expected_document": "Month-End Close Policy",
       "retrieved_expected_document": true,
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 9387,
+      "latency_ms": 7687,
       "error": null
     },
     {
@@ -451,7 +451,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 7755,
+      "latency_ms": 8420,
       "error": null
     },
     {
@@ -470,7 +470,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 7575,
+      "latency_ms": 7852,
       "error": null
     },
     {
@@ -489,7 +489,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 8627,
+      "latency_ms": 7800,
       "error": null
     },
     {
@@ -508,7 +508,7 @@
       "cited_expected_document": true,
       "grounded_citations": 1,
       "ungrounded_citations": 0,
-      "latency_ms": 6624,
+      "latency_ms": 7872,
       "error": null
     },
     {
@@ -527,7 +527,7 @@
       "cited_expected_document": true,
       "grounded_citations": 1,
       "ungrounded_citations": 0,
-      "latency_ms": 7121,
+      "latency_ms": 7861,
       "error": null
     },
     {
@@ -546,7 +546,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 7590,
+      "latency_ms": 8672,
       "error": null
     },
     {
@@ -565,7 +565,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 9172,
+      "latency_ms": 8625,
       "error": null
     },
     {
@@ -584,7 +584,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 7598,
+      "latency_ms": 7985,
       "error": null
     },
     {
@@ -603,7 +603,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 7634,
+      "latency_ms": 8482,
       "error": null
     },
     {
@@ -622,7 +622,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 7314,
+      "latency_ms": 8440,
       "error": null
     },
     {
@@ -641,7 +641,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 7448,
+      "latency_ms": 7645,
       "error": null
     },
     {
@@ -660,7 +660,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 8722,
+      "latency_ms": 8677,
       "error": null
     },
     {
@@ -679,7 +679,7 @@
       "cited_expected_document": true,
       "grounded_citations": 4,
       "ungrounded_citations": 0,
-      "latency_ms": 9949,
+      "latency_ms": 9170,
       "error": null
     },
     {
@@ -698,7 +698,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 7964,
+      "latency_ms": 8593,
       "error": null
     },
     {
@@ -717,7 +717,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 9776,
+      "latency_ms": 9048,
       "error": null
     },
     {
@@ -736,7 +736,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 8885,
+      "latency_ms": 8767,
       "error": null
     },
     {
@@ -753,9 +753,9 @@
       "expected_document": "Account Reconciliation Policy",
       "retrieved_expected_document": true,
       "cited_expected_document": true,
-      "grounded_citations": 4,
+      "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 9114,
+      "latency_ms": 8792,
       "error": null
     },
     {
@@ -774,7 +774,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 9271,
+      "latency_ms": 10079,
       "error": null
     },
     {
@@ -793,7 +793,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 7785,
+      "latency_ms": 7892,
       "error": null
     },
     {
@@ -812,7 +812,7 @@
       "cited_expected_document": false,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 7856,
+      "latency_ms": 8802,
       "error": null
     },
     {
@@ -831,7 +831,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 7731,
+      "latency_ms": 8291,
       "error": null
     },
     {
@@ -850,7 +850,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 6555,
+      "latency_ms": 7420,
       "error": null
     },
     {
@@ -869,7 +869,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 7841,
+      "latency_ms": 7124,
       "error": null
     },
     {
@@ -888,7 +888,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 9461,
+      "latency_ms": 9489,
       "error": null
     },
     {
@@ -907,7 +907,7 @@
       "cited_expected_document": true,
       "grounded_citations": 1,
       "ungrounded_citations": 0,
-      "latency_ms": 7449,
+      "latency_ms": 8223,
       "error": null
     },
     {
@@ -920,13 +920,13 @@
       "expected_review": false,
       "actual_review": true,
       "expected_action": "no_action",
-      "actual_action": "request_justification",
+      "actual_action": "route_to_preparer",
       "expected_document": "Manual Posting Control",
       "retrieved_expected_document": true,
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 8470,
+      "latency_ms": 7638,
       "error": null
     },
     {
@@ -945,7 +945,7 @@
       "cited_expected_document": true,
       "grounded_citations": 4,
       "ungrounded_citations": 0,
-      "latency_ms": 9255,
+      "latency_ms": 9731,
       "error": null
     },
     {
@@ -964,7 +964,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 8683,
+      "latency_ms": 10096,
       "error": null
     },
     {
@@ -983,7 +983,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 7159,
+      "latency_ms": 11745,
       "error": null
     },
     {
@@ -1002,7 +1002,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 7390,
+      "latency_ms": 7440,
       "error": null
     },
     {
@@ -1021,7 +1021,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 6906,
+      "latency_ms": 7131,
       "error": null
     },
     {
@@ -1040,7 +1040,7 @@
       "cited_expected_document": true,
       "grounded_citations": 4,
       "ungrounded_citations": 0,
-      "latency_ms": 9845,
+      "latency_ms": 9927,
       "error": null
     },
     {
@@ -1059,7 +1059,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 10293,
+      "latency_ms": 8634,
       "error": null
     },
     {
@@ -1078,7 +1078,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 9769,
+      "latency_ms": 9791,
       "error": null
     },
     {
@@ -1097,7 +1097,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 10357,
+      "latency_ms": 8769,
       "error": null
     },
     {
@@ -1116,7 +1116,7 @@
       "cited_expected_document": true,
       "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 9160,
+      "latency_ms": 9590,
       "error": null
     },
     {
@@ -1133,9 +1133,9 @@
       "expected_document": "Account Reconciliation Policy",
       "retrieved_expected_document": true,
       "cited_expected_document": true,
-      "grounded_citations": 2,
+      "grounded_citations": 3,
       "ungrounded_citations": 0,
-      "latency_ms": 8228,
+      "latency_ms": 9775,
       "error": null
     },
     {
@@ -1154,7 +1154,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 9690,
+      "latency_ms": 9991,
       "error": null
     },
     {
@@ -1173,7 +1173,7 @@
       "cited_expected_document": true,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 8763,
+      "latency_ms": 8594,
       "error": null
     },
     {
@@ -1192,7 +1192,7 @@
       "cited_expected_document": false,
       "grounded_citations": 2,
       "ungrounded_citations": 0,
-      "latency_ms": 8490,
+      "latency_ms": 8976,
       "error": null
     }
   ]

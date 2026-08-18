@@ -272,6 +272,16 @@ def load_run_detail(path: Path) -> BenchmarkRun | None:
         return None
 
 
+def _all_recorded(settings: Settings, key: tuple[str, str]) -> list[BenchmarkRun]:
+    """Every recorded pass for one provider and model, repeats included."""
+    runs = []
+    for path in sorted(settings.results_dir.glob("eval_*.json")):
+        run = load_run_detail(path)
+        if run is not None and (run.provider, run.model) == key:
+            runs.append(run)
+    return runs
+
+
 def collect_runs(fresh: list[BenchmarkRun], settings: Settings | None = None) -> list[BenchmarkRun]:
     """Combine this invocation's runs with every run recorded previously.
 
@@ -284,11 +294,24 @@ def collect_runs(fresh: list[BenchmarkRun], settings: Settings | None = None) ->
 
     collected: list[BenchmarkRun] = [run for run in fresh if run.metrics is not None]
 
+    # Repeat passes of the same model are kept on disk — measuring how much a
+    # single run moves is the point of running twice — but the comparison table
+    # holds one row per provider and model, showing the most recent. Otherwise
+    # a repeat reads as two different configurations.
+    seen: set[tuple[str, str]] = set(fresh_keys)
     for path in sorted(settings.results_dir.glob("eval_*.json")):
         previous = load_run_detail(path)
-        if previous is None or (previous.provider, previous.model) in fresh_keys:
+        if previous is None:
             continue
-        collected.append(previous)
+        key = (previous.provider, previous.model)
+        if key in seen:
+            continue
+        newest = max(
+            (r for r in _all_recorded(settings, key) if r is not None),
+            key=lambda r: r.run_at or "",
+        )
+        seen.add(key)
+        collected.append(newest)
 
     for provider in ("mock", "bedrock", "vertex"):
         if any(run.provider == provider for run in collected):
