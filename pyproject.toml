@@ -35,6 +35,8 @@ dependencies = [
 # testable and demonstrable without any cloud account.
 bedrock = ["langchain-aws>=1.0", "boto3>=1.34"]
 vertex = ["langchain-google-vertexai>=3.0"]
+# Only src/fcca/figure.py imports matplotlib; nothing on the decision path does.
+figures = ["matplotlib>=3.8"]
 dev = ["pytest>=8.0", "ruff>=0.16,<0.17", "mypy>=1.11"]
 
 [project.scripts]
