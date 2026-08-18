@@ -1,0 +1,44 @@
+
+Exception EXC-0001  ·  missing supporting documentation  ·  NL30  ·  period 2026-07
+Manual journal entry above group materiality posted without a supporting document reference.
+
+  [entry detail abridged: EUR 434,538.11 · account 600000 · manual · support none]
+
+
+Deterministic controls — 4 of 18 triggered
+check                            severity  observed      detail                                                       
+CHK-01 supporting_documentation  CRITICAL  none          Manual posting carries no supporting document reference;     
+                                                         amount is at or above the clearly trivial threshold.         
+CHK-09 narrative_quality         WARNING   As discussed  Description does not allow an independent reviewer to        
+                                                         understand the business event.                               
+CHK-13 materiality_assessment    CRITICAL  434538.11     At or above group materiality; reportable to Group           
+                                                         Accounting. Band: material.                                  
+CHK-17 account_variance          WARNING   447791.31     Account movement of 447,791 reporting currency (858.9%)      
+                                                         versus the prior-period average exceeds the variance         
+                                                         escalation trigger.                                          
+
+Risk        HIGH    confidence 0.95    classification missing_supporting_documentation
+Finding     Manual journal entry of EUR 434,538 to personnel expenses posted without supporting documentation. Amount 
+exceeds group materiality (EUR 250,000) and second-level approval threshold (EUR 50,000). Entry description 'As 
+discussed' does not meet documentation standards.
+Action      Escalate to entity Financial Controller per policy. Request supporting documentation and business 
+justification from preparer u.jansen within two working days. Document must explain the EUR 448k variance (859% 
+increase) in personnel expenses.
+Disposition HUMAN REVIEW REQUIRED
+  · Deterministic mandatory escalation trigger(s): CHK-01 supporting_documentation; CHK-13 materiality_assessment
+  · Risk rated high; policy reserves high-rated items for human review.
+  · Recommended action 'escalate_to_financial_controller' requires a named person to act.
+
+Policy evidence
+  > Supporting Documentation Standard §4.2 Escalation   relevance 1.00   policies/supporting_documentation_standard.md
+  > Supporting Documentation Standard §4.1 Standard treatment   relevance 0.87   
+policies/supporting_documentation_standard.md
+  > Materiality and Escalation Policy §3.3 Variance escalation   relevance 0.74   
+policies/materiality_and_escalation_policy.md
+  > Journal Entry Policy §3. Documentation requirement   relevance 0.61   policies/journal_entry_policy.md
+
+Rationale   [abridged: five sentences mapping each fired check to the policy section
+            that governs it]
+
+bedrock:eu.anthropic.claude-sonnet-4-5-20250929-v1:0  ·  9153 ms  ·  1 parse attempt(s)  ·  mode json_schema_prompt  ·
+prompt 60f99c5f23e8
