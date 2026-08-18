@@ -8,6 +8,16 @@ project.
 **Status:** implemented and importable, but not executed against a live Vertex
 endpoint in this repository. Benchmark rows for Vertex are marked ``not_run``
 until someone runs them with their own project.
+
+**Deprecation, stated rather than hidden:** as of ``langchain-google-vertexai``
+3.2.0, ``ChatVertexAI`` emits a deprecation warning and points at
+``ChatGoogleGenerativeAI`` from ``langchain-google-genai``; removal is
+scheduled for 4.0.0. It has deliberately not been swapped here. The two
+differ in how they authenticate, and replacing one adapter that has never been
+run against a live endpoint with another that has never been run against a
+live endpoint is not an improvement — it only moves the untested surface. The
+migration belongs with the first real Vertex run, where it can be verified in
+the same pass.
 """
 
 from __future__ import annotations

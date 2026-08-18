@@ -326,6 +326,12 @@ python -m fcca.evaluate --provider vertex
 
 Authentication uses Application Default Credentials or an attached service account.
 
+Note that `ChatVertexAI` is deprecated as of `langchain-google-vertexai` 3.2.0 in favour of
+`ChatGoogleGenerativeAI`, with removal due in 4.0.0. The adapter has not been switched: the two
+authenticate differently, and exchanging one never-executed adapter for another only relocates the
+untested surface. That migration belongs with the first live Vertex run, where it can be verified
+in the same pass — which is also when this row stops reading `not_run`.
+
 ## Tests
 
 ```bash
