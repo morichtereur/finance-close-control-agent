@@ -231,6 +231,12 @@ in eu-central-1, 8m55s wall clock, 189k input and 27k output tokens, $0.97 at li
 The Vertex row still reads `not_run` because nobody has run it, and no cell in it is
 estimated.
 
+![Escalation outcome of the Bedrock run over 60 labelled exceptions: 48 escalated correctly, 7
+escalated unnecessarily, 5 cleared correctly, none missed.](results/escalation_outcomes_bedrock.png)
+
+Regenerate with `python -m fcca.figure --provider bedrock`. It reads the recorded run rather than
+taking numbers as arguments, so the picture cannot drift from the table above it.
+
 **Reading it.** The mock scores 1.00 on risk because it *is* the labelling rubric expressed in
 Python — that row measures pipeline integrity, not model quality, and comparing the two makes the
 point better than the caveat did. What the live run shows:
