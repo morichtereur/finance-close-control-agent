@@ -388,8 +388,9 @@ configuration change have to be made together, which is honest about what would 
 - **Labels are ground truth by construction**, derived from the scenario definitions, not from human review of
   production exceptions. They validate the pipeline, not the finance judgement.
 - **Mock results measure the harness, not a model.** See the evaluation section.
-- **Bedrock and Vertex have not been executed here.** The adapters are implemented; the benchmark rows read `not_run`
-  until someone runs them with their own credentials.
+- **Bedrock has been run; Vertex has not.** The Bedrock row is one live run of 60 cases, not a track record — a
+  second run would land differently, and no confidence interval is claimed from a single pass. The Vertex adapter is
+  implemented and its row reads `not_run` until someone runs it with their own project.
 - **Prototype, not production.** No authentication, no multi-tenancy, no ERP integration, no retention policy, no
   monitoring, no change control over the policy corpus. [`docs/architecture.md`](docs/architecture.md) lists what
   would have to change first.

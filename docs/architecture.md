@@ -250,7 +250,10 @@ Not a roadmap. An honest list of what is missing, roughly in the order it would 
   rate, latency and spend.
 
 **Evidence**
-- A real benchmark on Bedrock and Vertex, with agreement rates against controller decisions on real exceptions.
+- Repeated benchmark runs rather than one pass per provider, so the spread between runs is known — a single run
+  reports a point, and a control needs to know how much that point moves.
+- Agreement rates against controller decisions on real exceptions, which is the validation the constructed labels
+  cannot provide.
 - A prospective study of whether reviewer time actually falls — the business case, which no amount of architecture
   substitutes for.
 
