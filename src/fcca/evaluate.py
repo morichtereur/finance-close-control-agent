@@ -19,6 +19,7 @@ from fcca.evaluation.benchmark import (
     BenchmarkRun,
     collect_runs,
     run_benchmark,
+    run_slug,
     write_benchmark_csv,
     write_run_detail,
 )
@@ -78,7 +79,7 @@ def main(argv: list[str] | None = None) -> int:
             con.print(" " * 60, end="\r")
         runs.append(run)
         if run.metrics is not None:
-            write_run_detail(run, settings.results_dir / f"eval_{provider}.json")
+            write_run_detail(run, settings.results_dir / f"{run_slug(run.provider, run.model)}.json")
 
     runs = collect_runs(runs, settings)
     csv_path = write_benchmark_csv(runs, settings.results_dir / "benchmark.csv")

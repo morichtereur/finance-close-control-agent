@@ -220,44 +220,45 @@ python -m fcca.evaluate --compare
 
 Current [`results/benchmark.csv`](results/benchmark.csv):
 
-| provider | model | status | cases | risk acc | action acc | esc prec | esc rec | cite acc | valid out | p50 latency | cost/case |
+| provider | model | status | cases | risk acc | action acc | esc prec | esc rec | cite acc | valid out | p50 | cost/case |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | mock | deterministic-stub-v1 | ok | 60 | 1.00 | 0.90 | 1.00 | 1.00 | 0.95 | 1.00 | 0 ms | — |
+| **bedrock** | **claude-haiku-4-5 (eu)** | **ok** | **60** | **0.70** | **0.62** | **0.81** | **1.00** | **0.98** | **1.00** | **4.9 s** | **$0.005** |
 | **bedrock** | **claude-sonnet-4-5 (eu)** | **ok** | **60** | **0.87** | **0.63** | **0.87** | **1.00** | **0.97** | **1.00** | **8.7 s** | **$0.016** |
 | vertex | *(configurable)* | **not_run** | not_run | not_run | not_run | not_run | not_run | not_run | not_run | not_run | not_run |
 
-The Bedrock row is a real run: 60 cases through `eu.anthropic.claude-sonnet-4-5-20250929-v1:0`
-in eu-central-1, 8m55s wall clock, 189k input and 27k output tokens, $0.97 at list price.
-The Vertex row still reads `not_run` because nobody has run it, and no cell in it is
+Both Bedrock rows are real runs over the same 60 cases in eu-central-1, differing only in
+`BEDROCK_MODEL_ID`. No code changed between them — which is the portability claim, measured rather
+than asserted. Vertex still reads `not_run` because nobody has run it, and no cell in that row is
 estimated.
 
-![Escalation outcome of the Bedrock run over 60 labelled exceptions: 48 escalated correctly, 7
-escalated unnecessarily, 5 cleared correctly, none missed.](results/escalation_outcomes_bedrock.png)
-
-Regenerate with `python -m fcca.figure --provider bedrock`. It reads the recorded run rather than
-taking numbers as arguments, so the picture cannot drift from the table above it.
-
 **Reading it.** The mock scores 1.00 on risk because it *is* the labelling rubric expressed in
-Python — that row measures pipeline integrity, not model quality, and comparing the two makes the
-point better than the caveat did. What the live run shows:
+Python; that row measures pipeline integrity, not model quality. The two live rows are where the
+architecture is either doing its job or not:
 
-- **No missed escalations.** Recall 1.00, `fn=0`. Every item the labels reserve for a person
-  reached one.
-- **Seven false escalations** out of 60 (`fp=7`, precision 0.87). All seven are benign scenarios —
-  a supported out-of-hours posting, a routine flagged entry, an unfamiliar cost-centre combination
-  — rated `medium` where the labels say `low`. For a control assistant that is the right direction
-  to be wrong in: the cost is reviewer time, not an unreviewed misstatement.
-- **Structured output valid on every case, zero ungrounded citations, zero unsupported
-  recommendations.** The parts of the system that were designed to hold, held, against a model
-  that had never seen them.
-- **Action-category accuracy 0.63 is the weak number, and it is one behaviour rather than noise.**
-  Twelve of the twenty-two disagreements are the model choosing
-  `escalate_to_financial_controller` where the labels expect a more specific remedy —
-  `route_to_reviewer` for an unapproved entry, `propose_correcting_entry` for a duplicate,
-  `refer_to_internal_audit` for a segregation-of-duties failure. It escalates rather than routes.
-  That is fixable with a prompt that says when each category applies, and it is deliberately not
-  fixed here: tuning a model against labels this repository wrote itself would improve the score
-  and prove nothing.
+- **Neither model missed an escalation.** `fn = 0` on both, recall 1.00. Not because both models
+  were right, but because the deterministic gate forces review on a mandatory trigger and never
+  consults the model about it. That is the single property the design exists to guarantee, and it
+  survived a threefold drop in model price.
+- **Judgement degrades with model capability, and only judgement does.** Haiku rates risk correctly
+  on 70% of cases against Sonnet's 87%, and clears only 1 of the 12 benign items where Sonnet
+  clears 5 (`fp` 11 versus 7). The cheaper model is noisier for reviewers; it is not less safe.
+- **The mechanical properties held identically.** Structured output valid on every case for both,
+  zero ungrounded citations for both, citation accuracy 0.98 and 0.97. Schema validation and
+  citation grounding are code, so model choice does not move them.
+- **The buying decision follows from the table.** Haiku costs a third and answers in half the time.
+  If the deliverable is "nothing reaches sign-off unreviewed", it is sufficient. Sonnet is what you
+  pay for to cut reviewer noise — four fewer false escalations per sixty exceptions.
+- **Action-category accuracy is ~0.62 on both and is one behaviour, not noise.** Both models
+  escalate where the labels expect a specific remedy — `route_to_reviewer` for an unapproved entry,
+  `propose_correcting_entry` for a duplicate. Deliberately not fixed: tuning a prompt against labels
+  this repository wrote itself would raise the number and prove nothing.
+
+![Escalation outcome of the Sonnet run over 60 labelled exceptions: 48 escalated correctly, 7
+escalated unnecessarily, 5 cleared correctly, none missed.](results/escalation_outcomes_bedrock__eu-anthropic-claude-sonnet-4-5-20250929-v1-0.png)
+
+Regenerate with `python -m fcca.figure --provider bedrock --model <id>`. It reads the recorded run
+rather than taking numbers as arguments, so the picture cannot drift from the table above it.
 
 **On the labels.** They are ground truth by construction, so a disagreement is not automatically a
 model error. Whether an uncleared duplicate should be routed for a correcting entry or escalated
@@ -394,9 +395,10 @@ configuration change have to be made together, which is honest about what would 
 - **Labels are ground truth by construction**, derived from the scenario definitions, not from human review of
   production exceptions. They validate the pipeline, not the finance judgement.
 - **Mock results measure the harness, not a model.** See the evaluation section.
-- **Bedrock has been run; Vertex has not.** The Bedrock row is one live run of 60 cases, not a track record — a
-  second run would land differently, and no confidence interval is claimed from a single pass. The Vertex adapter is
-  implemented and its row reads `not_run` until someone runs it with their own project.
+- **Bedrock has been run on two models; Vertex has not been run at all.** Each Bedrock row is a single pass, not a
+  track record — the same model run twice would land differently, and no confidence interval is claimed from one
+  pass each. The Vertex adapter is implemented and its row reads `not_run` until someone runs it with their own
+  project.
 - **Prototype, not production.** No authentication, no multi-tenancy, no ERP integration, no retention policy, no
   monitoring, no change control over the policy corpus. [`docs/architecture.md`](docs/architecture.md) lists what
   would have to change first.

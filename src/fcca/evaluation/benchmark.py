@@ -16,6 +16,7 @@ from __future__ import annotations
 import csv
 import json
 import logging
+import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -234,6 +235,18 @@ def write_run_detail(run: BenchmarkRun, path: Path) -> Path:
     return path
 
 
+def run_slug(provider: str, model: str) -> str:
+    """Filename key for one recorded run.
+
+    Keyed on provider *and* model, because "changing BEDROCK_MODEL_ID changes no
+    code" is a claim this repository makes, and a comparison table that keeps
+    one row per provider quietly overwrites the evidence for it every time a
+    second model is tried.
+    """
+    safe = re.sub(r"[^a-z0-9]+", "-", model.lower()).strip("-")
+    return f"eval_{provider}__{safe}"
+
+
 def load_run_detail(path: Path) -> BenchmarkRun | None:
     """Read a previously written per-provider run, if it exists.
 
@@ -260,28 +273,40 @@ def load_run_detail(path: Path) -> BenchmarkRun | None:
 
 
 def collect_runs(fresh: list[BenchmarkRun], settings: Settings | None = None) -> list[BenchmarkRun]:
-    """Combine this invocation's runs with everything recorded previously."""
+    """Combine this invocation's runs with every run recorded previously.
+
+    One row per provider *and model*, so a second model on the same provider
+    adds a comparison rather than replacing the first. Providers with no
+    recorded run at all still appear once, as ``not_run``.
+    """
     settings = settings or get_settings()
-    by_provider = {run.provider: run for run in fresh}
-    collected: list[BenchmarkRun] = []
-    for provider in ("mock", "bedrock", "vertex"):
-        current = by_provider.get(provider)
-        if current is not None and current.metrics is not None:
-            collected.append(current)
+    fresh_keys = {(run.provider, run.model) for run in fresh if run.metrics is not None}
+
+    collected: list[BenchmarkRun] = [run for run in fresh if run.metrics is not None]
+
+    for path in sorted(settings.results_dir.glob("eval_*.json")):
+        previous = load_run_detail(path)
+        if previous is None or (previous.provider, previous.model) in fresh_keys:
             continue
-        previous = load_run_detail(settings.results_dir / f"eval_{provider}.json")
-        if previous is not None:
-            collected.append(previous)
-        elif current is not None:
-            collected.append(current)
-        else:
-            spec = describe_provider(provider, settings=settings)  # type: ignore[arg-type]
-            collected.append(
-                BenchmarkRun(
-                    provider=provider,
-                    model=spec.model,
-                    status="not_run",
-                    note="not evaluated in this repository; requires the provider's credentials",
-                )
+        collected.append(previous)
+
+    for provider in ("mock", "bedrock", "vertex"):
+        if any(run.provider == provider for run in collected):
+            continue
+        unrun = next((run for run in fresh if run.provider == provider), None)
+        if unrun is not None:
+            collected.append(unrun)
+            continue
+        spec = describe_provider(provider, settings=settings)  # type: ignore[arg-type]
+        collected.append(
+            BenchmarkRun(
+                provider=provider,
+                model=spec.model,
+                status="not_run",
+                note="not evaluated in this repository; requires the provider's credentials",
             )
+        )
+
+    order = {"mock": 0, "bedrock": 1, "vertex": 2}
+    collected.sort(key=lambda run: (order.get(run.provider, 9), run.model))
     return collected
