@@ -33,12 +33,13 @@ Python 3.12 · LangChain · LlamaIndex · AWS Bedrock · Google Vertex AI · Pyd
 
 ## Outcome
 
-Benchmarked on AWS Bedrock over 60 labelled exceptions: escalation recall 1.00 with zero missed, precision 0.87,
-structured output valid on every case, no ungrounded citations, $0.016 per case. The direction of the error is the
-result worth quoting — the seven false escalations cost reviewer time, and nothing that required review was cleared.
-Action-category accuracy is 0.63 and stays unfixed on purpose: twelve of twenty-two disagreements are the model
-escalating where a specific remedy was expected, and tuning a model against labels the project wrote itself would
-raise the number without meaning anything. Vertex remains `not_run`.
+Benchmarked on AWS Bedrock over 60 labelled exceptions, on two models differing only by an
+environment variable. Neither missed an escalation — recall 1.00, zero false negatives on both —
+because the gate that forces review is deterministic and never asks the model. What the cheaper
+model costs is reviewer noise, not safety: Haiku rates risk correctly on 70% of cases against
+Sonnet's 87% and clears 1 of 12 benign items where Sonnet clears 5, at a third of the price and
+half the latency. Structured output validated on every case for both, with no ungrounded citations.
+Vertex remains `not_run`.
 
 ## So what
 
@@ -69,7 +70,11 @@ trail and a labelled evaluation harness.
   is allowed to see, what shape it may answer in, which of its claims survive a grounding check, and who decides when
   it is wrong.
 - **Why multi-cloud?** Enterprise model access is a procurement and data-residency decision, not an engineering one,
-  and it changes. The portability is enforced by a test that runs the whole pipeline against a second chat model.
+  and it changes. Two models were benchmarked through the same pipeline with no code change between them, and a test
+  runs the whole pipeline against a second chat model to keep that true.
+- **What did swapping the model actually show?** That the safety property is not the model's. Cutting model cost by
+  two thirds moved risk accuracy from 0.87 to 0.70 and moved missed escalations not at all — they were zero on both,
+  because a deterministic gate decides that, not the model.
 - **Why no autonomous agent?** In a close, the sequence of checks *is* the control design. An agent that plans its own
   path produces a different audit trail for every case, and a missed check becomes invisible.
 - **What's the weakest part?** One benchmark run rather than several, so the spread between runs is unknown, and

@@ -1,4 +1,5 @@
 provider,model,status,note,n_cases,risk_accuracy,action_category_accuracy,escalation_precision,escalation_recall,escalation_f1,retrieval_recall,citation_accuracy,structured_output_success,ungrounded_citation_rate,unsupported_recommendation_rate,auto_recommendation_rate,median_latency_ms,p95_latency_ms,cost_per_case_usd,run_at
 mock,deterministic-stub-v1,ok,"deterministic stub; measures pipeline integrity, not model quality",60,1.0,0.9,1.0,1.0,1.0,0.9833,0.95,1.0,0.0,0.0,0.2,0.0,0.0,not_run,2026-08-16T20:53:18+00:00
+bedrock,eu.anthropic.claude-haiku-4-5-20251001-v1:0,ok,,60,0.7,0.6167,0.8136,1.0,0.8972,0.9833,0.9833,1.0,0.0,0.0,0.0167,4942.5,5891.0,0.005419,2026-08-18T20:49:42+00:00
 bedrock,eu.anthropic.claude-sonnet-4-5-20250929-v1:0,ok,,60,0.8667,0.6333,0.8727,1.0,0.932,0.9833,0.9667,1.0,0.0,0.0,0.0833,8675.0,10096.0,0.016229,2026-08-18T06:59:22+00:00
 vertex,gemini-2.5-flash,not_run,not evaluated in this repository; requires the provider's credentials,not_run,not_run,not_run,not_run,not_run,not_run,not_run,not_run,not_run,not_run,not_run,not_run,not_run,not_run,not_run,not_run

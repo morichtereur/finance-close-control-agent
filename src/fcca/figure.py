@@ -33,17 +33,31 @@ WARN = "#b8763a"
 RULE = "#7e857a"
 
 
-def render(provider: str = "bedrock", settings: Settings | None = None) -> Path:
-    """Write the escalation-outcome bar for one provider's recorded run."""
+def render(
+    provider: str = "bedrock", model: str | None = None, settings: Settings | None = None
+) -> Path:
+    """Write the escalation-outcome bar for one recorded run.
+
+    Runs are keyed by provider and model, so the model has to be named — or
+    left to the configured default, which is what a caller with one run per
+    provider expects.
+    """
     import matplotlib
 
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
 
+    from fcca.evaluation.benchmark import run_slug
+
     settings = settings or get_settings()
-    source = settings.results_dir / f"eval_{provider}.json"
+    model = model or settings.model_name_for(provider)  # type: ignore[arg-type]
+    source = settings.results_dir / f"{run_slug(provider, model)}.json"
     if not source.exists():
-        raise FileNotFoundError(f"{source} not found — run `fcca evaluate --provider {provider}`")
+        available = sorted(p.name for p in settings.results_dir.glob("eval_*.json"))
+        raise FileNotFoundError(
+            f"{source.name} not found — run `fcca evaluate --provider {provider}`. "
+            f"Recorded runs: {available or 'none'}"
+        )
 
     payload = json.loads(source.read_text(encoding="utf-8"))
     matrix = payload["metrics"]["confusion"]
@@ -134,7 +148,7 @@ def render(provider: str = "bedrock", settings: Settings | None = None) -> Path:
         va="bottom",
     )
 
-    destination = settings.results_dir / f"escalation_outcomes_{provider}.png"
+    destination = settings.results_dir / f"escalation_outcomes_{run_slug(provider, model)[5:]}.png"
     fig.savefig(destination, facecolor=BACKGROUND, bbox_inches="tight", pad_inches=0.35)
     plt.close(fig)
     return destination
@@ -211,11 +225,12 @@ def main(argv: list[str] | None = None) -> int:
         prog="fcca figure", description="Render a figure from a recorded run."
     )
     parser.add_argument("--provider", default="bedrock", help="Which recorded run to render.")
+    parser.add_argument("--model", default=None, help="Model id; defaults to the configured one.")
     parser.add_argument(
         "--review", action="store_true", help="Render the captured control review instead."
     )
     args = parser.parse_args(argv)
-    print(render_review() if args.review else render(args.provider))
+    print(render_review() if args.review else render(args.provider, args.model))
     return 0
 
 
