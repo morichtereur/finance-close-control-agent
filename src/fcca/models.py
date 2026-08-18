@@ -199,7 +199,13 @@ class ControlDecision(BaseModel):
     confidence: float = Field(ge=0.0, le=1.0)
     policy_citations: list[PolicyCitation] = Field(default_factory=list)
     rationale: str = Field(
-        max_length=1200,
+        # 2000, not 1200: the original cap was set against a rule-based stub
+        # that writes one sentence. A real model reasoning over ten triggered
+        # checks and three cited policies exceeded it on the first live case,
+        # every time — and a schema that reliably rejects a good answer is a
+        # badly calibrated schema, not a well-guarded one. The cap still exists
+        # because an unbounded rationale is a place for a model to wander.
+        max_length=2000,
         description="Why this classification and action follow from the signals and policy.",
     )
 

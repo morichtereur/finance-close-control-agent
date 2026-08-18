@@ -220,25 +220,42 @@ python -m fcca.evaluate --compare
 
 Current [`results/benchmark.csv`](results/benchmark.csv):
 
-| provider | model | status | cases | risk acc | action acc | esc prec | esc rec | cite acc | valid out |
-|---|---|---|---|---|---|---|---|---|---|
-| mock | deterministic-stub-v1 | ok | 60 | 1.00 | 0.90 | 1.00 | 1.00 | 0.95 | 1.00 |
-| bedrock | *(configurable)* | **not_run** | not_run | not_run | not_run | not_run | not_run | not_run | not_run |
-| vertex | *(configurable)* | **not_run** | not_run | not_run | not_run | not_run | not_run | not_run | not_run |
+| provider | model | status | cases | risk acc | action acc | esc prec | esc rec | cite acc | valid out | p50 latency | cost/case |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| mock | deterministic-stub-v1 | ok | 60 | 1.00 | 0.90 | 1.00 | 1.00 | 0.95 | 1.00 | 0 ms | — |
+| **bedrock** | **claude-sonnet-4-5 (eu)** | **ok** | **60** | **0.87** | **0.63** | **0.87** | **1.00** | **0.97** | **1.00** | **8.7 s** | **$0.016** |
+| vertex | *(configurable)* | **not_run** | not_run | not_run | not_run | not_run | not_run | not_run | not_run | not_run | not_run |
 
-**Read that table carefully, because two of its three rows are the honest part.**
+The Bedrock row is a real run: 60 cases through `eu.anthropic.claude-sonnet-4-5-20250929-v1:0`
+in eu-central-1, 8m55s wall clock, 189k input and 27k output tokens, $0.97 at list price.
+The Vertex row still reads `not_run` because nobody has run it, and no cell in it is
+estimated.
 
-The mock provider is a rule engine wearing a chat-model interface: it reads the control signals out of the prompt and
-applies the policy rubric in Python. Its scores measure *pipeline integrity* — that signals reach the decision, that
-every output validates, that citations ground, that the gate behaves, that the audit record is complete — and say
-**nothing whatsoever** about how a real model performs. The row is labelled as a stub in the CSV for that reason. Even
-so it does not score 1.00 everywhere: six cases pick a defensible-but-different remediation (`route_to_preparer`
-instead of `no_action` on a flagged-but-compliant item) and three cite a neighbouring policy section rather than the
-governing one. Those are the metrics doing their job, not noise to be tuned away.
+**Reading it.** The mock scores 1.00 on risk because it *is* the labelling rubric expressed in
+Python — that row measures pipeline integrity, not model quality, and comparing the two makes the
+point better than the caveat did. What the live run shows:
 
-The Bedrock and Vertex rows read `not_run` because this repository has never called those endpoints. The adapters are
-implemented and importable; nobody has spent the credits. No number is estimated, defaulted or inferred — a cell is
-either a measurement or the word `not_run`. Run them with your own account and the same command fills the row in.
+- **No missed escalations.** Recall 1.00, `fn=0`. Every item the labels reserve for a person
+  reached one.
+- **Seven false escalations** out of 60 (`fp=7`, precision 0.87). All seven are benign scenarios —
+  a supported out-of-hours posting, a routine flagged entry, an unfamiliar cost-centre combination
+  — rated `medium` where the labels say `low`. For a control assistant that is the right direction
+  to be wrong in: the cost is reviewer time, not an unreviewed misstatement.
+- **Structured output valid on every case, zero ungrounded citations, zero unsupported
+  recommendations.** The parts of the system that were designed to hold, held, against a model
+  that had never seen them.
+- **Action-category accuracy 0.63 is the weak number, and it is one behaviour rather than noise.**
+  Twelve of the twenty-two disagreements are the model choosing
+  `escalate_to_financial_controller` where the labels expect a more specific remedy —
+  `route_to_reviewer` for an unapproved entry, `propose_correcting_entry` for a duplicate,
+  `refer_to_internal_audit` for a segregation-of-duties failure. It escalates rather than routes.
+  That is fixable with a prompt that says when each category applies, and it is deliberately not
+  fixed here: tuning a model against labels this repository wrote itself would improve the score
+  and prove nothing.
+
+**On the labels.** They are ground truth by construction, so a disagreement is not automatically a
+model error. Whether an uncleared duplicate should be routed for a correcting entry or escalated
+outright is a matter a real controller would rule on, and this repository is not that controller.
 
 Metrics collected: risk accuracy, action-category accuracy, escalation precision / recall / F1, retrieval recall
 (did the retriever surface the governing document?) reported separately from citation accuracy (did the decision cite
@@ -279,8 +296,15 @@ python -m fcca.run_case --exception EXC-0001
 python -m fcca.evaluate --provider bedrock
 ```
 
-Any chat model enabled in your account works; model access must be granted in the Bedrock console first.
-Authentication uses the standard AWS credential chain — this project never reads, stores or logs a key.
+Any chat model enabled in your account works. Serverless models are enabled on first invocation;
+Anthropic models may require a one-time use-case form. In EU regions an inference-profile id
+(`eu.anthropic.…`) is required rather than the bare model id.
+
+Authentication uses the standard AWS credential chain, so a Bedrock API key works too — export it
+as `AWS_BEARER_TOKEN_BEDROCK` and botocore prefers bearer auth automatically, with no access keys
+involved. Note that a *short-term* Bedrock key expires after a few hours and then fails with
+"Signature expired"; generate a long-term one for anything that has to keep working. This project
+never reads, stores or logs a key either way.
 
 ## Run it on Google Vertex AI
 
