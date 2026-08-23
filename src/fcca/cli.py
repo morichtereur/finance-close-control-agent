@@ -6,10 +6,11 @@
     fcca evaluate --provider mock
     fcca audit --exception EXC-0042
     fcca review --exception EXC-0042 --action approved --reviewer u.klein
+    fcca trace --case EXC-0042
     fcca info
 
 Every subcommand is also runnable as a module, e.g.
-``python -m fcca.run_case --exception EXC-0042``, which is what the repository
+``python -m fcca.close.run_case --exception EXC-0042``, which is what the repository
 uses in CI and in the README.
 """
 
@@ -21,21 +22,22 @@ import sys
 from datetime import UTC, datetime
 
 from fcca import __version__
-from fcca.config import get_settings
-from fcca.errors import FCCAError
-from fcca.models import ReviewRecord
-from fcca.presentation import console
+from fcca.close.presentation import console
+from fcca.shared.config import get_settings
+from fcca.shared.errors import FCCAError
+from fcca.shared.models import ReviewRecord
+from fcca.shared.trace import TraceWriter, read_trace, render_trace
 
 SUBCOMMANDS = {
-    "generate-data": "fcca.generate_data",
-    "ingest-policies": "fcca.ingest_policies",
-    "run-case": "fcca.run_case",
-    "evaluate": "fcca.evaluate",
+    "generate-data": "fcca.close.generate_data",
+    "ingest-policies": "fcca.close.ingest_policies",
+    "run-case": "fcca.close.run_case",
+    "evaluate": "fcca.close.evaluate",
 }
 
 
 def _audit(argv: list[str]) -> int:
-    from fcca.audit.logger import AuditLog
+    from fcca.shared.audit.logger import AuditLog
 
     parser = argparse.ArgumentParser(
         prog="fcca audit", description="Inspect the decision audit trail."
@@ -94,7 +96,7 @@ def _audit(argv: list[str]) -> int:
 
 
 def _review(argv: list[str]) -> int:
-    from fcca.audit.logger import AuditLog
+    from fcca.shared.audit.logger import AuditLog
 
     parser = argparse.ArgumentParser(
         prog="fcca review",
@@ -107,16 +109,32 @@ def _review(argv: list[str]) -> int:
     args = parser.parse_args(argv)
 
     record = ReviewRecord(
-        exception_id=args.exception,
+        case_id=args.exception,
         reviewer=args.reviewer,
         action=args.action,
         comment=args.comment,
         reviewed_at=datetime.now(UTC),
     )
-    with AuditLog(get_settings()) as log:
+    settings = get_settings()
+    with AuditLog(settings) as log:
         # Confirm a decision exists before recording a review of it.
         log.reconstruct(args.exception)
         review_id = log.record_review(record)
+
+    # A human disposition is a step of the pipeline like any other, and the
+    # trace is where the whole sequence lives. Recording it only in the audit
+    # table would leave the trace ending at the machine's recommendation, which
+    # is precisely the part a reviewer cares least about.
+    TraceWriter(settings.close_trace_path, module="close").step(
+        case_id=args.exception,
+        step_name="human_review",
+        actor="human",
+        inputs={"exception_id": args.exception, "action": args.action},
+        outcome=args.action,
+        summary=f"{args.reviewer} {args.action} the recommendation."
+        + (f" Comment: {args.comment}" if args.comment else ""),
+        detail={"reviewer": args.reviewer, "comment": args.comment},
+    )
     console().print(
         f"recorded review {review_id}: {args.exception} {args.action} by {args.reviewer}"
     )
@@ -124,7 +142,7 @@ def _review(argv: list[str]) -> int:
 
 
 def _info(argv: list[str]) -> int:
-    from fcca.providers.base import available_providers, describe_provider
+    from fcca.shared.providers.base import available_providers, describe_provider
 
     parser = argparse.ArgumentParser(prog="fcca info", description="Show the active configuration.")
     parser.parse_args(argv)
@@ -146,7 +164,7 @@ def _info(argv: list[str]) -> int:
     con.print()
 
     try:
-        from fcca.analytics import CloseAnalytics
+        from fcca.close.analytics import CloseAnalytics
 
         with CloseAnalytics(settings) as analytics:
             con.print("Dataset", style="bold")
@@ -157,7 +175,7 @@ def _info(argv: list[str]) -> int:
     con.print()
 
     try:
-        from fcca.retrieval.index import policy_index_manifest
+        from fcca.close.retrieval.index import policy_index_manifest
 
         manifest = policy_index_manifest(settings)
         con.print("Policy index", style="bold")
@@ -172,9 +190,9 @@ def _info(argv: list[str]) -> int:
     con.print("Control tools", style="bold")
     con.print("  invoked deterministically by the workflow, not selected by a model", style="dim")
     try:
-        from fcca.analytics import CloseAnalytics
-        from fcca.retrieval.retriever import PolicyRetrievalService
-        from fcca.workflow.tools import build_control_tools, tool_catalogue
+        from fcca.close.analytics import CloseAnalytics
+        from fcca.close.retrieval.retriever import PolicyRetrievalService
+        from fcca.close.workflow.tools import build_control_tools, tool_catalogue
 
         with CloseAnalytics(settings) as analytics:
             tools = build_control_tools(analytics, PolicyRetrievalService(settings), settings)
@@ -184,6 +202,38 @@ def _info(argv: list[str]) -> int:
                 )
     except FCCAError as exc:
         con.print(f"  unavailable: {exc}", style="yellow")
+    return 0
+
+
+def _trace(argv: list[str]) -> int:
+    parser = argparse.ArgumentParser(
+        prog="fcca trace",
+        description="Render the append-only step trace for one case.",
+    )
+    parser.add_argument("--case", help="Invoice id or close-exception id.")
+    parser.add_argument(
+        "--module",
+        choices=["close", "i2p"],
+        default="close",
+        help="Which process module's trace to read.",
+    )
+    parser.add_argument("--json", action="store_true", help="Emit raw JSONL records instead.")
+    args = parser.parse_args(argv)
+
+    settings = get_settings()
+    path = settings.close_trace_path if args.module == "close" else settings.i2p_trace_path
+    records = read_trace(path, case_id=args.case)
+    if not records:
+        console().print(
+            f"no trace records in {path}" + (f" for {args.case}" if args.case else ""),
+            style="dim",
+        )
+        return 0
+    if args.json:
+        for record in records:
+            print(record.to_line())
+        return 0
+    print(render_trace(records))
     return 0
 
 
@@ -202,6 +252,8 @@ def main(argv: list[str] | None = None) -> int:
             return _audit(rest)
         if command == "review":
             return _review(rest)
+        if command == "trace":
+            return _trace(rest)
         if command == "info":
             return _info(rest)
         module_name = SUBCOMMANDS.get(command)
