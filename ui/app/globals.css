@@ -1,161 +1,253 @@
 /*
- * Greyscale, flat, dense.
+ * Invoice exception queue — visual system.
  *
- * The constraint is that this should read like something already installed at a
- * client, not like a product being sold. So: no gradients, no glow, no shadows,
- * no colour except where colour carries information a reviewer acts on, and a
- * type scale that fits a lot of numbers on a screen rather than one number
- * beautifully.
+ * The brief is fixed: greyscale, flat, dense, no gradients, no glow, no
+ * shadows, no emoji, reads like an internal finance tool. Everything below
+ * works inside that, so the quality has to come from proportion, alignment and
+ * restraint rather than from decoration.
  *
- * Severity is the one place colour is used, and it is used sparingly — a left
- * border and a label, never a filled block. A queue where everything is
- * coloured is a queue where nothing stands out.
+ * Three decisions carry the design.
+ *
+ * ONE SIGNAL COLOUR. The ramp is a cool neutral — ledger paper under office
+ * light — and there is exactly one non-grey value in the entire system. It
+ * means "a person must act on this": a tolerance breach, an escalation, a bank
+ * account that does not match the master. Severity gradation is carried by
+ * weight and rule thickness instead of by hue, because a queue where three
+ * colours compete is a queue where none of them reads.
+ *
+ * TABULAR FIGURES EVERYWHERE. Every number is IBM Plex Mono with tabular
+ * numerals and right alignment. This interface is columns of money; digits that
+ * do not stack are digits nobody scans.
+ *
+ * RULES DO THE STRUCTURING. No cards, no fills to separate things — hairlines
+ * at 1px and a heavier 2px rule to mark a section head. Weight of rule encodes
+ * hierarchy the way it does on a printed exhibit.
  */
 
 :root {
-  --ink: #17191c;
-  --ink-2: #43484e;
-  --ink-3: #6b7178;
-  --ink-4: #9aa0a6;
-  --rule: #d8dbde;
-  --rule-2: #e8eaec;
-  --bg: #ffffff;
-  --bg-2: #f6f7f8;
-  --bg-3: #eeeff1;
+  /* Cool neutral ramp. */
+  --paper: #ffffff;
+  --paper-2: #f7f8f9;
+  --paper-3: #eceff1;
+  --hair: #e3e6e9;
+  --rule: #cbd0d5;
+  --rule-strong: #9aa2a9;
+  --ink-4: #858d95;
+  --ink-3: #656d75;
+  --ink-2: #3d454c;
+  --ink: #12161a;
 
-  /* Reserved for state a reviewer acts on. Muted deliberately. */
-  --high: #8c2f24;
-  --medium: #8a6416;
-  --low: #4a5157;
-  --ok: #2f5d3f;
+  /* The only non-grey value in the system. Used where a person must act. */
+  --signal: #a3241a;
+  --signal-wash: #faf1f0;
 
-  --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-sans-stack: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono-stack: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Dense type scale. Steps are small because the content is dense; the
+     hierarchy comes from weight and tracking as much as from size. */
+  --t-micro: 10.5px;
+  --t-fine: 11.5px;
+  --t-body: 12.5px;
+  --t-lead: 14px;
+  --t-fig: 18px;
+  --t-hero: 30px;
+
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 24px;
+  --s6: 32px;
+  --s7: 48px;
+
+  --shell: 1560px;
 }
 
 * {
   box-sizing: border-box;
 }
 
-html,
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   margin: 0;
-  padding: 0;
-  background: var(--bg);
+  background: var(--paper);
   color: var(--ink);
-  font-family: var(--sans);
-  font-size: 13px;
-  line-height: 1.45;
+  font-family: var(--font-sans-stack);
+  font-size: var(--t-body);
+  line-height: 1.5;
+  font-feature-settings: "kern" 1;
   -webkit-font-smoothing: antialiased;
 }
 
 a {
-  color: var(--ink);
+  color: inherit;
   text-decoration: none;
 }
 
 a:hover {
   text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
 }
 
-/* ---------------------------------------------------------------- chrome */
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+
+.skip:focus {
+  left: var(--s3);
+  top: var(--s2);
+  z-index: 10;
+  background: var(--ink);
+  color: var(--paper);
+  padding: var(--s2) var(--s3);
+}
+
+/* ---------------------------------------------------------------- masthead */
 
 .masthead {
-  border-bottom: 1px solid var(--rule);
-  padding: 10px 16px;
   display: flex;
-  align-items: baseline;
-  gap: 16px;
+  align-items: center;
+  gap: var(--s5);
+  padding: var(--s3) var(--s5);
+  border-bottom: 2px solid var(--ink);
 }
 
-.masthead h1 {
-  font-size: 13px;
+.mark {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  font-size: var(--t-fine);
   font-weight: 600;
-  margin: 0;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.mark:hover {
+  text-decoration: none;
+}
+
+/* A short heavy rule standing in for a logo. The subject has no brand and
+   inventing one would be decoration; a rule is the page's own vocabulary. */
+.mark-rule {
+  width: 22px;
+  height: 3px;
+  background: var(--ink);
 }
 
 .masthead nav {
   display: flex;
-  gap: 12px;
-  margin-left: auto;
+  gap: var(--s4);
+  font-size: var(--t-fine);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--ink-3);
-  font-size: 12px;
 }
 
-.notice {
-  background: var(--bg-2);
-  border-bottom: 1px solid var(--rule);
-  padding: 6px 16px;
-  color: var(--ink-3);
-  font-size: 12px;
+.masthead nav a:hover {
+  color: var(--ink);
+}
+
+.provenance {
+  margin: 0 0 0 auto;
+  font-family: var(--font-mono-stack);
+  font-size: var(--t-micro);
+  letter-spacing: 0.02em;
+  color: var(--ink-4);
 }
 
 main {
-  padding: 16px;
-  max-width: 1600px;
+  padding: var(--s5);
+  max-width: var(--shell);
 }
 
-/* ------------------------------------------------------------- headings */
+/* ------------------------------------------------------------------ eyebrow */
 
-h2 {
-  font-size: 12px;
+.eyebrow {
+  font-size: var(--t-micro);
   font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
   color: var(--ink-3);
-  margin: 0 0 8px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--rule-2);
+  margin: 0 0 var(--s2);
+  padding-bottom: var(--s1);
+  border-bottom: 1px solid var(--rule);
 }
 
-h3 {
-  font-size: 12px;
-  font-weight: 600;
-  margin: 14px 0 6px;
-  color: var(--ink-2);
+.eyebrow-plain {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
-/* --------------------------------------------------------------- tables */
+.note {
+  color: var(--ink-3);
+  max-width: 74ch;
+  margin: var(--s2) 0 0;
+}
+
+.fine {
+  font-size: var(--t-fine);
+  color: var(--ink-4);
+}
+
+/* ------------------------------------------------------------------- tables */
 
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: var(--t-fine);
 }
 
-th {
+thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--paper);
   text-align: left;
+  font-size: var(--t-micro);
   font-weight: 600;
-  color: var(--ink-3);
-  padding: 5px 8px;
-  border-bottom: 1px solid var(--rule);
-  white-space: nowrap;
-  font-size: 11px;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: var(--ink-3);
+  padding: var(--s2) var(--s2) var(--s1);
+  border-bottom: 2px solid var(--rule-strong);
+  white-space: nowrap;
 }
 
 td {
-  padding: 4px 8px;
-  border-bottom: 1px solid var(--rule-2);
-  vertical-align: top;
+  padding: 5px var(--s2);
+  border-bottom: 1px solid var(--hair);
+  vertical-align: baseline;
 }
 
-tbody tr:hover {
-  background: var(--bg-2);
+tbody tr:hover td {
+  background: var(--paper-2);
+}
+
+tbody tr[aria-current="true"] td {
+  background: var(--paper-3);
+}
+
+.num,
+.mono {
+  font-family: var(--font-mono-stack);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 .num {
-  font-family: var(--mono);
   text-align: right;
   white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-
-.mono {
-  font-family: var(--mono);
-  font-variant-numeric: tabular-nums;
 }
 
 .muted {
@@ -166,91 +258,382 @@ tbody tr:hover {
   color: var(--ink-4);
 }
 
-/* --------------------------------------------------------------- badges */
+.breach {
+  color: var(--signal);
+  font-weight: 600;
+}
 
+/* ------------------------------------------------------------ tier + state */
+
+/* Tier is set in mono and graded by weight, not hue. Only `escalate` — the one
+   that removes a person's discretion — takes the signal colour. */
 .tier {
-  font-family: var(--mono);
-  font-size: 11px;
+  font-family: var(--font-mono-stack);
+  font-size: var(--t-fine);
   letter-spacing: 0.02em;
   white-space: nowrap;
 }
 
 .tier-escalate {
-  color: var(--high);
+  color: var(--signal);
   font-weight: 600;
 }
 
 .tier-propose_and_approve {
-  color: var(--medium);
+  color: var(--ink);
+  font-weight: 500;
 }
 
 .tier-auto_clear {
-  color: var(--ok);
+  color: var(--ink-4);
 }
 
+/* Severity as rule thickness on the left edge. Three weights, one colour. */
 .sev {
   border-left: 3px solid transparent;
-  padding-left: 5px;
+  padding-left: var(--s2);
 }
 
 .sev-high {
-  border-color: var(--high);
+  border-left-color: var(--signal);
 }
 
 .sev-medium {
-  border-color: var(--medium);
+  border-left-color: var(--rule-strong);
 }
 
 .sev-low {
-  border-color: var(--rule);
+  border-left-color: var(--hair);
 }
 
-/* ---------------------------------------------------------------- panes */
+/* -------------------------------------------------------------- queue stats */
 
-.split {
-  display: grid;
-  grid-template-columns: minmax(320px, 1fr) minmax(420px, 1.35fr);
-  gap: 16px;
-  align-items: start;
-}
-
-@media (max-width: 1100px) {
-  .split {
-    grid-template-columns: 1fr;
-  }
-}
-
-.pane {
-  border: 1px solid var(--rule);
-}
-
-.pane > .pane-head {
-  background: var(--bg-2);
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  border-top: 2px solid var(--ink);
   border-bottom: 1px solid var(--rule);
-  padding: 5px 10px;
-  font-size: 11px;
+  margin-bottom: var(--s4);
+}
+
+.stat {
+  padding: var(--s2) var(--s5) var(--s3) 0;
+  margin-right: var(--s5);
+}
+
+.stat + .stat {
+  border-left: 1px solid var(--hair);
+  padding-left: var(--s5);
+}
+
+.stat dt {
+  font-size: var(--t-micro);
   font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
   color: var(--ink-3);
 }
 
-.pane > .pane-body {
-  padding: 10px;
+.stat dd {
+  margin: 2px 0 0;
+  font-family: var(--font-mono-stack);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-fig);
+  font-weight: 500;
+  letter-spacing: -0.01em;
 }
 
-.pane > .pane-body > table {
-  margin: 0 -10px;
-  width: calc(100% + 20px);
+.stat dd.is-zero {
+  color: var(--ink);
 }
 
-/* ------------------------------------------------------------ field rows */
+/* -------------------------------------------------------------- tier ribbon */
+
+/* Proportional split of the population across the three tiers. Width is the
+   share, so the shape of the queue is legible before any number is read. */
+.ribbon {
+  display: flex;
+  height: 6px;
+  margin-bottom: var(--s2);
+  border: 1px solid var(--rule);
+}
+
+.ribbon span {
+  display: block;
+}
+
+.ribbon .r-escalate {
+  background: var(--signal);
+}
+
+.ribbon .r-propose_and_approve {
+  background: var(--rule-strong);
+}
+
+.ribbon .r-auto_clear {
+  background: var(--paper-3);
+}
+
+.ribbon-key {
+  display: flex;
+  gap: var(--s4);
+  font-size: var(--t-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: var(--s4);
+}
+
+/* ------------------------------------------------------------------ filters */
+
+.filters {
+  display: flex;
+  gap: var(--s2);
+  flex-wrap: wrap;
+  align-items: baseline;
+  margin-bottom: var(--s3);
+}
+
+.filters > .filter-label {
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  width: 74px;
+  flex: none;
+}
+
+.chip {
+  font-family: var(--font-mono-stack);
+  font-size: var(--t-fine);
+  color: var(--ink-2);
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  padding: 2px var(--s2);
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--ink-3);
+}
+
+.chip[aria-pressed="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+.chip-clear {
+  border-style: dashed;
+  color: var(--ink-4);
+}
+
+.count {
+  font-family: var(--font-mono-stack);
+  font-size: var(--t-fine);
+  color: var(--ink-3);
+  margin: 0 0 var(--s2);
+}
+
+.hint {
+  font-size: var(--t-micro);
+  letter-spacing: 0.04em;
+  color: var(--ink-4);
+  margin: 0 0 var(--s4);
+}
+
+kbd {
+  font-family: var(--font-mono-stack);
+  font-size: var(--t-micro);
+  border: 1px solid var(--rule);
+  padding: 0 3px;
+  color: var(--ink-3);
+}
+
+/* ------------------------------------------------------------- case header */
+
+.case {
+  border-top: 2px solid var(--ink);
+  padding-top: var(--s3);
+  margin-bottom: var(--s5);
+}
+
+.case-top {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s5);
+  flex-wrap: wrap;
+}
+
+.case-id {
+  font-family: var(--font-mono-stack);
+  font-size: var(--t-hero);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+
+.case-vendor {
+  font-size: var(--t-lead);
+  color: var(--ink-2);
+  margin-top: 2px;
+}
+
+.case-facts {
+  display: flex;
+  gap: var(--s5);
+  margin-left: auto;
+  text-align: right;
+}
+
+.case-fact dt {
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.case-fact dd {
+  margin: 2px 0 0;
+  font-family: var(--font-mono-stack);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-fig);
+  font-weight: 500;
+}
+
+.verdict {
+  margin-top: var(--s3);
+  padding-top: var(--s2);
+  border-top: 1px solid var(--hair);
+  display: flex;
+  gap: var(--s3);
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.verdict-tier {
+  font-family: var(--font-mono-stack);
+  font-size: var(--t-lead);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.verdict-why {
+  color: var(--ink-2);
+  max-width: 92ch;
+}
+
+/* --------------------------------------------------------- tolerance bridge */
+
+/* The signature element. A scaled band showing the agreed price, the tolerance
+   window around it, and where the invoice actually landed. Position is
+   magnitude — a reviewer sees whether this is a rounding argument or a real
+   dispute before reading a single figure. */
+.bridge {
+  border: 1px solid var(--rule);
+  border-top: 2px solid var(--ink);
+  padding: var(--s4) var(--s4) var(--s3);
+  margin-bottom: var(--s5);
+}
+
+.bridge-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+  flex-wrap: wrap;
+}
+
+.bridge-residual {
+  font-family: var(--font-mono-stack);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--t-hero);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.bridge-residual.is-breach {
+  color: var(--signal);
+}
+
+.bridge-sub {
+  font-family: var(--font-mono-stack);
+  font-size: var(--t-fine);
+  color: var(--ink-3);
+}
+
+.bridge svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.bridge-legend {
+  display: flex;
+  gap: var(--s5);
+  margin-top: var(--s3);
+  padding-top: var(--s2);
+  border-top: 1px solid var(--hair);
+  font-size: var(--t-micro);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  flex-wrap: wrap;
+}
+
+/* ------------------------------------------------------------------- panels */
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(340px, 1fr) minmax(430px, 1.3fr);
+  gap: var(--s5);
+  align-items: start;
+}
+
+/* Grid and flex children default to a min-content floor, which a wide table
+   will happily push past the viewport. Both tracks must be allowed to shrink;
+   the tables handle their own overflow below. */
+.split > * {
+  min-width: 0;
+}
+
+.panel + .panel {
+  margin-top: var(--s5);
+}
+
+.panel-head {
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding-bottom: var(--s1);
+  border-bottom: 2px solid var(--rule-strong);
+  margin-bottom: var(--s2);
+  display: flex;
+  align-items: baseline;
+  gap: var(--s2);
+}
+
+.panel-head .of {
+  font-family: var(--font-mono-stack);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--ink-4);
+  margin-left: auto;
+}
 
 .fields {
   display: grid;
   grid-template-columns: max-content 1fr;
-  gap: 2px 12px;
-  font-size: 12px;
+  gap: 3px var(--s3);
+  margin: 0 0 var(--s3);
 }
 
 .fields dt {
@@ -260,193 +643,256 @@ tbody tr:hover {
 
 .fields dd {
   margin: 0;
-  font-family: var(--mono);
+  font-family: var(--font-mono-stack);
   font-variant-numeric: tabular-nums;
 }
 
+/* Free text is written by whoever sent the invoice. It is set apart so it can
+   never be mistaken for a value the system derived. */
 .freetext {
-  margin-top: 8px;
-  padding: 6px 8px;
-  background: var(--bg-2);
-  border-left: 2px solid var(--rule);
+  margin: var(--s3) 0;
+  padding: var(--s2) var(--s3);
+  background: var(--paper-2);
+  border-left: 2px solid var(--rule-strong);
   color: var(--ink-2);
-  font-size: 12px;
 }
 
-/* --------------------------------------------------------------- trace */
+.freetext .src {
+  display: block;
+  font-size: var(--t-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  margin-bottom: 2px;
+}
+
+/* --------------------------------------------------------------- comparison */
+
+.compare {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.compare td {
+  padding: 4px var(--s2);
+  border-bottom: 1px solid var(--hair);
+}
+
+.compare tr.is-total td {
+  border-top: 1px solid var(--rule-strong);
+  border-bottom: none;
+  font-weight: 600;
+}
+
+.compare tr.is-derived td:first-child {
+  color: var(--ink-3);
+}
+
+/* The naive figure is set apart: it decides nothing and must never be mistaken
+   for the number the system used. */
+.compare tr.is-aside td {
+  border-bottom: none;
+  color: var(--ink-4);
+  font-size: var(--t-micro);
+  padding-top: var(--s2);
+}
+
+/* -------------------------------------------------------------------- trace */
 
 .trace {
-  font-family: var(--mono);
-  font-size: 11.5px;
-  border-collapse: collapse;
+  font-family: var(--font-mono-stack);
+  font-size: var(--t-fine);
   width: 100%;
+  border-collapse: collapse;
 }
 
 .trace td {
-  padding: 3px 8px;
-  border-bottom: 1px solid var(--rule-2);
-  vertical-align: top;
+  padding: 3px var(--s2);
+  border-bottom: 1px solid var(--hair);
+  vertical-align: baseline;
 }
 
-.trace .actor-model {
-  color: var(--medium);
-  font-weight: 600;
-}
-
-.trace .actor-human {
-  color: var(--ok);
-  font-weight: 600;
-}
-
-.trace .actor-rule {
-  color: var(--ink-4);
-}
-
-.trace .step {
+.trace .t-step {
   white-space: nowrap;
   color: var(--ink-2);
 }
 
-.trace .outcome {
+/* Actor is the reason the trace exists. A model step gets a heavier left rule
+   and full-strength ink; rule steps recede. */
+.trace tr.by-model td {
+  background: var(--paper-2);
+}
+
+.trace tr.by-model .t-step {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.trace .t-actor {
+  white-space: nowrap;
+  font-size: var(--t-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+}
+
+.trace tr.by-model .t-actor,
+.trace tr.by-human .t-actor {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.trace .t-outcome {
   white-space: nowrap;
   color: var(--ink-3);
 }
 
-/* -------------------------------------------------------------- actions */
-
-.actions {
-  border: 1px solid var(--rule);
-  margin-top: 16px;
+.trace .t-hash {
+  color: var(--ink-4);
 }
 
-.actions .pane-body {
-  padding: 10px;
+.trace .t-summary {
+  font-family: var(--font-sans-stack);
+  color: var(--ink-2);
+}
+
+/* ------------------------------------------------------------- decision bar */
+
+/* Sticky, because the decision is the job. A reviewer should never have to
+   scroll back up past the evidence to act on it. */
+.decide {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  margin-top: var(--s5);
+  background: var(--paper);
+  border-top: 2px solid var(--ink);
+  padding: var(--s3) 0 var(--s4);
   display: flex;
-  gap: 8px;
-  align-items: center;
+  align-items: baseline;
+  gap: var(--s3);
   flex-wrap: wrap;
 }
 
-button {
-  font-family: var(--sans);
-  font-size: 12px;
-  padding: 5px 12px;
-  border: 1px solid var(--ink-3);
-  background: var(--bg);
-  color: var(--ink);
-  cursor: pointer;
-  border-radius: 0;
+.decide-label {
+  font-size: var(--t-micro);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
 }
 
-button:hover {
-  background: var(--bg-3);
+button {
+  font-family: var(--font-sans-stack);
+  font-size: var(--t-body);
+  padding: 6px var(--s3);
+  border: 1px solid var(--ink-3);
+  border-radius: 0;
+  background: var(--paper);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+button:hover:not([disabled]) {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+button.primary {
+  border-color: var(--ink);
+  font-weight: 500;
 }
 
 button[disabled] {
   color: var(--ink-4);
-  border-color: var(--rule);
-  cursor: default;
+  border-color: var(--hair);
+  cursor: not-allowed;
 }
 
-button[disabled]:hover {
-  background: var(--bg);
+.decide-note {
+  color: var(--ink-3);
+  max-width: 62ch;
 }
 
 .recorded {
-  border-top: 1px solid var(--rule-2);
-  padding: 8px 10px;
-  font-size: 12px;
+  border-top: 1px solid var(--hair);
+  margin-top: var(--s3);
+  padding-top: var(--s2);
   color: var(--ink-2);
 }
 
-.recorded code {
-  font-family: var(--mono);
-  font-size: 11.5px;
-  background: var(--bg-2);
-  padding: 1px 4px;
-  display: inline-block;
-}
-
 .command {
-  margin-top: 6px;
-  padding: 6px 8px;
-  background: var(--bg-2);
-  border-left: 2px solid var(--rule);
-  font-family: var(--mono);
-  font-size: 11.5px;
+  margin-top: var(--s2);
+  padding: var(--s2) var(--s3);
+  background: var(--paper-2);
+  border-left: 2px solid var(--rule-strong);
+  font-family: var(--font-mono-stack);
+  font-size: var(--t-fine);
   overflow-x: auto;
   white-space: pre;
 }
 
-/* --------------------------------------------------------------- filters */
-
-.filters {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-bottom: 10px;
-  font-size: 12px;
-}
-
-.filters label {
-  color: var(--ink-3);
-  margin-right: 2px;
-}
-
-.chip {
-  border: 1px solid var(--rule);
-  background: var(--bg);
-  padding: 2px 8px;
-  cursor: pointer;
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--ink-2);
-}
-
-.chip[aria-pressed="true"] {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--bg);
-}
-
-.summary {
-  display: flex;
-  gap: 20px;
-  flex-wrap: wrap;
-  border: 1px solid var(--rule);
-  padding: 8px 12px;
-  margin-bottom: 12px;
-  font-size: 12px;
-}
-
-.summary div {
-  display: flex;
-  gap: 6px;
-  align-items: baseline;
-}
-
-.summary .k {
-  color: var(--ink-3);
-}
-
-.summary .v {
-  font-family: var(--mono);
-  font-variant-numeric: tabular-nums;
-}
-
 .back {
-  font-size: 12px;
-  color: var(--ink-3);
-  margin-bottom: 10px;
-  display: block;
-}
-
-.residual-out {
-  color: var(--high);
+  display: inline-block;
+  font-size: var(--t-micro);
   font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: var(--s3);
 }
 
-.residual-in {
-  color: var(--ink-2);
+/* -------------------------------------------------------------- responsive */
+
+/* Every table can scroll on its own account rather than widening the page. */
+.table-scroll {
+  overflow-x: auto;
+}
+
+@media (max-width: 1180px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 820px) {
+  main {
+    padding: var(--s4) var(--s3);
+  }
+
+  .masthead {
+    flex-wrap: wrap;
+    gap: var(--s3);
+    padding: var(--s3);
+  }
+
+  .provenance {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .case-facts {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .stats {
+    gap: 0;
+  }
+
+  .stat,
+  .stat + .stat {
+    padding: var(--s2) var(--s4) var(--s2) 0;
+    margin-right: var(--s3);
+    border-left: none;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
 }
