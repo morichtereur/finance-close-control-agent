@@ -1,0 +1,78 @@
+name: pages
+
+# Publishes the invoice-to-pay review interface to
+# https://morichtereur.github.io/finance-close-control-agent/
+#
+# The site is the static export in ui/. It is built from ui/data, which is
+# committed, so this job needs no Python, no dataset generation and no model
+# provider — and therefore cannot make a paid API call.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ui/**"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never cancel a deploy midway; queue behind the running one instead.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ui
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: ui/package-lock.json
+
+      - name: Install
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build
+        env:
+          # GitHub Pages serves project sites from a subpath, so every asset and
+          # internal link has to carry it. Derived from the repository name so a
+          # rename cannot silently break every URL on the site.
+          NEXT_PUBLIC_BASE_PATH: /${{ github.event.repository.name }}
+        run: npm run build
+
+      - name: Confirm the export is complete
+        # A Pages deploy that silently ships an empty directory looks like a
+        # success. Fail here instead.
+        run: |
+          test -f out/.nojekyll || { echo "missing .nojekyll — Jekyll would drop _next/"; exit 1; }
+          pages=$(find out -name '*.html' | wc -l)
+          echo "exported $pages pages"
+          test "$pages" -gt 300 || { echo "expected the full invoice set, got $pages"; exit 1; }
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: ui/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
