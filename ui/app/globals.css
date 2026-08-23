@@ -137,6 +137,11 @@ a:hover {
   text-decoration: none;
 }
 
+.mark span:last-child,
+.mark {
+  white-space: nowrap;
+}
+
 /* A short heavy rule standing in for a logo. The subject has no brand and
    inventing one would be decoration; a rule is the page's own vocabulary. */
 .mark-rule {
@@ -247,6 +252,16 @@ tbody tr[aria-current="true"] td {
 
 .num {
   text-align: right;
+  white-space: nowrap;
+}
+
+/* An identifier is one token. Left to wrap, "INV-00051" breaks after the hyphen
+   and "2026-04-22" after the year, which reads as broken rather than dense.
+   Scoped to table cells: the field lists carry long values like IBANs that
+   should still wrap inside their panel. Tables sit in .table-scroll, so a wide
+   row scrolls rather than widening the page. */
+td.mono,
+td .mono {
   white-space: nowrap;
 }
 
@@ -848,6 +863,21 @@ button[disabled] {
 /* Every table can scroll on its own account rather than widening the page. */
 .table-scroll {
   overflow-x: auto;
+}
+
+/* The provenance caption is one sentence and should read as one. Below this
+   width it no longer fits beside the nav, so it takes its own line rather than
+   wrapping into a ragged two-line block against the masthead edge. */
+@media (max-width: 960px) {
+  .masthead {
+    flex-wrap: wrap;
+    row-gap: var(--s2);
+  }
+
+  .provenance {
+    margin-left: 0;
+    width: 100%;
+  }
 }
 
 @media (max-width: 1180px) {
