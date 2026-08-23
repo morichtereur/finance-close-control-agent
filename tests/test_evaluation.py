@@ -6,9 +6,9 @@ that only ever sees correct input is not evidence of anything.
 
 from __future__ import annotations
 
-from fcca.config import Settings
-from fcca.evaluation.benchmark import CSV_COLUMNS, NOT_RUN, BenchmarkRun, run_benchmark
-from fcca.evaluation.metrics import CaseEvaluation, aggregate
+from fcca.close.evaluation.benchmark import CSV_COLUMNS, NOT_RUN, BenchmarkRun, run_benchmark
+from fcca.close.evaluation.metrics import CaseEvaluation, aggregate
+from fcca.shared.config import Settings
 
 
 def _case(**overrides: object) -> CaseEvaluation:

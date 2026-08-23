@@ -16,8 +16,8 @@ from typing import Any
 
 import pytest
 
-from fcca.config import Settings, get_settings, reset_settings_cache
-from fcca.models import CloseException, JournalEntry
+from fcca.close.models import CloseException, JournalEntry
+from fcca.shared.config import Settings, get_settings, reset_settings_cache
 
 # Import paths come from `pythonpath` in pyproject.toml, so the suite runs the
 # same way whether or not the package is installed, and however pytest is invoked.
@@ -41,9 +41,9 @@ def sandbox(tmp_path_factory: pytest.TempPathFactory) -> Settings:
     reset_settings_cache()
     settings = get_settings()
 
-    from fcca.generate_data import generate
-    from fcca.retrieval.index import build_policy_index
-    from fcca.retrieval.retriever import clear_retriever_cache
+    from fcca.close.generate_data import generate
+    from fcca.close.retrieval.index import build_policy_index
+    from fcca.close.retrieval.retriever import clear_retriever_cache
 
     generate(settings)
     build_policy_index(settings)

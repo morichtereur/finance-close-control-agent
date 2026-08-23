@@ -10,14 +10,14 @@ from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage
 from langchain_core.outputs import ChatGeneration, ChatResult
 
-from fcca.analytics import CloseAnalytics
-from fcca.audit.logger import AuditLog
-from fcca.config import Settings
-from fcca.evaluation.benchmark import load_labels
-from fcca.models import CaseFailure, CaseResult
-from fcca.providers.base import ProviderSpec
-from fcca.retrieval.retriever import PolicyRetrievalService
-from fcca.workflow.control_agent import ControlAgent
+from fcca.close.analytics import CloseAnalytics
+from fcca.close.evaluation.benchmark import load_labels
+from fcca.close.models import CaseFailure, CaseResult
+from fcca.close.retrieval.retriever import PolicyRetrievalService
+from fcca.close.workflow.control_agent import ControlAgent
+from fcca.shared.audit.logger import AuditLog
+from fcca.shared.config import Settings
+from fcca.shared.providers.base import ProviderSpec
 
 
 def _scenario_case(settings: Settings, scenario: str) -> str:

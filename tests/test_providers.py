@@ -10,9 +10,9 @@ from __future__ import annotations
 import pytest
 from langchain_core.language_models import BaseChatModel
 
-from fcca.config import Settings
-from fcca.errors import ConfigurationError, ProviderError, ProviderNotInstalledError
-from fcca.providers.base import available_providers, describe_provider, get_llm
+from fcca.shared.config import Settings
+from fcca.shared.errors import ConfigurationError, ProviderError, ProviderNotInstalledError
+from fcca.shared.providers.base import available_providers, describe_provider, get_llm
 
 
 def test_mock_provider_returns_a_langchain_chat_model(settings: Settings) -> None:
