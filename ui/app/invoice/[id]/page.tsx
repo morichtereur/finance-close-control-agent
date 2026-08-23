@@ -12,6 +12,7 @@ import {
 } from "@/lib/format";
 import type { InvoiceDetail, LineResolution, PurchaseOrderLine } from "@/lib/types";
 
+import { ToleranceBridge } from "./bridge";
 import { Disposition } from "./disposition";
 import { Trace } from "./trace";
 
@@ -22,71 +23,110 @@ export function generateStaticParams() {
 export default async function InvoicePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const detail = invoiceDetail(id);
-  const { invoice, vendor, result, routing, assessment } = detail;
+
+  // The page is ordered by what the reviewer needs, not by what the pipeline
+  // produced: the verdict and the reason for it first, then the one figure that
+  // drives it, then the evidence, then the record of how it was reached.
+  const priced = detail.result.resolutions.filter((r) => r.price !== null);
+  const worst = priced.reduce<LineResolution | null>((acc, r) => {
+    if (!acc) return r;
+    return Math.abs(r.price!.residual_pct) > Math.abs(acc.price!.residual_pct) ? r : acc;
+  }, null);
 
   return (
     <>
       <Link className="back" href="/">
-        &larr; queue
+        ← Queue
       </Link>
+
+      <CaseHeader detail={detail} />
+
+      {worst?.price && (
+        <ToleranceBridge price={worst.price} currency={detail.result.currency} />
+      )}
 
       <div className="split">
         <SourceDocument detail={detail} />
         <div>
-          <Discrepancies detail={detail} />
+          <Comparison detail={detail} />
           <Findings detail={detail} />
-          <Routing detail={detail} />
+          <Reasoning detail={detail} />
         </div>
       </div>
 
-      <div style={{ marginTop: 16 }}>
-        <div className="pane">
-          <div className="pane-head">Trace — every step, in order, with its actor</div>
-          <div className="pane-body" style={{ padding: 0 }}>
-            <Trace records={detail.trace} />
-          </div>
-        </div>
-      </div>
+      <section className="panel" style={{ marginTop: "var(--s5)" }}>
+        <h2 className="panel-head">
+          Trace
+          <span className="of">
+            {detail.trace.length} steps ·{" "}
+            {detail.trace.filter((r) => r.actor === "model").length} by model
+          </span>
+        </h2>
+        <Trace records={detail.trace} />
+      </section>
 
       <Disposition
-        invoiceId={invoice.invoice_id}
-        tier={routing.tier}
-        proposedAction={assessment?.assessment.proposed_action ?? null}
+        invoiceId={detail.invoice.invoice_id}
+        tier={detail.routing.tier}
+        proposedAction={detail.assessment?.assessment.proposed_action ?? null}
       />
-
-      <p className="dim" style={{ marginTop: 16, maxWidth: "80ch" }}>
-        {result.findings.length === 0
-          ? "No rule fired on this invoice, so no model was consulted."
-          : `${result.findings.length} rule finding(s). The model was consulted only after the rules flagged this invoice, and only to classify it, propose a resolution and cite evidence.`}{" "}
-        {vendor ? `Checked against vendor master record ${vendor.vendor_id}.` : ""}
-      </p>
     </>
   );
 }
 
-/* ------------------------------------------------------------ left pane */
+/* ------------------------------------------------------------ case header */
+
+function CaseHeader({ detail }: { detail: InvoiceDetail }) {
+  const { invoice, vendor, routing, result } = detail;
+  return (
+    <header className="case">
+      <div className="case-top">
+        <div>
+          <div className="case-id">{invoice.invoice_id}</div>
+          <div className="case-vendor">
+            {vendor?.name ?? invoice.vendor_id} · ref {invoice.vendor_reference}
+          </div>
+        </div>
+        <dl className="case-facts">
+          <div className="case-fact">
+            <dt>Value</dt>
+            <dd>{money(result.document_value, result.currency)}</dd>
+          </div>
+          <div className="case-fact">
+            <dt>Type</dt>
+            <dd>{result.category}</dd>
+          </div>
+          <div className="case-fact">
+            <dt>Received</dt>
+            <dd>{invoice.received_date}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <div className="verdict">
+        <span className={`verdict-tier tier-${routing.tier}`}>{label(routing.tier)}</span>
+        <span className="verdict-why">{routing.deciding_reason}</span>
+      </div>
+    </header>
+  );
+}
+
+/* ------------------------------------------------------------- left panel */
 
 function SourceDocument({ detail }: { detail: InvoiceDetail }) {
   const { invoice, vendor } = detail;
+  const bankDiffers = vendor != null && invoice.stated_bank_iban !== vendor.bank_iban;
+
   return (
-    <div className="pane">
-      <div className="pane-head">Source document — as received</div>
-      <div className="pane-body">
+    <div>
+      <section className="panel">
+        <h2 className="panel-head">
+          Document as received
+          <span className="of">{invoice.lines.length} lines</span>
+        </h2>
         <dl className="fields">
-          <dt>Invoice</dt>
-          <dd>{invoice.invoice_id}</dd>
-          <dt>Vendor</dt>
-          <dd>
-            {vendor?.name ?? invoice.vendor_id} ({invoice.vendor_id})
-          </dd>
-          <dt>Their reference</dt>
-          <dd>{invoice.vendor_reference}</dd>
-          <dt>Category</dt>
-          <dd>{invoice.category}</dd>
           <dt>Invoice date</dt>
           <dd>{invoice.invoice_date}</dd>
-          <dt>Received</dt>
-          <dd>{invoice.received_date}</dd>
           <dt>Company code</dt>
           <dd>{invoice.company_code}</dd>
           <dt>Net</dt>
@@ -96,9 +136,7 @@ function SourceDocument({ detail }: { detail: InvoiceDetail }) {
           <dt>Gross</dt>
           <dd>{money(invoice.stated_total_gross, invoice.currency)}</dd>
           <dt>Bank stated</dt>
-          <dd className={vendor && invoice.stated_bank_iban !== vendor.bank_iban ? "residual-out" : ""}>
-            {invoice.stated_bank_iban}
-          </dd>
+          <dd className={bankDiffers ? "breach" : undefined}>{invoice.stated_bank_iban}</dd>
           {vendor && (
             <>
               <dt>Bank on file</dt>
@@ -108,50 +146,53 @@ function SourceDocument({ detail }: { detail: InvoiceDetail }) {
         </dl>
 
         {invoice.free_text && (
-          <div className="freetext">
-            <span className="dim">Free text as supplied by the sender — untrusted input:</span>
-            <br />
+          <p className="freetext">
+            <span className="src">Free text — written by the sender, treated as untrusted</span>
             {invoice.free_text}
-          </div>
+          </p>
         )}
+      </section>
 
-        <h3>Lines as invoiced</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Their item</th>
-              <th>Description</th>
-              <th style={{ textAlign: "right" }}>Qty</th>
-              <th>UoM</th>
-              <th style={{ textAlign: "right" }}>List</th>
-              <th style={{ textAlign: "right" }}>/unit</th>
-              <th>Discounts</th>
-              <th style={{ textAlign: "right" }}>Tax</th>
-            </tr>
-          </thead>
-          <tbody>
-            {invoice.lines.map((line) => (
-              <tr key={line.line_no}>
-                <td className="mono dim">{line.line_no}</td>
-                <td className="mono">{line.supplier_item_no}</td>
-                <td>{line.description}</td>
-                <td className="num">{fmtQuantity(line.quantity)}</td>
-                <td className="mono dim">{line.uom}</td>
-                <td className="num">{line.price.list_price}</td>
-                <td className="num dim">{line.price.price_unit}</td>
-                <td className="mono dim">
-                  {discountSchedule(line.price.discount_pct, line.price.surcharge_per_unit)}
-                </td>
-                <td className="num dim">{line.tax_rate}%</td>
+      <section className="panel">
+        <h2 className="panel-head">Lines as invoiced</h2>
+        <div className="table-scroll">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Their item</th>
+                <th>Description</th>
+                <th style={{ textAlign: "right" }}>Qty</th>
+                <th>UoM</th>
+                <th style={{ textAlign: "right" }}>List</th>
+                <th>Discounts</th>
+                <th style={{ textAlign: "right" }}>Tax</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {invoice.lines.map((line) => (
+                <tr key={line.line_no}>
+                  <td className="mono dim">{line.line_no}</td>
+                  <td className="mono">{line.supplier_item_no}</td>
+                  <td>{line.description}</td>
+                  <td className="num">{fmtQuantity(line.quantity)}</td>
+                  <td className="mono dim">{line.uom}</td>
+                  <td className="num">{line.price.list_price}</td>
+                  <td className="mono dim">
+                    {discountSchedule(line.price.discount_pct, line.price.surcharge_per_unit)}
+                  </td>
+                  <td className="num dim">{line.tax_rate}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-        {Object.keys(detail.purchase_orders).length > 0 && (
-          <>
-            <h3>Purchase order lines</h3>
+      {Object.keys(detail.purchase_orders).length > 0 && (
+        <section className="panel">
+          <h2 className="panel-head">Purchase order</h2>
+          <div className="table-scroll">
             <table>
               <thead>
                 <tr>
@@ -161,7 +202,6 @@ function SourceDocument({ detail }: { detail: InvoiceDetail }) {
                   <th style={{ textAlign: "right" }}>Qty</th>
                   <th>UoM</th>
                   <th style={{ textAlign: "right" }}>List</th>
-                  <th style={{ textAlign: "right" }}>/unit</th>
                   <th>Discounts</th>
                 </tr>
               </thead>
@@ -175,7 +215,6 @@ function SourceDocument({ detail }: { detail: InvoiceDetail }) {
                       <td className="num">{fmtQuantity(line.quantity)}</td>
                       <td className="mono dim">{line.uom}</td>
                       <td className="num">{line.price.list_price}</td>
-                      <td className="num dim">{line.price.price_unit}</td>
                       <td className="mono dim">
                         {discountSchedule(line.price.discount_pct, line.price.surcharge_per_unit)}
                       </td>
@@ -184,296 +223,274 @@ function SourceDocument({ detail }: { detail: InvoiceDetail }) {
                 )}
               </tbody>
             </table>
-          </>
-        )}
+          </div>
+        </section>
+      )}
 
-        {detail.goods_receipts.length > 0 && (
-          <>
-            <h3>Goods receipts</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Receipt</th>
-                  <th>PO line</th>
-                  <th>Date</th>
-                  <th style={{ textAlign: "right" }}>Qty</th>
-                  <th>UoM</th>
+      {detail.goods_receipts.length > 0 && (
+        <section className="panel">
+          <h2 className="panel-head">Goods receipts</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Receipt</th>
+                <th>PO line</th>
+                <th>Date</th>
+                <th style={{ textAlign: "right" }}>Qty</th>
+                <th>UoM</th>
+              </tr>
+            </thead>
+            <tbody>
+              {detail.goods_receipts.map((receipt) => (
+                <tr key={receipt.gr_id}>
+                  <td className="mono">{receipt.gr_id}</td>
+                  <td className="mono dim">
+                    {receipt.po_id} / {receipt.po_line}
+                  </td>
+                  <td className="mono dim">{receipt.receipt_date}</td>
+                  <td className="num">{fmtQuantity(receipt.quantity)}</td>
+                  <td className="mono dim">{receipt.uom}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {detail.goods_receipts.map((receipt) => (
-                  <tr key={receipt.gr_id}>
-                    <td className="mono">{receipt.gr_id}</td>
-                    <td className="mono dim">
-                      {receipt.po_id} / {receipt.po_line}
-                    </td>
-                    <td className="mono dim">{receipt.receipt_date}</td>
-                    <td className="num">{fmtQuantity(receipt.quantity)}</td>
-                    <td className="mono dim">{receipt.uom}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-/* ----------------------------------------------------------- right pane */
-
-function Discrepancies({ detail }: { detail: InvoiceDetail }) {
-  const priced = detail.result.resolutions.filter((r) => r.price !== null);
-
-  return (
-    <div className="pane">
-      <div className="pane-head">
-        Comparison — system value, document value, normalised, residual, tolerance
-      </div>
-      <div className="pane-body">
-        {priced.length === 0 ? (
-          <p className="muted" style={{ margin: 0 }}>
-            No purchase order to compare against — this is an FI invoice, governed by coding
-            completeness and approval rather than by three-way match.
-          </p>
-        ) : (
-          priced.map((resolution) => (
-            <LineComparison
-              key={resolution.line_no}
-              resolution={resolution}
-              currency={detail.result.currency}
-            />
-          ))
-        )}
-        <CodingTable detail={detail} />
-      </div>
-    </div>
-  );
-}
-
-function LineComparison({
-  resolution,
-  currency,
-}: {
-  resolution: LineResolution;
-  currency: string;
-}) {
-  const price = resolution.price!;
-  const outside = !price.within_tolerance;
-
-  return (
-    <div style={{ marginBottom: 14 }}>
-      <h3 style={{ marginTop: 0 }}>Line {resolution.line_no} — price</h3>
-      <table>
-        <tbody>
-          <tr>
-            <td className="muted">Purchase order, normalised per base unit</td>
-            <td className="num">{unitPrice(price.po_unit_price_normalised)}</td>
-          </tr>
-          <tr>
-            <td className="muted">Invoice, normalised per base unit</td>
-            <td className="num">{unitPrice(price.invoice_unit_price_normalised)}</td>
-          </tr>
-          <tr>
-            <td className="muted">Residual per unit</td>
-            <td className={`num ${outside ? "residual-out" : "residual-in"}`}>
-              {signed(price.residual_abs)}
-            </td>
-          </tr>
-          <tr>
-            <td className="muted">Residual %</td>
-            <td className={`num ${outside ? "residual-out" : "residual-in"}`}>
-              {percent(price.residual_pct)}
-            </td>
-          </tr>
-          <tr>
-            <td className="muted">Residual on the line</td>
-            <td className={`num ${outside ? "residual-out" : "residual-in"}`}>
-              {currency} {signed(price.line_residual_abs)}
-            </td>
-          </tr>
-          <tr>
-            <td className="muted">Tolerance</td>
-            <td className="num dim">
-              {price.tolerance_pct}% or {price.tolerance_abs.toFixed(2)}
-            </td>
-          </tr>
-          <tr>
-            <td className="muted">Within tolerance</td>
-            <td className={`num ${outside ? "residual-out" : ""}`}>
-              {price.within_tolerance ? "yes" : "no"}
-            </td>
-          </tr>
-          <tr>
-            <td className="dim">
-              Naive comparison of the printed prices would have shown
-            </td>
-            <td className="num dim">{signed(price.naive_residual_abs)}</td>
-          </tr>
-        </tbody>
-      </table>
-
-      {resolution.quantity && (
-        <table style={{ marginTop: 6 }}>
-          <tbody>
-            <tr>
-              <td className="muted">Invoiced, base units</td>
-              <td className="num">{fmtQuantity(resolution.quantity.invoiced_base_qty)}</td>
-            </tr>
-            <tr>
-              <td className="muted">Received, base units</td>
-              <td className="num">{fmtQuantity(resolution.quantity.received_base_qty)}</td>
-            </tr>
-            <tr>
-              <td className="muted">Available to invoice</td>
-              <td className="num">{fmtQuantity(resolution.quantity.open_base_qty)}</td>
-            </tr>
-            <tr>
-              <td className="muted">Over-billed by</td>
-              <td
-                className={`num ${
-                  resolution.quantity.within_tolerance ? "residual-in" : "residual-out"
-                }`}
-              >
-                {fmtQuantity(resolution.quantity.residual_base_qty)}
-              </td>
-            </tr>
-          </tbody>
-        </table>
+              ))}
+            </tbody>
+          </table>
+        </section>
       )}
     </div>
   );
 }
 
-function CodingTable({ detail }: { detail: InvoiceDetail }) {
+/* ------------------------------------------------------------ right panel */
+
+function Comparison({ detail }: { detail: InvoiceDetail }) {
+  const priced = detail.result.resolutions.filter((r) => r.price !== null);
+
   return (
-    <>
-      <h3>Coding</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Material</th>
-            <th>Tax code</th>
-            <th>GL account</th>
-            <th>Cost centre</th>
-          </tr>
-        </thead>
+    <section className="panel">
+      <h2 className="panel-head">
+        Comparison
+        <span className="of">normalised to one base unit</span>
+      </h2>
+
+      {priced.length === 0 ? (
+        <p className="note">
+          No purchase order to compare against. This is an FI invoice, governed by coding
+          completeness and approval rather than by three-way match.
+        </p>
+      ) : (
+        priced.map((resolution) => (
+          <LineCompare
+            key={resolution.line_no}
+            resolution={resolution}
+            currency={detail.result.currency}
+            multiple={priced.length > 1}
+          />
+        ))
+      )}
+
+      <h3 className="eyebrow" style={{ marginTop: "var(--s4)" }}>
+        Coding
+      </h3>
+      <table className="compare">
         <tbody>
           {detail.result.resolutions.map((resolution) => (
-            <tr key={resolution.line_no}>
-              <td className="mono dim">{resolution.line_no}</td>
+            <tr key={resolution.line_no} className={resolution.gl_source === "derived" ? "is-derived" : undefined}>
+              <td className="mono dim">line {resolution.line_no}</td>
               <td className="mono">{resolution.material_id ?? "—"}</td>
               <td className="mono">{resolution.tax_code ?? "—"}</td>
               <td className="mono">
                 {resolution.gl_account ?? "—"}{" "}
-                <span className="dim">({label(resolution.gl_source)})</span>
+                <span className="dim">{label(resolution.gl_source)}</span>
               </td>
               <td className="mono">
                 {resolution.cost_center ?? "—"}{" "}
-                <span className="dim">({label(resolution.cost_center_source)})</span>
+                <span className="dim">{label(resolution.cost_center_source)}</span>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-      <p className="dim" style={{ marginTop: 4 }}>
-        &ldquo;stated&rdquo; means the vendor supplied the value; &ldquo;derived&rdquo; means a rule
-        computed it from master data.
+      <p className="fine" style={{ marginTop: "var(--s2)" }}>
+        Stated means the vendor supplied it. Derived means a rule computed it from master data.
       </p>
-    </>
+    </section>
+  );
+}
+
+function LineCompare({
+  resolution,
+  currency,
+  multiple,
+}: {
+  resolution: LineResolution;
+  currency: string;
+  multiple: boolean;
+}) {
+  const price = resolution.price!;
+  const breach = !price.within_tolerance;
+  const cls = breach ? "num breach" : "num";
+
+  return (
+    <div style={{ marginBottom: "var(--s4)" }}>
+      {multiple && <h3 className="eyebrow eyebrow-plain">Line {resolution.line_no}</h3>}
+      <table className="compare">
+        <tbody>
+          <tr>
+            <td className="muted">Purchase order, per base unit</td>
+            <td className="num">{unitPrice(price.po_unit_price_normalised)}</td>
+          </tr>
+          <tr>
+            <td className="muted">Invoice, per base unit</td>
+            <td className="num">{unitPrice(price.invoice_unit_price_normalised)}</td>
+          </tr>
+          <tr>
+            <td className="muted">Residual per unit</td>
+            <td className={cls}>{signed(price.residual_abs)}</td>
+          </tr>
+          <tr>
+            <td className="muted">Residual</td>
+            <td className={cls}>{percent(price.residual_pct)}</td>
+          </tr>
+          <tr>
+            <td className="muted">Tolerance</td>
+            <td className="num dim">
+              ±{price.tolerance_pct}% or {price.tolerance_abs.toFixed(2)}
+            </td>
+          </tr>
+          <tr className="is-total">
+            <td>On the line</td>
+            <td className={cls}>
+              {currency} {signed(price.line_residual_abs)}
+            </td>
+          </tr>
+          {resolution.quantity && (
+            <>
+              <tr>
+                <td className="muted">Invoiced / available, base units</td>
+                <td className="num">
+                  {fmtQuantity(resolution.quantity.invoiced_base_qty)} /{" "}
+                  {fmtQuantity(resolution.quantity.open_base_qty)}
+                </td>
+              </tr>
+              <tr>
+                <td className="muted">Over-billed by</td>
+                <td className={resolution.quantity.within_tolerance ? "num" : "num breach"}>
+                  {fmtQuantity(resolution.quantity.residual_base_qty)}
+                </td>
+              </tr>
+            </>
+          )}
+          <tr className="is-aside">
+            <td>Comparing the printed prices instead would have shown</td>
+            <td className="num">{signed(price.naive_residual_abs)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   );
 }
 
 function Findings({ detail }: { detail: InvoiceDetail }) {
-  if (detail.result.findings.length === 0) return null;
+  if (detail.result.findings.length === 0) {
+    return (
+      <section className="panel">
+        <h2 className="panel-head">Findings</h2>
+        <p className="note">
+          No rule fired. The invoice matches on price, quantity and coding, so no model was
+          consulted.
+        </p>
+      </section>
+    );
+  }
+
   return (
-    <div className="pane" style={{ marginTop: 16 }}>
-      <div className="pane-head">Findings — produced by rules, not by the model</div>
-      <div className="pane-body" style={{ padding: 0 }}>
-        <table>
-          <thead>
-            <tr>
-              <th>Rule</th>
-              <th>Type</th>
-              <th>Line</th>
-              <th>Detail</th>
+    <section className="panel">
+      <h2 className="panel-head">
+        Findings
+        <span className="of">produced by rules, not by the model</span>
+      </h2>
+      <table>
+        <tbody>
+          {detail.result.findings.map((finding, index) => (
+            <tr key={`${finding.rule_id}-${index}`}>
+              <td className="mono dim" style={{ whiteSpace: "nowrap" }}>
+                {finding.rule_id}
+              </td>
+              <td className={`sev sev-${finding.severity}`} style={{ whiteSpace: "nowrap" }}>
+                {label(finding.exception_type)}
+              </td>
+              <td className="mono dim">{finding.line_no ? `line ${finding.line_no}` : "header"}</td>
+              <td>{finding.detail}</td>
             </tr>
-          </thead>
-          <tbody>
-            {detail.result.findings.map((finding, index) => (
-              <tr key={`${finding.rule_id}-${index}`}>
-                <td className="mono">{finding.rule_id}</td>
-                <td className={`sev sev-${finding.severity}`}>{label(finding.exception_type)}</td>
-                <td className="mono dim">{finding.line_no ?? "header"}</td>
-                <td>{finding.detail}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
+          ))}
+        </tbody>
+      </table>
+    </section>
   );
 }
 
-function Routing({ detail }: { detail: InvoiceDetail }) {
+function Reasoning({ detail }: { detail: InvoiceDetail }) {
   const { routing, assessment } = detail;
+
   return (
-    <div className="pane" style={{ marginTop: 16 }}>
-      <div className="pane-head">Routing</div>
-      <div className="pane-body">
-        <dl className="fields">
-          <dt>Tier</dt>
-          <dd className={`tier tier-${routing.tier}`}>{label(routing.tier)}</dd>
-          <dt>Rules alone said</dt>
-          <dd>{label(detail.result.routing.tier)}</dd>
-          {assessment && (
+    <section className="panel">
+      <h2 className="panel-head">
+        Routing
+        {assessment && (
+          <span className="of">
+            {assessment.run.provider}:{assessment.run.model}
+          </span>
+        )}
+      </h2>
+
+      <ol style={{ margin: "0 0 var(--s3)", paddingLeft: "1.1rem" }}>
+        {routing.reasons.map((reason, index) => (
+          <li key={index} style={{ marginBottom: 4, color: "var(--ink-2)" }}>
+            {reason}
+          </li>
+        ))}
+      </ol>
+
+      {assessment ? (
+        <>
+          <dl className="fields">
+            <dt>Proposes</dt>
+            <dd>{label(assessment.assessment.proposed_action)}</dd>
+            <dt>Confidence</dt>
+            <dd>{assessment.assessment.confidence.toFixed(2)}</dd>
+            <dt>Tier before model</dt>
+            <dd>{label(detail.result.routing.tier)}</dd>
+            {assessment.assessment.proposed_cost_center && (
+              <>
+                <dt>Proposed cost centre</dt>
+                <dd>{assessment.assessment.proposed_cost_center}</dd>
+              </>
+            )}
+          </dl>
+
+          {assessment.assessment.evidence.length > 0 && (
             <>
-              <dt>Model</dt>
-              <dd>
-                {assessment.run.provider}:{assessment.run.model}
-              </dd>
-              <dt>Proposes</dt>
-              <dd>{label(assessment.assessment.proposed_action)}</dd>
-              <dt>Confidence</dt>
-              <dd>{assessment.assessment.confidence.toFixed(2)}</dd>
-              {assessment.assessment.proposed_cost_center && (
-                <>
-                  <dt>Proposed cost centre</dt>
-                  <dd>{assessment.assessment.proposed_cost_center}</dd>
-                </>
-              )}
+              <h3 className="eyebrow">Evidence cited</h3>
+              <ul className="mono fine" style={{ margin: 0, paddingLeft: "1.1rem" }}>
+                {assessment.assessment.evidence.map((citation) => (
+                  <li key={citation.field_path}>{citation.field_path}</li>
+                ))}
+              </ul>
             </>
           )}
-        </dl>
 
-        <h3>Why</h3>
-        <ul style={{ margin: 0, paddingLeft: 18 }}>
-          {routing.reasons.map((reason, index) => (
-            <li key={index} style={{ marginBottom: 4 }}>
-              {reason}
-            </li>
-          ))}
-        </ul>
-
-        {assessment && assessment.assessment.evidence.length > 0 && (
-          <>
-            <h3>Evidence the model cited</h3>
-            <ul className="mono" style={{ margin: 0, paddingLeft: 18, fontSize: 11.5 }}>
-              {assessment.assessment.evidence.map((citation) => (
-                <li key={citation.field_path}>{citation.field_path}</li>
-              ))}
-            </ul>
-            {assessment.grounding.ungrounded_citations.length > 0 && (
-              <p className="residual-out" style={{ marginBottom: 0 }}>
-                Stripped {assessment.grounding.ungrounded_citations.length} citation(s) naming
-                fields the model was not given.
-              </p>
-            )}
-          </>
-        )}
-      </div>
-    </div>
+          {assessment.grounding.ungrounded_citations.length > 0 && (
+            <p className="breach" style={{ marginBottom: 0 }}>
+              Stripped {assessment.grounding.ungrounded_citations.length} citation(s) naming fields
+              the model was not given.
+            </p>
+          )}
+        </>
+      ) : (
+        <p className="note" style={{ marginTop: 0 }}>
+          No model was consulted. A clean invoice never reaches one.
+        </p>
+      )}
+    </section>
   );
 }

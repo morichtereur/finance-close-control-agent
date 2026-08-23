@@ -7,34 +7,28 @@ export default function QueuePage() {
 
   return (
     <>
-      <div className="summary">
-        <div>
-          <span className="k">invoices</span>
-          <span className="v">{report.invoices}</span>
+      <dl className="stats">
+        <div className="stat">
+          <dt>Invoices</dt>
+          <dd>{report.invoices}</dd>
         </div>
-        <div>
-          <span className="k">touchless</span>
-          <span className="v">{(report.touchless_rate * 100).toFixed(1)}%</span>
+        <div className="stat">
+          <dt>Touchless</dt>
+          <dd>{(report.touchless_rate * 100).toFixed(1)}%</dd>
         </div>
-        <div>
-          <span className="k">exceptions</span>
-          <span className="v">{report.invoices_with_findings}</span>
+        <div className="stat">
+          <dt>Exceptions</dt>
+          <dd>{report.invoices_with_findings}</dd>
         </div>
-        <div>
-          <span className="k">model calls</span>
-          <span className="v">{report.model_calls}</span>
+        <div className="stat">
+          <dt>Model calls</dt>
+          <dd>{report.model_calls}</dd>
         </div>
-        <div>
-          <span className="k">false auto-post</span>
-          <span className="v">{report.false_auto_post_count}</span>
+        <div className="stat">
+          <dt>False auto-post</dt>
+          <dd className="is-zero">{report.false_auto_post_count}</dd>
         </div>
-        <div>
-          <span className="k">provider</span>
-          <span className="v">
-            {report.provider}:{report.model}
-          </span>
-        </div>
-      </div>
+      </dl>
       <QueueTable rows={rows} />
     </>
   );
