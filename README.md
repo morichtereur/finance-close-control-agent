@@ -271,15 +271,18 @@ switched off, and a test asserts there is no setting for it.
 334 invoices, both MM (PO-based) and FI (non-PO), each generated from a named scenario whose expected outcome was
 known before the engine saw it. Measured with the mock provider under the shipped configuration:
 
-| | |
-|---|---|
-| invoices | 334 |
-| touchless rate (`auto_clear`) | **0.234** (78) |
-| `propose_and_approve` | 0.494 (165) |
-| `escalate` | 0.272 (91) |
-| **false auto-post count** | **0** |
-| model calls | 114 — exactly the exception count |
-| invoices citing evidence they were not given | 0 |
+| | stub | Sonnet 4.5 (live, eu-central-1) |
+|---|---|---|
+| invoices | 334 | 334 |
+| touchless rate (`auto_clear`) | **0.234** (78) | **0.234** (78) |
+| `propose_and_approve` | 0.494 (165) | 0.494 (165) |
+| `escalate` | 0.272 (91) | 0.272 (91) |
+| **false auto-post count** | **0** | **0** |
+| exact agreement with expected outcome | 1.000 | 1.000 |
+| model calls | 114 — exactly the exception count | 114 |
+| mean confidence | 0.845 | 0.925 |
+| invoices citing evidence they were not given | 0 | **15** |
+| wall clock | — | 9m44s |
 
 | class | actual | rate | precision | recall |
 |---|---|---|---|---|
@@ -291,6 +294,17 @@ known before the engine saw it. Measured with the mock provider under the shippe
 | duplicate_invoice | 14 | 4.2% | 1.000 | 1.000 |
 | bank_details_mismatch | 12 | 3.6% | 1.000 | 1.000 |
 | quantity_variance | 0 | — | n/a | n/a |
+
+**The last row is the one a live model produced and the stub could not.** In 15 of 114 assessments,
+Sonnet cited an invoice field it had not been given. Those citations were stripped before the assessment
+was used — the same control the close module applies to policy citations — so no routing decision rested
+on them, and the routing is identical to the stub's down to the invoice: same tiers, same counts, same
+zero false auto-posts. Classification was unaffected too.
+
+That is worth stating plainly because an earlier version of this table reported the zero as a property of
+the system. It was a property of the stub. A rule engine cites only what it was handed; a model
+occasionally reaches for a field it expects to exist. The check that catches it is code, which is why the
+count is reported rather than discovered.
 
 **Reading it honestly.** Every class scoring 1.000 measures pipeline integrity, not difficulty. The labels are
 derived from the same scenario definitions the generator works from, so this says the pipeline carries a known

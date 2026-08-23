@@ -76,5 +76,7 @@ and cites — benchmarked on live Bedrock models with a labelled set and an appe
 - **What did swapping the model show?** That the safety property is not the model's. Cutting model cost by two thirds
   moved risk accuracy from 0.87 to 0.70 and moved missed escalations not at all — zero on both.
 - **What's the weakest part?** Labels derived from the scenarios that generated the data, so every 1.000 measures
-  pipeline integrity rather than difficulty. Invoice-to-pay has not been run on a live provider at all; only close
-  has. Both are stated in the README rather than papered over.
+  pipeline integrity rather than difficulty. Both modules now have a live Bedrock run, and the
+  live invoice-to-pay run produced the one thing the stub never did: in 15 of 114 assessments the model cited an
+  invoice field it had not been given. Those citations were stripped and the routing was unchanged — but it is the
+  reason the check exists, and it is in the README rather than papered over.
