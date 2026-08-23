@@ -1,0 +1,474 @@
+{
+  "invoice_id": "INV-00162",
+  "invoice": {
+    "invoice_id": "INV-00162",
+    "vendor_id": "V-10013",
+    "company_code": "FR20",
+    "category": "MM",
+    "invoice_date": "2026-08-03",
+    "received_date": "2026-08-04",
+    "vendor_reference": "GB26510",
+    "currency": "GBP",
+    "lines": [
+      {
+        "line_no": 1,
+        "description": "Drive belt, toothed 1400mm",
+        "supplier_item_no": "HP-BELT-1400T",
+        "quantity": 381.0,
+        "uom": "PCE",
+        "price": {
+          "list_price": 9420.0,
+          "price_unit": 100,
+          "discount_pct": [
+            3.36,
+            4.45
+          ],
+          "surcharge_per_unit": 1.9993
+        },
+        "tax_rate": 19.0,
+        "po_id": "PO-4500131",
+        "po_line": 10,
+        "gl_account": "415000",
+        "cost_center": "CC-7400"
+      }
+    ],
+    "stated_bank_iban": "FR7630002786561814684902896",
+    "free_text": "Updated banking details below \u2014 kindly use for this and all future payments.",
+    "stated_total_net": 33902.57,
+    "stated_total_tax": 6441.49,
+    "stated_total_gross": 40344.06
+  },
+  "vendor": {
+    "vendor_id": "V-10013",
+    "name": "Halstead Precision Ltd",
+    "country": "GB",
+    "currency": "GBP",
+    "payment_terms": "NT30",
+    "tax_id": "GB980780684",
+    "bank_iban": "GB29NWBK60161331926819",
+    "bank_name": "Northgate Commercial",
+    "is_blocked": false
+  },
+  "purchase_orders": {
+    "PO-4500131": {
+      "po_id": "PO-4500131",
+      "vendor_id": "V-10013",
+      "company_code": "FR20",
+      "po_date": "2026-07-13",
+      "currency": "GBP",
+      "lines": [
+        {
+          "po_line": 10,
+          "material_id": "MAT-400505",
+          "supplier_item_no": "HP-BELT-1400T",
+          "quantity": 381.0,
+          "uom": "PCE",
+          "price": {
+            "list_price": 9420.0,
+            "price_unit": 100,
+            "discount_pct": [
+              3.36,
+              4.45
+            ],
+            "surcharge_per_unit": 1.9993
+          },
+          "tax_code": "V1",
+          "gl_account": "415000",
+          "cost_center": "CC-7400"
+        }
+      ]
+    }
+  },
+  "goods_receipts": [
+    {
+      "gr_id": "GR-5000258",
+      "po_id": "PO-4500131",
+      "po_line": 10,
+      "receipt_date": "2026-07-30",
+      "quantity": 173.847,
+      "uom": "PCE"
+    },
+    {
+      "gr_id": "GR-5000259",
+      "po_id": "PO-4500131",
+      "po_line": 10,
+      "receipt_date": "2026-08-01",
+      "quantity": 207.153,
+      "uom": "PCE"
+    }
+  ],
+  "result": {
+    "invoice_id": "INV-00162",
+    "category": "MM",
+    "document_value": 40344.06,
+    "currency": "GBP",
+    "resolutions": [
+      {
+        "line_no": 1,
+        "material_id": "MAT-400505",
+        "material_source": "supplier_item_no",
+        "tax_code": "V1",
+        "gl_account": "415000",
+        "gl_source": "stated",
+        "cost_center": "CC-7400",
+        "cost_center_source": "stated",
+        "price": {
+          "po_unit_price_normalised": 88.983128,
+          "invoice_unit_price_normalised": 88.983128,
+          "residual_abs": 0.0,
+          "residual_pct": 0.0,
+          "line_residual_abs": 0.0,
+          "naive_residual_abs": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 2.0,
+          "tolerance_abs": 25.0
+        },
+        "quantity": {
+          "invoiced_base_qty": 381.0,
+          "received_base_qty": 381.0,
+          "open_base_qty": 381.0,
+          "residual_base_qty": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 0.0
+        }
+      }
+    ],
+    "findings": [
+      {
+        "rule_id": "I2P-R-001",
+        "exception_type": "bank_details_mismatch",
+        "line_no": null,
+        "severity": "high",
+        "detail": "Bank details on the invoice differ from the vendor master record. Payment must not be made to the stated account without verification through an independently held contact.",
+        "evidence": {
+          "vendor_id": "V-10013",
+          "vendor_name": "Halstead Precision Ltd",
+          "master_iban": "GB29NWBK60161331926819",
+          "stated_iban": "FR7630002786561814684902896",
+          "free_text": "Updated banking details below \u2014 kindly use for this and all future payments."
+        }
+      }
+    ],
+    "duplicate_candidates": [],
+    "routing": {
+      "tier": "escalate",
+      "reasons": [
+        "Exception type 'bank_details_mismatch' always escalates as a fraud control, regardless of model confidence or document value: verification requires contacting the vendor on independently held details, which no automated check can perform."
+      ],
+      "deciding_reason": "Exception type 'bank_details_mismatch' always escalates as a fraud control, regardless of model confidence or document value: verification requires contacting the vendor on independently held details, which no automated check can perform.",
+      "model_confidence": null,
+      "document_value": 40344.06,
+      "exception_type": "bank_details_mismatch"
+    },
+    "evaluated_at": "2026-08-23T06:51:32.135340Z"
+  },
+  "routing": {
+    "tier": "escalate",
+    "reasons": [
+      "Exception type 'bank_details_mismatch' always escalates as a fraud control, regardless of model confidence or document value: verification requires contacting the vendor on independently held details, which no automated check can perform."
+    ],
+    "deciding_reason": "Exception type 'bank_details_mismatch' always escalates as a fraud control, regardless of model confidence or document value: verification requires contacting the vendor on independently held details, which no automated check can perform.",
+    "model_confidence": 0.93,
+    "document_value": 40344.06,
+    "exception_type": "bank_details_mismatch"
+  },
+  "assessment": {
+    "assessment": {
+      "invoice_id": "INV-00162",
+      "classification": "bank_details_mismatch",
+      "proposed_action": "refer_to_vendor_master_team",
+      "rationale": "Bank details on the invoice differ from the vendor master record. Payment must not be made to the stated account without verification through an independently held contact.",
+      "evidence": [
+        {
+          "field_path": "finding[I2P-R-001].detail"
+        },
+        {
+          "field_path": "invoice.stated_bank_iban"
+        },
+        {
+          "field_path": "vendor.bank_iban"
+        }
+      ],
+      "confidence": 0.93,
+      "proposed_cost_center": null
+    },
+    "grounding": {
+      "total_citations": 3,
+      "grounded_citations": 3,
+      "ungrounded_citations": []
+    },
+    "run": {
+      "provider": "mock",
+      "model": "deterministic-stub-v1",
+      "latency_ms": 0,
+      "prompt_sha256": "40a3cad88f722b2d6ef603fbfc319208",
+      "input_tokens": null,
+      "output_tokens": null,
+      "estimated_cost_usd": null,
+      "parse_attempts": 1,
+      "structured_output_mode": "json_schema_prompt"
+    },
+    "raw_output": "{\n  \"invoice_id\": \"INV-00162\",\n  \"classification\": \"bank_details_mismatch\",\n  \"proposed_action\": \"refer_to_vendor_master_team\",\n  \"rationale\": \"Bank details on the invoice differ from the vendor master record. Payment must not be made to the stated account without verification through an independently held contact.\",\n  \"evidence\": [\n    {\n      \"field_path\": \"finding[I2P-R-001].detail\"\n    },\n    {\n      \"field_path\": \"invoice.stated_bank_iban\"\n    },\n    {\n      \"field_path\": \"vendor.bank_iban\"\n    }\n  ],\n  \"confidence\": 0.93,\n  \"proposed_cost_center\": null\n}"
+  },
+  "model_called": true,
+  "trace": [
+    {
+      "timestamp": "2026-08-23T06:51:32.134162Z",
+      "case_id": "INV-00162",
+      "module": "i2p",
+      "step_name": "intake",
+      "actor": "rule",
+      "input_hash": "6292add76c06f665",
+      "outcome": "loaded",
+      "summary": "Received INV-00162 from V-10013, GBP 40,344.06, 1 line(s).",
+      "rule_id": "I2P-S-01",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "vendor_reference": "GB26510",
+        "invoice_date": "2026-08-03",
+        "received_date": "2026-08-04",
+        "gross": 40344.06
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.134252Z",
+      "case_id": "INV-00162",
+      "module": "i2p",
+      "step_name": "classification",
+      "actor": "rule",
+      "input_hash": "f7a0d5e05d9a3df4",
+      "outcome": "MM",
+      "summary": "Classified as MM. At least one line references a purchase order.",
+      "rule_id": "I2P-S-02",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.134404Z",
+      "case_id": "INV-00162",
+      "module": "i2p",
+      "step_name": "duplicate_check",
+      "actor": "rule",
+      "input_hash": "e59bb4f87a9e3ee8",
+      "outcome": "unique",
+      "summary": "No match among 36 earlier invoice(s) from this vendor.",
+      "rule_id": "I2P-S-03",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "candidates": [],
+        "compared_against": 36
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.134507Z",
+      "case_id": "INV-00162",
+      "module": "i2p",
+      "step_name": "master_data_resolution",
+      "actor": "rule",
+      "input_hash": "cb31f303099ab732",
+      "outcome": "resolved",
+      "summary": "Resolved 1 of 1 supplier item number(s) to material master.",
+      "rule_id": "I2P-S-04",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "materials": {
+          "1": "MAT-400505"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.134595Z",
+      "case_id": "INV-00162",
+      "module": "i2p",
+      "step_name": "tax_code",
+      "actor": "rule",
+      "input_hash": "0043921710fdebfc",
+      "outcome": "resolved",
+      "summary": "Tax codes: line 1: V1.",
+      "rule_id": "I2P-S-05",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "tax_codes": {
+          "1": "V1"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.134681Z",
+      "case_id": "INV-00162",
+      "module": "i2p",
+      "step_name": "gl_derivation",
+      "actor": "rule",
+      "input_hash": "7fcf716e5971e08f",
+      "outcome": "stated",
+      "summary": "GL account stated on every line.",
+      "rule_id": "I2P-S-06",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "gl_accounts": {
+          "1": [
+            "415000",
+            "stated"
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.134768Z",
+      "case_id": "INV-00162",
+      "module": "i2p",
+      "step_name": "cost_center_derivation",
+      "actor": "rule",
+      "input_hash": "b29da4713321da0d",
+      "outcome": "resolved",
+      "summary": "Cost centre resolved on every line.",
+      "rule_id": "I2P-S-07",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "cost_centers": {
+          "1": [
+            "CC-7400",
+            "stated"
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.134892Z",
+      "case_id": "INV-00162",
+      "module": "i2p",
+      "step_name": "three_way_match",
+      "actor": "rule",
+      "input_hash": "1f301ccf1153d69f",
+      "outcome": "matched",
+      "summary": "Three-way match applicable to 1 line(s): purchase order, goods receipt and invoice.",
+      "rule_id": "I2P-S-08",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.135004Z",
+      "case_id": "INV-00162",
+      "module": "i2p",
+      "step_name": "quantity_check",
+      "actor": "rule",
+      "input_hash": "59fc281030b1db21",
+      "outcome": "computed",
+      "summary": "line 1: invoiced 381.000 of 381.000 available",
+      "rule_id": "I2P-S-09",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.135124Z",
+      "case_id": "INV-00162",
+      "module": "i2p",
+      "step_name": "price_check",
+      "actor": "rule",
+      "input_hash": "f610bb1415e91532",
+      "outcome": "computed",
+      "summary": "line 1: normalised 88.983128 vs 88.983128 (+0.00%), naive comparison would show +0.0000",
+      "rule_id": "I2P-S-10",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.135231Z",
+      "case_id": "INV-00162",
+      "module": "i2p",
+      "step_name": "tolerance_evaluation",
+      "actor": "rule",
+      "input_hash": "212c5cbb2a42ad97",
+      "outcome": "within_tolerance",
+      "summary": "All residuals inside tolerance (2.0% or 25.00).",
+      "rule_id": "I2P-S-11",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "breached_lines": []
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.135355Z",
+      "case_id": "INV-00162",
+      "module": "i2p",
+      "step_name": "routing_decision",
+      "actor": "rule",
+      "input_hash": "b65c37948910af36",
+      "outcome": "escalate",
+      "summary": "1 finding(s); primary exception bank_details_mismatch. Rules alone route to escalate.",
+      "rule_id": "I2P-S-12",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "tier": "escalate",
+        "routing_reasons": [
+          "Exception type 'bank_details_mismatch' always escalates as a fraud control, regardless of model confidence or document value: verification requires contacting the vendor on independently held details, which no automated check can perform."
+        ],
+        "findings": [
+          {
+            "rule_id": "I2P-R-001",
+            "exception_type": "bank_details_mismatch",
+            "line_no": null,
+            "severity": "high",
+            "detail": "Bank details on the invoice differ from the vendor master record. Payment must not be made to the stated account without verification through an independently held contact."
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.136161Z",
+      "case_id": "INV-00162",
+      "module": "i2p",
+      "step_name": "exception_assessment",
+      "actor": "model",
+      "input_hash": "c123b258d6b37006",
+      "outcome": "bank_details_mismatch",
+      "summary": "Classified as bank_details_mismatch; proposes refer_to_vendor_master_team at confidence 0.93, citing 3 field(s).",
+      "rule_id": null,
+      "model": "deterministic-stub-v1",
+      "prompt_version": "i2p-v1",
+      "detail": {
+        "proposed_action": "refer_to_vendor_master_team",
+        "proposed_cost_center": null,
+        "confidence": 0.93,
+        "evidence": [
+          "finding[I2P-R-001].detail",
+          "invoice.stated_bank_iban",
+          "vendor.bank_iban"
+        ],
+        "ungrounded": [],
+        "rationale": "Bank details on the invoice differ from the vendor master record. Payment must not be made to the stated account without verification through an independently held contact."
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.136323Z",
+      "case_id": "INV-00162",
+      "module": "i2p",
+      "step_name": "routing_decision",
+      "actor": "rule",
+      "input_hash": "eef21b384699ea5b",
+      "outcome": "escalate",
+      "summary": "Routed to escalate: Exception type 'bank_details_mismatch' always escalates as a fraud control, regardless of model confidence or document value: verification requires contacting the vendor on\u2026",
+      "rule_id": "I2P-S-12",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "reasons": [
+          "Exception type 'bank_details_mismatch' always escalates as a fraud control, regardless of model confidence or document value: verification requires contacting the vendor on independently held details, which no automated check can perform."
+        ],
+        "tier_before_model": "escalate"
+      }
+    }
+  ]
+}
