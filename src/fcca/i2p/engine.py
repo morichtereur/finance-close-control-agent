@@ -55,6 +55,7 @@ from fcca.i2p.models import (
     QuantityComparison,
 )
 from fcca.i2p.posting import PostedKeyLedger, posting_key
+from fcca.i2p.pricing import UomConversionError, to_base_quantity
 from fcca.i2p.repository import I2PRepository
 from fcca.shared.config import Settings, get_settings
 from fcca.shared.routing import route
@@ -358,10 +359,28 @@ class InvoiceEngine:
         # ------------------------------------------------------ three-way match
         matched_lines = 0
         receipted: dict[int, float] = {}
+        # Lines the engine could not evaluate at all. Distinct from a finding:
+        # a finding says the invoice is wrong, this says we could not tell. It
+        # happens when a line references a purchase order whose material is
+        # measured in a unit the line cannot be converted to — which in practice
+        # means the purchase-order reference is not the one the vendor intended,
+        # exactly what a misread PO number produces. Escalating is the only
+        # defensible answer: the alternative is skipping the line silently and
+        # clearing an invoice on the strength of the lines that happened to
+        # parse.
+        unevaluable: list[str] = []
+        unevaluable_lines: set[int] = set()
         for line in invoice.lines:
             po_line = self._po_line_for(line)
             material_id = materials[line.line_no]
             if po_line is None or line.po_id is None or material_id is None:
+                continue
+            if not can_convert(line, po_line, material_id):
+                unevaluable.append(
+                    f"line {line.line_no}: cannot compare {line.uom} against purchase order "
+                    f"{line.po_id} for material {material_id}"
+                )
+                unevaluable_lines.add(line.line_no)
                 continue
             matched_lines += 1
             cutoff = invoice.received_date + timedelta(days=config.gr_grace_days)
@@ -418,7 +437,7 @@ class InvoiceEngine:
         for line in invoice.lines:
             po_line = self._po_line_for(line)
             material_id = materials[line.line_no]
-            if po_line is None or material_id is None:
+            if po_line is None or material_id is None or line.line_no in unevaluable_lines:
                 continue
             matched = quantity_comparisons.get(line.line_no)
             matched_qty = matched.invoiced_base_qty if matched else 0.0
@@ -523,7 +542,8 @@ class InvoiceEngine:
             extra_escalations=[
                 f"Extraction confidence below {gate.threshold:.2f}: {reason}"
                 for reason in gate.reasons
-            ],
+            ]
+            + [f"Line could not be evaluated — {reason}" for reason in unevaluable],
         )
 
         result = InvoiceResult(
@@ -588,6 +608,21 @@ class InvoiceEngine:
         if po is None:
             return None
         return po.line(line.po_line)
+
+
+def can_convert(line: InvoiceLine, po_line: PurchaseOrderLine, material_id: str) -> bool:
+    """Whether both sides of this line can be expressed in the same base unit.
+
+    Asked before comparing rather than discovered by an exception mid-arithmetic,
+    so that an unconvertible line becomes a routing decision with a reason
+    instead of a stack trace.
+    """
+    try:
+        to_base_quantity(line.quantity, material_id, line.uom)
+        to_base_quantity(po_line.quantity, material_id, po_line.uom)
+    except UomConversionError:
+        return False
+    return True
 
 
 def _by_line(invoice: Invoice) -> list[tuple[int, InvoiceLine]]:

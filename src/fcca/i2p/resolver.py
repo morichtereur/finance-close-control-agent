@@ -37,7 +37,15 @@ from pydantic import BaseModel, Field
 
 from fcca.i2p.agent import AssessmentOutcome, ExceptionAgent, failed_assessment
 from fcca.i2p.engine import InvoiceEngine
+from fcca.i2p.extraction import InvoiceSource
 from fcca.i2p.models import InvoiceResult
+from fcca.i2p.posting import (
+    PostedKeyLedger,
+    PostingBlocked,
+    PostingPayload,
+    PostingTarget,
+    get_target,
+)
 from fcca.i2p.prompts import PROMPT_VERSION
 from fcca.i2p.repository import I2PRepository
 from fcca.shared.config import ProviderName, Settings, get_settings
@@ -58,6 +66,13 @@ class ResolvedInvoice(BaseModel):
         default=None, description="None where no model was called — that is, on clean invoices."
     )
     model_called: bool
+    posting: PostingPayload | None = Field(
+        default=None,
+        description=(
+            "The payload that would post, for auto_clear invoices only. None everywhere "
+            "else — a payload exists precisely where no person is going to look at one."
+        ),
+    )
     resolved_at: datetime
 
     @property
@@ -79,11 +94,18 @@ class InvoiceResolver:
         settings: Settings | None = None,
         agent: ExceptionAgent | None = None,
         trace: TraceWriter | None = None,
+        source: InvoiceSource | None = None,
+        ledger: PostedKeyLedger | None = None,
+        target: PostingTarget | None = None,
     ) -> None:
         self.settings = settings or get_settings()
         self.repository = repository or I2PRepository(self.settings)
         self.trace = trace or TraceWriter(self.settings.i2p_trace_path, module="i2p")
-        self.engine = InvoiceEngine(self.repository, self.settings, trace=self.trace)
+        self.ledger = ledger or PostedKeyLedger(self.settings.i2p_posted_keys_path)
+        self.engine = InvoiceEngine(
+            self.repository, self.settings, trace=self.trace, source=source, ledger=self.ledger
+        )
+        self.target = target or get_target(self.settings.i2p.posting_target)
         self._agent = agent
 
     @classmethod
@@ -114,13 +136,18 @@ class InvoiceResolver:
         config = self.settings.i2p
         result = self.engine.run(invoice_id)
 
-        if not result.is_exception:
-            # No model call. Not an optimisation — the point.
+        if not result.model_may_be_called:
+            # No model call. Not an optimisation — the point. Two ways to land
+            # here: the invoice is clean, or we did not read it well enough to
+            # ask anything about it. The second escalates; asking a model to
+            # explain a misread amount produces a fluent account of a number
+            # that was never on the document.
             return ResolvedInvoice(
                 result=result,
                 routing=result.routing,
                 assessment=None,
                 model_called=False,
+                posting=self._posting_for(result),
                 resolved_at=datetime.now(UTC),
             )
 
@@ -243,8 +270,64 @@ class InvoiceResolver:
                 raw_output="",
             ),
             model_called=True,
+            posting=self._posting_for(result, routing),
             resolved_at=datetime.now(UTC),
         )
+
+    # --------------------------------------------------------------- posting
+    def _posting_for(
+        self, result: InvoiceResult, routing: RoutingDecision | None = None
+    ) -> PostingPayload | None:
+        """Build the payload a cleared invoice would post, and claim its key.
+
+        Only ``auto_clear`` produces one, and the adapter enforces that
+        independently — see :func:`fcca.i2p.posting._require_auto_clear`. The
+        belt and braces are deliberate: this is the single place in the system
+        where something happens to an invoice that no person will look at, so
+        the condition is checked by the caller that knows the tier *and* by the
+        adapter that builds the payload.
+
+        Claiming the key here rather than at dispatch is what makes the control
+        work at all, because there is no dispatch. The key is claimed the moment
+        the system decides it would post, which is the moment a second sighting
+        of the same document becomes a duplicate.
+        """
+        final = routing or result.routing
+        if final.tier != "auto_clear":
+            return None
+        invoice = self.repository.invoice(result.invoice_id)
+        try:
+            payload = self.target.build(invoice, result, result.provenance)
+        except PostingBlocked:
+            logger.exception("posting payload refused for %s", result.invoice_id)
+            return None
+        claimed = self.ledger.record(payload)
+        self.trace.step(
+            case_id=result.invoice_id,
+            step_name="posting_payload",
+            actor="rule",
+            rule_id="I2P-S-14",
+            inputs={"posting_key": payload.posting_key, "target": payload.target},
+            outcome="built" if claimed else "key_already_claimed",
+            summary=(
+                f"Built a {payload.target} payload for {payload.line_count} line(s); "
+                f"key {payload.posting_key} claimed. Dry run — nothing dispatched."
+                if claimed
+                else (
+                    f"Key {payload.posting_key} was already claimed; no second payload "
+                    "recorded. Nothing dispatched."
+                )
+            ),
+            detail={
+                "posting_key": payload.posting_key,
+                "target": payload.target,
+                "service": payload.service,
+                "dry_run": payload.dry_run,
+                "newly_claimed": claimed,
+                "transformed_fields": [m.target_field for m in payload.mapping if m.transformed],
+            },
+        )
+        return payload
 
 
 def _first_clause(reason: str, limit: int = 180) -> str:
