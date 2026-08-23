@@ -44,10 +44,16 @@ def sandbox(tmp_path_factory: pytest.TempPathFactory) -> Settings:
     from fcca.close.generate_data import generate
     from fcca.close.retrieval.index import build_policy_index
     from fcca.close.retrieval.retriever import clear_retriever_cache
+    from fcca.i2p.generate_data import generate as generate_i2p
 
     generate(settings)
     build_policy_index(settings)
     clear_retriever_cache()
+    # The I2P dataset is generated at full size rather than scaled down: its
+    # scenario weights are what make the exception mix realistic, and a
+    # truncated version would not exercise the duplicate check, which needs both
+    # halves of a resubmitted pair to be present.
+    generate_i2p(settings)
     return settings
 
 
