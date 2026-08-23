@@ -5,6 +5,7 @@
     fcca run-case --exception EXC-0042 --provider mock
     fcca evaluate --provider mock
     fcca i2p-generate-data
+    fcca i2p-run --invoice INV-00001
     fcca audit --exception EXC-0042
     fcca review --exception EXC-0042 --action approved --reviewer u.klein
     fcca trace --case EXC-0042
@@ -35,6 +36,7 @@ SUBCOMMANDS = {
     "run-case": "fcca.close.run_case",
     "evaluate": "fcca.close.evaluate",
     "i2p-generate-data": "fcca.i2p.generate_data",
+    "i2p-run": "fcca.i2p.run_invoice",
 }
 
 
