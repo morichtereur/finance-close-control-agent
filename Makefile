@@ -13,14 +13,14 @@ install:
 	$(PY) -m pip install -e ".[dev]"
 
 data:
-	$(PY) -m fcca.generate_data
-	$(PY) -m fcca.ingest_policies
+	$(PY) -m fcca.close.generate_data
+	$(PY) -m fcca.close.ingest_policies
 
 demo:
-	$(PY) -m fcca.run_case --exception EXC-0001 --provider mock
+	$(PY) -m fcca.close.run_case --exception EXC-0001 --provider mock
 
 eval:
-	$(PY) -m fcca.evaluate --provider mock
+	$(PY) -m fcca.close.evaluate --provider mock
 
 test:
 	$(PY) -m pytest

@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from fcca.config import Settings
-from fcca.controls import journal_checks as jc
-from fcca.retrieval.index import load_policy_nodes, policy_index_manifest
-from fcca.retrieval.retriever import PolicyRetrievalService, tokenize
+from fcca.close.controls import journal_checks as jc
+from fcca.close.retrieval.index import load_policy_nodes, policy_index_manifest
+from fcca.close.retrieval.retriever import PolicyRetrievalService, tokenize
+from fcca.shared.config import Settings
 from tests.conftest import make_entry, make_exception
 
 

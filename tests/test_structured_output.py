@@ -12,10 +12,10 @@ from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 from langchain_core.outputs import ChatGeneration, ChatResult
 from pydantic import Field
 
-from fcca.config import Settings
-from fcca.errors import StructuredOutputError
-from fcca.models import ControlDecision
-from fcca.workflow.structured import extract_json_object, invoke_structured
+from fcca.close.models import ControlDecision
+from fcca.close.workflow.structured import extract_json_object, invoke_structured
+from fcca.shared.config import Settings
+from fcca.shared.errors import StructuredOutputError
 
 VALID_DECISION = {
     "exception_id": "EXC-0001",

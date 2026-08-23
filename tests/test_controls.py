@@ -10,21 +10,21 @@ from datetime import date, datetime
 
 import pytest
 
-from fcca.analytics import VarianceResult
-from fcca.config import Settings
-from fcca.controls import journal_checks as jc
-from fcca.controls.engine import mandatory_escalation_triggers
-from fcca.controls.materiality import (
+from fcca.close.analytics import VarianceResult
+from fcca.close.controls import journal_checks as jc
+from fcca.close.controls.engine import mandatory_escalation_triggers
+from fcca.close.controls.materiality import (
     amount_in_reporting_currency,
     check_materiality,
     materiality_band,
 )
-from fcca.controls.reconciliation import (
+from fcca.close.controls.reconciliation import (
     check_account_variance,
     check_reconciliation_difference,
     check_reconciliation_status,
     check_suspense_cleared,
 )
+from fcca.shared.config import Settings
 from tests.conftest import make_entry
 
 
