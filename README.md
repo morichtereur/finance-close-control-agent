@@ -1,286 +1,352 @@
-# Finance Close Control Agent
+# Finance Control Agent
 
-An evidence-based, auditable control assistant for month-end close exceptions, portable across enterprise model providers.
+Two finance exception processes — month-end close and invoice-to-pay — built on one auditable spine.
+
+**The data is synthetic. The ERP posting is simulated.** No real entity, vendor, invoice, bank account, employee
+or amount appears anywhere in this repository, and no path in the code writes to a financial system. Where this
+document says an invoice was "cleared", it means a decision was recorded and a trace written. Nothing was paid.
 
 ---
 
 ## Why this exists
 
-Every month, a group finance function raises more close exceptions than it has reviewer hours: unsupported manual
-entries, late postings, reconciliation differences, suspected duplicates, postings to high-risk accounts. Most are
-benign. A few are not. The scarce resource is not analysis — it is the attention of the people qualified to decide.
+Two finance processes have the same shape. Month-end close raises more exceptions than there are reviewer hours:
+unsupported manual entries, late postings, reconciliation differences. Accounts payable raises more invoice
+mismatches than there are AP clerk hours: missing goods receipts, price variances, suspected duplicates. In both,
+most items are benign, a few are not, and the scarce resource is the attention of the people qualified to decide.
 
-Triage is therefore an obvious candidate for automation, and an obviously dangerous one. A control process has
-requirements that a helpful summary does not meet: the same checks must run on every item, the reasoning must rest on
-a policy someone can open and read, high-risk items must reach a person regardless of how confident the software is,
-and six months later an auditor must be able to reconstruct what the system knew when it made a recommendation.
+Both are therefore obvious candidates for automation and obviously dangerous ones, for the same reason: the failure
+mode is not a bad summary, it is money out of the door against a document nobody checked.
 
-This project explores a narrower question than "can AI do finance": **can a finance-control workflow stay
-evidence-based, auditable and portable across enterprise model providers?** It is a prototype built to be discussed,
-challenged, and — where it falls short — to say clearly where.
+This repository explores one question across both: **can a finance control workflow stay evidence-based, auditable,
+and honest about where a language model is and is not involved?** The two modules exist to test whether the answer
+generalises, or whether it was an artefact of one process.
 
 ## What it does
 
-For one close exception, the system:
+**Close (record-to-report).** For one close exception: 18 deterministic control checks over a synthetic ledger in
+DuckDB, policy retrieval through LlamaIndex with document and section preserved, one model call returning a
+validated Pydantic object, citation grounding against what was actually retrieved, and a deterministic review gate.
+It recommends; a named person decides.
 
-1. runs 18 deterministic control checks over the ledger in DuckDB (materiality, approval, segregation of duties,
-   timeliness, duplicates, reconciliation status, variance, …);
-2. retrieves the governing policy sections through LlamaIndex, with document, section and chunk id preserved;
-3. asks a language model — reached through a provider abstraction, not an SDK — to classify, rate and recommend,
-   returning a validated Pydantic object rather than prose;
-4. checks every citation the model made against what was actually retrieved, and strips the ones that were not;
-5. applies a deterministic review gate that decides whether a person must look at the case;
-6. writes an audit record from which the whole decision can be reconstructed.
+**Invoice-to-pay.** For one vendor invoice: twelve deterministic steps ending in a three-way match — purchase
+order, goods receipt, invoice — with price and quantity normalised before anything is compared. Records the rules
+flag go to a model to classify, propose a resolution and cite evidence. Records the rules clear never reach a model
+at all.
 
-It never posts, reverses or modifies a ledger entry. It recommends; a named person decides.
+**Shared.** Configuration, the provider factory, the audit log, the routing tiers, and the append-only trace.
+
+## The one rule everything else follows from
+
+**No language model touches arithmetic, matching, or a tolerance decision.** Not as a guideline — as a structural
+property. `src/fcca/i2p/checks.py` imports no provider and cannot call one. The model is handed numbers that have
+already been computed, compared and thresholded, and it is asked only to classify, propose and cite. Its output is
+a Pydantic object with closed vocabularies; there is no free-text field any downstream step reads.
+
+A test asserts that every trace record from a full deterministic run is attributed to a rule, so the property is
+checked rather than claimed.
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-    A["Synthetic ERP extract<br/>861 entries · 120 reconciliations · 60 exceptions"] --> B
-
-    subgraph DET["Deterministic layer — no model involved"]
-        B["DuckDB analytics<br/>duplicates · variance · history"] --> C["18 control checks<br/>typed, thresholded signals"]
+    subgraph SHARED["fcca/shared — one spine, two processes"]
+        CFG["config/thresholds.yaml<br/>tolerances · limits · approval bands"]
+        PROV["provider factory<br/>mock · Bedrock · Vertex"]
+        ROUTE["routing tiers<br/>auto_clear · propose · escalate"]
+        TRACE["append-only trace (JSONL)<br/>step · actor · input hash · outcome"]
     end
 
-    C --> D["LlamaIndex policy retrieval<br/>6 policies · 63 sections<br/>query expanded from fired signals"]
-    C --> E
-    D --> E["LangChain workflow<br/>fixed six-stage pipeline"]
+    subgraph CLOSE["fcca/close — month-end close"]
+        C1["synthetic ledger (DuckDB)"] --> C2["18 control checks"]
+        C2 --> C3["policy retrieval<br/>6 policies · BM25"]
+        C3 --> C4["model: classify · rate · cite"]
+        C4 --> C5["citation grounding"]
+        C5 --> C6["review gate"]
+    end
 
-    E --> F["Provider abstraction<br/>get_llm(provider, model)"]
-    F --> G["mock<br/>local, free"]
-    F --> H["AWS Bedrock<br/>ChatBedrockConverse"]
-    F --> I["Vertex AI<br/>ChatVertexAI"]
+    subgraph I2P["fcca/i2p — invoice-to-pay"]
+        I1["synthetic invoices (JSON)<br/>PO · GR · vendor · material"] --> I2["intake · classify · duplicates"]
+        I2 --> I3["master data · tax · GL · cost centre"]
+        I3 --> I4["three-way match<br/>quantity check"]
+        I4 --> I5["price check<br/>normalise both sides"]
+        I5 --> I6["tolerance evaluation"]
+        I6 -->|clean| I8["no model call"]
+        I6 -->|exception| I7["model: classify · propose · cite"]
+    end
 
-    G --> J["Structured decision<br/>Pydantic ControlDecision"]
-    H --> J
-    I --> J
-
-    J --> K["Citation grounding<br/>not retrieved → stripped"]
-    K --> L{"Review gate<br/>deterministic"}
-    L -->|"clean · confident · evidenced"| M["Auto recommendation"]
-    L -->|"anything else"| N["Human review"]
-    M --> O["Audit trail (SQLite)<br/>signals · evidence · raw output · thresholds"]
-    N --> O
+    CFG --> C2
+    CFG --> I6
+    PROV --> C4
+    PROV --> I7
+    C6 --> ROUTE
+    I7 --> ROUTE
+    I8 --> ROUTE
+    C2 --> TRACE
+    I5 --> TRACE
+    ROUTE --> TRACE
+    ROUTE --> HUMAN["named person decides"]
 ```
 
-The load-bearing idea is the boundary inside that diagram. Everything before the model is deterministic and
-reproducible; the model interprets facts it did not compute, against policy it did not choose, and its output is
+The load-bearing idea is the boundary inside that diagram. Everything before a model call is deterministic and
+reproducible. The model interprets facts it did not compute, against limits it did not choose, and its output is
 constrained, grounded and gated on the way out.
 
-## Example
+## A worked example: a price variance, end to end
+
+Invoice `INV-00166`, EUR 408,413.81, one line. This is the case the invoice-to-pay module exists for, so it is
+worth following all the way through.
+
+### The raw input
+
+The purchase order and the invoice describe the same line and disagree about almost every printed number.
+
+| | Purchase order `PO-4500134` | Invoice `INV-00166` |
+|---|---|---|
+| item | `DC-SRVC-REVC` (vendor's code for `MAT-200310`) | `DC-SRVC-REVC` |
+| quantity | 206 BOX | 206 BOX |
+| list price | **1,648.00** per BOX | **1,666.043095** per BOX |
+| discounts | 2.4%, then 7.37%, then 3.43% | none |
+| surcharge | none | none |
+
+### What the naive comparison does
+
+Subtract the printed unit prices:
 
 ```
-$ fcca run-case --exception EXC-0001 --provider mock
-
-Exception EXC-0001  ·  missing supporting documentation  ·  NL30  ·  period 2026-07
-Manual journal entry above group materiality posted without a supporting document reference.
-
- journal entry  JE-202607-X0001   SA
-       account  600000  Personnel expenses
-   cost center  CC-1000
-        amount  EUR 434,538.11
-        posted  2026-07-15 16:29 by u.jansen
- document date  2026-07-15  (0 days to post)
-       support  none
-      approver  u.devries
-reconciliation  not_applicable
-
-Deterministic controls — 4 of 18 triggered
-check                            severity  observed      detail
-CHK-01 supporting_documentation  CRITICAL  none          Manual posting carries no supporting document reference;
-                                                         amount is at or above the clearly trivial threshold.
-CHK-09 narrative_quality         WARNING   As discussed  Description does not allow an independent reviewer to
-                                                         understand the business event.
-CHK-13 materiality_assessment    CRITICAL  434538.11     At or above group materiality; reportable to Group
-                                                         Accounting. Band: material.
-CHK-17 account_variance          WARNING   447791.31     Account movement of 447,791 reporting currency (858.9%)
-                                                         versus the prior-period average exceeds the variance
-                                                         escalation trigger.
-
-Risk        HIGH    confidence 0.87    classification missing_supporting_documentation
-Finding     Missing supporting documentation: supporting documentation breached and 3 further indicator(s).
-Action      Escalate to the entity Financial Controller before entity sign-off.
-Disposition HUMAN REVIEW REQUIRED
-  · Deterministic mandatory escalation trigger(s): CHK-01 supporting_documentation; CHK-13 materiality_assessment
-  · Risk rated high; policy reserves high-rated items for human review.
-  · Recommended action 'escalate_to_financial_controller' requires a named person to act.
-
-Policy evidence
-  > Supporting Documentation Standard §4.2 Escalation   relevance 1.00   policies/supporting_documentation_standard.md
-  > Supporting Documentation Standard §4.1 Standard treatment   relevance 0.87
-    Materiality and Escalation Policy §3.3 Variance escalation   relevance 0.74
-    Journal Entry Policy §3. Documentation requirement   relevance 0.61
-
-mock:deterministic-stub-v1  ·  1 parse attempt(s)  ·  mode json_schema_prompt  ·  prompt 2b5c4bd71a89
+1,666.043095 − 1,648.00 = +18.043095   →   +1.09%
 ```
 
-`>` marks the sections the decision actually cited. Everything shown here is also written to the audit trail.
+**+1.09% is inside the configured 2% tolerance, so a naive three-way match passes this invoice.**
 
-## Multi-cloud design
+That is the failure this module is built to prevent, and it is worth being precise about the direction. The vendor
+has quietly dropped a discount schedule and raised the list price slightly, so the printed difference looks like
+rounding. It is not.
 
-Nothing in the workflow imports a cloud SDK. One factory returns a `BaseChatModel`:
+### What normalisation does
 
-```python
-from fcca.providers import get_llm
+Both sides are reduced to a net price for one base unit, by the same function, in a fixed order — discounts in
+sequence, price unit, per-unit surcharge, then unit-of-measure conversion. `MAT-200310` is stocked in PCE and this
+line is priced in BOX of 4.
 
-model = get_llm(provider="bedrock", model_name="eu.anthropic.claude-sonnet-4-5-20250929-v1:0")
-model = get_llm(provider="vertex", model_name="gemini-2.5-flash")
-model = get_llm(provider="mock")  # local, deterministic, free
+```
+purchase order
+  1,648.000000   list price per BOX
+  1,608.448000   less 2.4%
+  1,489.905382   less 7.37%
+  1,438.801628   less 3.43%
+    359.700407   ÷ 4 PCE per BOX          ← net price of one piece
+
+invoice
+  1,666.043095   list price per BOX
+    416.510774   ÷ 4 PCE per BOX          ← net price of one piece
+
+residual        +56.810367 per piece  (+15.79%)
+base quantity   824 PCE
+line residual   +46,811.74 EUR
+tolerance       2.0% or 25.00            → outside both
 ```
 
-No model id appears anywhere outside [`src/fcca/config.py`](src/fcca/config.py). Bedrock uses
-`ChatBedrockConverse` — the Converse API rather than a model-specific invoke API — so changing `BEDROCK_MODEL_ID`
-from an Anthropic model to a Nova, Llama or Mistral model changes no code. Vertex uses `ChatVertexAI`. Both are
-optional installs; neither is needed to run, test or demonstrate the project.
+The discounts are applied in sequence, not summed: 2.4 + 7.37 + 3.43 is 13.2, but the cascade leaves 87.30% of the
+list price rather than 86.8%. Summing them would misprice the line by roughly 0.5% — itself a quarter of the
+tolerance.
 
-Why this matters outside an architecture diagram: enterprise model access is decided by procurement, data residency
-and an existing cloud agreement, not by the engineering team. A finance workflow that can only run on one provider may
-not be deployable at all. The portability claim here is enforced by a test
-([`tests/test_workflow.py`](tests/test_workflow.py)) that runs the entire pipeline against a second, unrelated chat
-model and asserts the behaviour is unchanged.
+**The naive comparison would have cleared a EUR 46,811.74 overcharge as a 1.09% rounding difference.** The
+normalised comparison reports it as +15.79%.
 
-Structured output has two modes, both producing a validated `ControlDecision`: `json_schema_prompt` (default,
-identical on every provider) and `native_tools` (delegates to the provider's own structured-output API). The portable
-one is the default deliberately — a prototype that only works where tool calling is good has not demonstrated
-portability.
+### The trace
 
-## Auditability and human review
+```
+$ fcca i2p-run --invoice INV-00166 --provider mock
 
-**Grounding.** The model may cite only from the list of retrieved sections supplied with the case, and it never
-supplies policy text — passages come from the retriever. Citations are matched against what was retrieved; unmatched
-ones are stripped from the decision and recorded as ungrounded. That turns "the system cited a policy" into "the
-recommendation is traceable to a passage a reviewer can open".
+step                   actor provenance                 outcome        summary
+intake                 rule  I2P-S-01                   loaded         Received INV-00166 from V-10017, EUR 408,413.81, 1 line(s).
+classification         rule  I2P-S-02                   MM             Classified as MM. At least one line references a purchase order.
+duplicate_check        rule  I2P-S-03                   unique         No match among 22 earlier invoice(s) from this vendor.
+master_data_resolution rule  I2P-S-04                   resolved       Resolved 1 of 1 supplier item number(s) to material master.
+tax_code               rule  I2P-S-05                   resolved       Tax codes: line 1: V1.
+gl_derivation          rule  I2P-S-06                   stated         GL account stated on every line.
+cost_center_derivation rule  I2P-S-07                   resolved       Cost centre resolved on every line.
+three_way_match        rule  I2P-S-08                   matched        Three-way match applicable to 1 line(s): purchase order, goods receipt and invoice.
+quantity_check         rule  I2P-S-09                   computed       line 1: invoiced 824.000 of 824.000 available
+price_check            rule  I2P-S-10                   computed       line 1: normalised 416.510774 vs 359.700407 (+15.79%), naive comparison would show +18.0431
+tolerance_evaluation   rule  I2P-S-11                   breach         Price tolerance breached on line(s) [1].
+routing_decision       rule  I2P-S-12                   escalate       1 finding(s); primary exception price_variance. Rules alone route to escalate.
+exception_assessment   model deterministic-stub-v1@i2p-v1 price_variance Classified as price_variance; proposes block_for_price_review at confidence 0.88, citing 4 field(s).
+routing_decision       rule  I2P-S-12                   escalate       Routed to escalate: Exception 'price_variance' is rated high severity.
+```
 
-**The gate is deterministic and it always wins.** Auto-recommendation requires *all* of: no mandatory escalation
-trigger, risk not `high`, confidence at or above threshold, enough grounded evidence, no ungrounded citations, and a
-remediation that carries no external consequence. Everything else is an explicit `human_review` state with the reasons
-recorded. A model that is certain an unsupported material entry is fine cannot clear it — the control layer overrides
-the model, not the other way round. A case the system *fails* on is not a pass either: it becomes a human-review item
-with the failure logged.
+Thirteen of the fourteen records are `rule`. One is `model`, and it appears only after the rules have already
+decided there is an exception. Note the two `routing_decision` records: the first is the tier the rules alone
+assigned, the second the tier after the model's confidence was added. Both are recorded so that what the model
+changed is visible rather than asserted.
 
-**Reconstruction.** `fcca audit --exception EXC-0001` returns everything the decision rested on:
+### The posting decision
+
+`escalate`. Not because the model was unsure — it was 0.88 confident — but because a price variance of this
+severity is reserved for a person by rule. A EUR 46,811.74 disagreement about price is a conversation with a
+vendor, not a checkbox.
+
+Nothing was posted. Nothing in this repository can post.
+
+## The trace
+
+The trace is the product, not a debug log. One record per pipeline step, append-only JSONL:
 
 ```json
-{
-  "exception_id": "EXC-0001", "status": "decided",
-  "provider": "mock", "model": "deterministic-stub-v1",
-  "structured_output_mode": "json_schema_prompt", "code_revision": "a1b2c3d",
-  "confidence": 0.87, "human_review_required": 1, "parse_attempts": 1,
-  "prompt_sha256": "2b5c4bd71a893be5ccf44ea80d6f6087",
-  "deterministic_checks": "… 18 signals with observed values and thresholds …",
-  "policy_evidence": [
-    {"document": "Supporting Documentation Standard", "section": "4.2 Escalation",
-     "node_id": "pol-a0e5377dc28c", "score": 1.0, "passage_sha256": "2468f9048a52120d"}
-  ],
-  "llm_raw_output": "… the unvalidated response, kept alongside the validated decision …",
-  "gate": {"disposition": "human_review", "reasons": ["…"]},
-  "settings_snapshot": {"materiality_group": 250000.0, "journal_approval_threshold": 50000.0,
-                        "auto_approve_min_confidence": 0.8}
-}
+{"timestamp":"2026-08-23T09:14:22Z","case_id":"INV-00166","module":"i2p","step_name":"price_check",
+ "actor":"rule","input_hash":"2250afd4e39d2316","outcome":"computed","rule_id":"I2P-S-10",
+ "model":null,"prompt_version":null,
+ "summary":"line 1: normalised 416.510774 vs 359.700407 (+15.79%), naive comparison would show +18.0431",
+ "detail":{"1":{"po_unit_price_normalised":359.700407,"residual_pct":15.793801,"line_residual_abs":46811.74}}}
 ```
 
-The thresholds in force are stored with each decision, so a recommendation can be reread against the policy
-configuration of the month it was made. Credentials never appear: only a non-secret settings snapshot is persisted,
-and a test asserts it. `fcca review --exception EXC-0001 --action approved --reviewer u.klein` closes the loop by
-appending the human disposition to the same record.
+Three properties are enforced rather than left to callers' discipline.
 
-## Security and governance
+**Every record names its actor** — `rule`, `model` or `human` — and a validator refuses a record that claims one
+actor while carrying another's provenance. A rule record must have a `rule_id` and must not have a model; a model
+record must have both `model` and `prompt_version` and must not have a `rule_id`. A trace where computed and
+inferred are indistinguishable is a transcript, not an audit trail.
 
-- **Credentials never enter the project.** AWS uses its standard credential chain, Vertex uses Application Default
-  Credentials. Nothing here reads, stores, prints or logs a key, and `.env` is git-ignored.
-- **Only a non-secret settings snapshot is persisted.** A test asserts no audit field name matches
-  `key|secret|token|password|credential`.
-- **Minimum necessary context leaves the boundary.** One entry, its 18 control signals, the retrieved passages. No
-  unrelated postings, no counterparty master data, no customer records — and the exact payload is reproduced in the
-  audit trail, so what was sent is not a matter of trust.
-- **Synthetic data only.** No real entity, account, employee or amount appears in this repository.
-- **Retrieved text is data, not instruction.** Policy passages and free-text entry descriptions are treated as
-  untrusted input. The defence is layered: the output vocabulary is closed, there is no write path in the codebase,
-  and the escalation gate never reads model output — so a successful injection cannot clear a flagged item. The system
-  prompt also says to ignore embedded instructions, which is the weakest of the three and listed last for that reason.
-- **Tool capability is bounded.** Six typed, read-only tools. None of them writes anywhere.
-- **Provider and model are recorded per decision**, alongside the code revision and the thresholds in force — a model
-  change is a change to a control, and the record shows which one made each recommendation.
-- **No compliance claim.** This is a prototype. Nothing here is certified against SOX, ISAE, ISO or GDPR, and
-  [`docs/architecture.md`](docs/architecture.md) §10 lists what would have to change before it went near a real
-  ledger.
+**The writer is append-only.** There is no update method and no delete method, because a trace that can be tidied
+up after the fact is evidence of nothing. Correcting a mistake means appending a record saying so. A test asserts
+the mutation API does not exist.
+
+**Computing and deciding are separate records.** `price_check` produces a residual; `tolerance_evaluation` decides
+what the residual means against a configured limit. They can be wrong separately — one for an arithmetic reason,
+one for a policy reason — so they are separate records.
+
+```bash
+fcca trace --case INV-00166 --module i2p
+fcca trace --case EXC-0001
+```
+
+## Configuration is a control
+
+Every tolerance, threshold and approval limit lives in [`config/thresholds.yaml`](config/thresholds.yaml), not in
+Python. A tolerance is a business rule, and the controller or internal auditor who owns it should be able to read
+the current value and propose a change without that being a code change.
+
+The types and bounds stay in [`src/fcca/shared/config.py`](src/fcca/shared/config.py), because a YAML file will
+happily accept a negative tolerance or a confidence of 4.0, and a bad edit should fail at start-up rather than
+silently change what the system approves. Precedence is environment variable > `.env` > YAML > default, and the
+values actually in force are recorded with every evaluation run.
+
+## Routing
+
+Three tiers, shared by both modules:
+
+| tier | meaning |
+|---|---|
+| `auto_clear` | applied without a second pair of eyes — a **simulated** posting, never a write to a ledger |
+| `propose_and_approve` | the system states what it would do; a named person approves or rejects |
+| `escalate` | a person investigates; approval is not enough |
+
+The tier is a function of four inputs in a fixed order of authority: the deterministic outcome, the document value,
+the exception type, and **only then** the model's confidence. Confidence is the last input and it can only move a
+case toward more scrutiny. A parametrised test walks confidence from 0.0 to 1.0 and asserts the tier never loosens;
+another asserts that no confidence value makes an exception auto-clearable at any document value.
+
+### One rule is hardcoded
+
+**Bank-detail changes always escalate**, regardless of confidence, document value, or how clean the rest of the
+invoice is. The reasoning is not about model quality.
+
+A payment-redirection fraud is *designed* so that every other check passes. The goods really were delivered, the
+price really is right, the purchase order really exists — the attacker's objective is that nothing else looks
+wrong. So the signals a confidence score is built from are exactly the signals the attack arranges to look normal,
+and a model that is 99% sure the invoice is fine is evidence that the fraud is working, not that the account is
+right.
+
+The control that catches this is a person telephoning the vendor on a number held independently of the invoice.
+Software cannot perform or verify that, so the only defensible routing is to put it in front of someone who can —
+every time, with no confidence threshold that bypasses it and no value floor beneath which it is skipped. It is
+hardcoded rather than configurable because a configurable fraud control is one deployment mistake from being
+switched off, and a test asserts there is no setting for it.
 
 ## Evaluation
 
-60 labelled exceptions across 20 scenarios, spanning all three risk ratings and both dispositions. Labels are ground
-truth **by construction** — each exception is generated from a named scenario whose expected outcome follows from the
-policy set — not human annotations of production data. That is a real limitation, stated here rather than buried.
+### Invoice-to-pay
+
+334 invoices, both MM (PO-based) and FI (non-PO), each generated from a named scenario whose expected outcome was
+known before the engine saw it. Measured with the mock provider under the shipped configuration:
+
+| | |
+|---|---|
+| invoices | 334 |
+| touchless rate (`auto_clear`) | **0.234** (78) |
+| `propose_and_approve` | 0.494 (165) |
+| `escalate` | 0.272 (91) |
+| **false auto-post count** | **0** |
+| model calls | 114 — exactly the exception count |
+| invoices citing evidence they were not given | 0 |
+
+| class | actual | rate | precision | recall |
+|---|---|---|---|---|
+| no_exception | 220 | 65.9% | 1.000 | 1.000 |
+| missing_or_delayed_goods_receipt | 32 | 9.6% | 1.000 | 1.000 |
+| price_variance | 24 | 7.2% | 1.000 | 1.000 |
+| gl_account_missing | 16 | 4.8% | 1.000 | 1.000 |
+| cost_center_missing | 16 | 4.8% | 1.000 | 1.000 |
+| duplicate_invoice | 14 | 4.2% | 1.000 | 1.000 |
+| bank_details_mismatch | 12 | 3.6% | 1.000 | 1.000 |
+| quantity_variance | 0 | — | n/a | n/a |
+
+**Reading it honestly.** Every class scoring 1.000 measures pipeline integrity, not difficulty. The labels are
+derived from the same scenario definitions the generator works from, so this says the pipeline carries a known
+population through correctly. It is not evidence about a real ledger, and a 1.000 obtained from a real AP
+population would be a reason for suspicion rather than confidence. `quantity_variance` reads n/a because the engine
+can raise it and the specified scenario set does not seed it: an absence, not a failure.
+
+The **false auto-post count is not a metric with a target.** It is a property. `fcca i2p-evaluate` exits nonzero if
+it is violated, a test asserts it is zero, and a companion test constructs a report that *does* contain one and
+asserts it is reported as unsafe — otherwise the first assertion would pass on a detector that could never fire.
+
+The touchless rate of 23.4% follows from the shipped configuration, chiefly `auto_clear_max_value: 5000`: 142 clean
+invoices are routed to `propose_and_approve` on value alone. Raising that limit raises the touchless rate and is a
+one-line change to a YAML file — which is the point of the number living in a YAML file, and also the reason the
+figure should not be read as a capability.
+
+### Close
+
+60 labelled exceptions across 20 scenarios. Both Bedrock rows are real runs in eu-central-1 differing only in
+`BEDROCK_MODEL_ID`, with no code change between them.
+
+| provider | model | cases | risk acc | esc prec | esc rec | cite acc | valid out | p50 | cost/case |
+|---|---|---|---|---|---|---|---|---|---|
+| mock | deterministic-stub-v1 | 60 | 1.00 | 1.00 | 1.00 | 0.95 | 1.00 | 0 ms | — |
+| bedrock | claude-haiku-4-5 (eu) | 60 | 0.70 | 0.81 | 1.00 | 0.98 | 1.00 | 4.9 s | $0.005 |
+| bedrock | claude-sonnet-4-5 (eu) | 60 | 0.87 | 0.87 | 1.00 | 0.97 | 1.00 | 8.7 s | $0.016 |
+| vertex | *(configurable)* | not_run | not_run | not_run | not_run | not_run | not_run | not_run | not_run |
+
+**Neither model missed an escalation** — recall 1.00 on both, `fn = 0`. Not because both models were right, but
+because the deterministic gate forces review on a mandatory trigger and never consults the model about it.
+Judgement degrades with model capability and only judgement does: Haiku rates risk correctly on 70% of cases
+against Sonnet's 87%, while structured-output validity, citation grounding and escalation recall are identical,
+because those are code.
+
+Sonnet was run twice at temperature 0 and **one case of sixty changed** — escalation precision moved 0.873 to
+0.857, because a benign item cleared in the first pass was escalated in the second. Two passes bound nothing
+tightly; it is stated because the direction matters, and the flip added review rather than removing it.
+
+## The review interface
+
+A dense, greyscale queue: exception list → open a record → source document on the left, discrepancy comparison on
+the right (system value, document value, normalised value, residual, tolerance), the full trace below it, then
+accept / reject / escalate.
+
+It is a **static export**. There is no server and no API route, and that is a consequence of the non-goals rather
+than a shortcut: with authentication out of scope, a live API would be an unauthenticated endpoint serving finance
+documents. `fcca i2p-export` writes `ui/data`, and the queue, the evaluation view and one page per invoice are all rendered from it at build time.
+
+Accept and reject write to `localStorage` and the panel says so — the disposition is held in that browser and is
+explicitly *not* in the append-only trace, and the panel prints the `fcca review` command that does append it. On
+escalated items accept and reject are disabled, because that tier means investigate rather than approve.
 
 ```bash
-python -m fcca.evaluate --provider mock
-python -m fcca.evaluate --compare
+fcca i2p-export --out ui/data
+cd ui && npm install && npm run build     # static export in ui/out, deployable to Vercel
 ```
-
-Current [`results/benchmark.csv`](results/benchmark.csv):
-
-| provider | model | status | cases | risk acc | action acc | esc prec | esc rec | cite acc | valid out | p50 | cost/case |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| mock | deterministic-stub-v1 | ok | 60 | 1.00 | 0.90 | 1.00 | 1.00 | 0.95 | 1.00 | 0 ms | — |
-| **bedrock** | **claude-haiku-4-5 (eu)** | **ok** | **60** | **0.70** | **0.62** | **0.81** | **1.00** | **0.98** | **1.00** | **4.9 s** | **$0.005** |
-| **bedrock** | **claude-sonnet-4-5 (eu)** | **ok** | **60** | **0.87** | **0.63** | **0.87** | **1.00** | **0.97** | **1.00** | **8.7 s** | **$0.016** |
-| vertex | *(configurable)* | **not_run** | not_run | not_run | not_run | not_run | not_run | not_run | not_run | not_run | not_run |
-
-Both Bedrock rows are real runs over the same 60 cases in eu-central-1, differing only in
-`BEDROCK_MODEL_ID`. No code changed between them — which is the portability claim, measured rather
-than asserted. Vertex still reads `not_run` because nobody has run it, and no cell in that row is
-estimated.
-
-**Reading it.** The mock scores 1.00 on risk because it *is* the labelling rubric expressed in
-Python; that row measures pipeline integrity, not model quality. The two live rows are where the
-architecture is either doing its job or not:
-
-- **Neither model missed an escalation.** `fn = 0` on both, recall 1.00. Not because both models
-  were right, but because the deterministic gate forces review on a mandatory trigger and never
-  consults the model about it. That is the single property the design exists to guarantee, and it
-  survived a threefold drop in model price.
-- **Judgement degrades with model capability, and only judgement does.** Haiku rates risk correctly
-  on 70% of cases against Sonnet's 87%, and clears only 1 of the 12 benign items where Sonnet
-  clears 5 (`fp` 11 versus 7). The cheaper model is noisier for reviewers; it is not less safe.
-- **The mechanical properties held identically.** Structured output valid on every case for both,
-  zero ungrounded citations for both, citation accuracy 0.98 and 0.97. Schema validation and
-  citation grounding are code, so model choice does not move them.
-- **The buying decision follows from the table.** Haiku costs a third and answers in half the time.
-  If the deliverable is "nothing reaches sign-off unreviewed", it is sufficient. Sonnet is what you
-  pay for to cut reviewer noise — four fewer false escalations per sixty exceptions.
-- **Action-category accuracy is ~0.62 on both and is one behaviour, not noise.** Both models
-  escalate where the labels expect a specific remedy — `route_to_reviewer` for an unapproved entry,
-  `propose_correcting_entry` for a duplicate. Deliberately not fixed: tuning a prompt against labels
-  this repository wrote itself would raise the number and prove nothing.
-
-![Escalation outcome of the Sonnet run over 60 labelled exceptions: 48 escalated correctly, 7
-escalated unnecessarily, 5 cleared correctly, none missed.](results/escalation_outcomes_bedrock__eu-anthropic-claude-sonnet-4-5-20250929-v1-0.png)
-
-Regenerate with `python -m fcca.figure --provider bedrock --model <id>`. It reads the recorded run
-rather than taking numbers as arguments, so the picture cannot drift from the table above it.
-
-**How much does one run move?** Sonnet was run twice over the same 60 cases at temperature 0.
-**One case of sixty changed.** Risk accuracy, action accuracy, citation accuracy, escalation recall
-and structured-output validity were identical to four decimals; escalation precision moved 0.873 to
-0.857, because a single benign item that was cleared in the first pass was escalated in the second.
-`fn` stayed at 0 in both.
-
-That is a stability figure, not a guarantee — two passes bound nothing tightly, and the one case
-that moved is exactly the kind that sits near a boundary. It is worth stating because the direction
-matters: the flip added review rather than removing it. Both passes are kept in `results/`; the
-comparison table shows the most recent per model.
-
-**On the labels.** They are ground truth by construction, so a disagreement is not automatically a
-model error. Whether an uncleared duplicate should be routed for a correcting entry or escalated
-outright is a matter a real controller would rule on, and this repository is not that controller.
-
-Metrics collected: risk accuracy, action-category accuracy, escalation precision / recall / F1, retrieval recall
-(did the retriever surface the governing document?) reported separately from citation accuracy (did the decision cite
-it?), structured-output validity, ungrounded-citation rate, unsupported-recommendation rate, latency percentiles, and
-cost per case when the provider reports token usage and prices are configured. Escalation recall and precision are the
-two that matter operationally: recall is missed escalations, precision is wasted reviewer time. The metric functions
-are tested against deliberately wrong answers, not only correct ones.
 
 ## Run it locally
 
@@ -292,132 +358,105 @@ cd finance-close-control-agent
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
-python -m fcca.generate_data        # seeded synthetic ledger + labelled exception set
-python -m fcca.ingest_policies      # chunk and index the policy knowledge base
-python -m fcca.run_case --exception EXC-0001 --provider mock
-python -m fcca.evaluate --provider mock
-python -m fcca.cli audit --exception EXC-0001
+python -m fcca.close.generate_data        # seeded ledger + labelled exceptions
+python -m fcca.close.ingest_policies      # chunk and index the policy corpus
+python -m fcca.i2p.generate_data          # seeded invoices, POs, receipts, masters
+
+python -m fcca.close.run_case --exception EXC-0001 --provider mock
+python -m fcca.i2p.run_invoice --invoice INV-00166 --provider mock
+python -m fcca.i2p.evaluate --provider mock
 ```
 
-Requires Python 3.12+. Every command is also available as `fcca <subcommand>` after installation, and `fcca info`
-prints the active provider, thresholds, dataset shape and index size.
+Requires Python 3.12+. Every command is also available as `fcca <subcommand>`; `fcca info` prints the active
+provider, thresholds, dataset shape and index size.
 
-## Run it on AWS Bedrock
-
-```bash
-pip install -e ".[bedrock]"
-aws sso login                        # or any standard AWS credential source
-export LLM_PROVIDER=bedrock
-export AWS_REGION=eu-central-1
-export BEDROCK_MODEL_ID=eu.anthropic.claude-sonnet-4-5-20250929-v1:0
-python -m fcca.run_case --exception EXC-0001
-python -m fcca.evaluate --provider bedrock
-```
-
-Any chat model enabled in your account works. Serverless models are enabled on first invocation;
-Anthropic models may require a one-time use-case form. In EU regions an inference-profile id
-(`eu.anthropic.…`) is required rather than the bare model id.
-
-Authentication uses the standard AWS credential chain, so a Bedrock API key works too — export it
-as `AWS_BEARER_TOKEN_BEDROCK` and botocore prefers bearer auth automatically, with no access keys
-involved. Note that a *short-term* Bedrock key expires after a few hours and then fails with
-"Signature expired"; generate a long-term one for anything that has to keep working. This project
-never reads, stores or logs a key either way.
-
-## Run it on Google Vertex AI
-
-```bash
-pip install -e ".[vertex]"
-gcloud auth application-default login
-export LLM_PROVIDER=vertex
-export GOOGLE_CLOUD_PROJECT=your-project-id
-export VERTEX_LOCATION=europe-west4
-export VERTEX_MODEL_NAME=gemini-2.5-flash
-python -m fcca.evaluate --provider vertex
-```
-
-Authentication uses Application Default Credentials or an attached service account.
-
-Note that `ChatVertexAI` is deprecated as of `langchain-google-vertexai` 3.2.0 in favour of
-`ChatGoogleGenerativeAI`, with removal due in 4.0.0. The adapter has not been switched: the two
-authenticate differently, and exchanging one never-executed adapter for another only relocates the
-untested surface. That migration belongs with the first live Vertex run, where it can be verified
-in the same pass — which is also when this row stops reading `not_run`.
+Bedrock and Vertex are optional installs and neither is needed to run, test or demonstrate anything here. Nothing
+in the workflow imports a cloud SDK — one factory returns a `BaseChatModel`, and no model id appears outside
+`config.py`. See [`docs/architecture.md`](docs/architecture.md) for the portability argument and the test that
+enforces it.
 
 ## Tests
 
 ```bash
-pytest          # 107 tests, mock provider only, no network calls
-ruff check .
+pytest          # 248 tests, mock provider only, no network calls
+ruff check . && ruff format --check .
 mypy
 ```
 
-Coverage spans the finance rules at their thresholds, retrieval (does the right section come back?), structured-output
-validation and its failure modes, the review gate including the deterministic override, provider substitution, audit
-completeness and secret-freedom, evaluation metrics against wrong answers, and data-generation reproducibility.
+Two are required rather than merely present:
+
+- `tests/test_i2p_pricing.py::TestTheCaseThisModuleExistsFor::test_cascading_discounts_plus_surcharge_is_not_a_variance`
+  — a purchase order at 38.50 per 100 pieces less 5%, 3% and 2% plus 0.04 per piece, against an invoice for the
+  identical money printed as 0.3876819 per piece. The naive comparison reports a 99% variance; normalised, the
+  residual is zero and no exception is raised.
+- `tests/test_i2p_evaluation.py::TestTheSafetyProperty::test_false_auto_post_count_is_zero`.
+
+Coverage also spans the order of operations that does not commute (a surcharge added before the discount cascade
+would be discounted by it), the tolerance rule in both directions, provider substitution, trace append-only
+behaviour and actor provenance, the routing tightening property, audit completeness and secret-freedom, and
+data-generation reproducibility.
 
 ## Repository structure
 
 ```
-policies/            six illustrative finance policies — the RAG knowledge base
+config/thresholds.yaml   every tolerance, threshold and approval limit
+policies/                six illustrative close policies — the RAG corpus
 src/fcca/
-  config.py          every threshold, path and model id; nothing hard-coded elsewhere
-  models.py          Pydantic contracts: facts, signals, decisions, evidence
-  masterdata.py      synthetic entities, accounts, cost centres, users
-  generate_data.py   seeded generator: ledger, reconciliations, exceptions, labels
-  analytics.py       DuckDB queries — duplicates, variance, history, reconciliations
-  controls/          18 deterministic checks (materiality, journal, reconciliation)
-  retrieval/         LlamaIndex index build + retriever with source attribution
-  providers/         get_llm factory · mock · bedrock · vertex
-  workflow/          LangChain pipeline, prompts, structured output, grounding, gate, tools
-  audit/             SQLite decision log and reconstruction
-  evaluation/        metrics and the multi-provider benchmark
-  cli.py             fcca generate-data | ingest-policies | run-case | evaluate | audit | review | info
-tests/               107 tests, mock provider only
-docs/                architecture.md · portfolio-copy.md
-results/             benchmark.csv and per-provider run detail
+  shared/                config · errors · trace · routing · providers · audit · common contracts
+  close/                 ledger · 18 control checks · retrieval · workflow · gate · evaluation
+  i2p/                   generator · pricing · checks · engine · agent · routing · evaluation · export
+  cli.py                 fcca <subcommand>
+ui/                      Next.js static export — the exception queue
+tests/                   248 tests, mock provider only
+docs/                    architecture.md · portfolio-copy.md
+results/                 benchmark and evaluation output from runs that happened
 ```
+
+Nothing under `shared/` may import from `close/` or `i2p/`. The audit logger was the one violation — it annotates
+against a close-module type — and that import is `TYPE_CHECKING`-only.
 
 ## Design decisions worth arguing with
 
-**Retrieval is lexical (BM25), not embeddings.** The corpus is six short, controlled, jargon-dense documents where the
-decisive tokens are exact — *materiality*, *suspense*, *segregation*, *50,000*. Lexical matching handles those
-precisely, needs no embedding provider (so the repository runs free), and is deterministic, which makes retrieval
-itself unit-testable and the audit trail reproducible. The retriever is a LlamaIndex `BaseRetriever`, so a vector or
-hybrid index is a constructor change in one module. On a corpus of 500 policies across a group's jurisdictions that
-swap is the right call — at six, it would be complexity without benefit.
+**The cost centre in free text is the only thing a model is asked to read.** The deterministic layer resolves a
+cost centre from the coding block, then from the purchase order. It deliberately does *not* regex the free-text
+note: extracting a cost centre from prose is genuinely a language problem, and a regex over free text would be a
+worse version of the same thing wearing a deterministic costume. What the code does instead is constrain the
+answer — the model chooses from a list of cost centres that exist, and the proposal is re-checked against the
+master rather than trusted, because a plausible invented code posts to an account nobody owns and passes every
+format check.
 
-**Tools exist but no agent drives them.** The capabilities are real typed LangChain tools (`calculate_materiality`,
-`retrieve_policy`, `get_account_risk`, …), invoked deterministically by the orchestrator. In a close, the sequence of
-checks *is* the control design: every exception must receive the same checks in the same order, or the population is
-no longer comparable and the close is not auditable. An agent that plans its own path produces a different audit trail
-for every case. LangGraph was considered and left out — the workflow has no cycles, no branching state machine and no
-need for one.
+**The price tolerance clears a line inside *either* limit.** The percentage alone blocks a 0.40 difference on a
+1.20 unit price, which is 33% and immaterial. The absolute alone waves through 400 on a 20,000 line, which is 2%
+and real money. Requiring both to be breached keeps the queue about pricing disputes rather than rounding — and it
+is a configuration choice a process owner can argue with, not a fact.
 
-**The policy documents do not drive the thresholds.** Retrieved policy text informs the model's reasoning; the numeric
-thresholds live in configuration. Parsing enforceable limits out of prose would be the more impressive demo and the
-worse control: a control threshold must be explicit, versioned and testable. The cost is that a policy edit and a
-configuration change have to be made together, which is honest about what would need governance in production.
+**Tools exist but no agent drives them.** The sequence of checks *is* the control design: every item must receive
+the same checks in the same order, or the population is not comparable. An agent that plans its own path produces a
+different audit trail for every case.
+
+**Retrieval is lexical (BM25), not embeddings.** Six short, jargon-dense policy documents where the decisive tokens
+are exact. Deterministic, unit-testable, and needs no embedding provider. On 500 policies that swap is the right
+call; at six it would be complexity without benefit.
+
+**The invoice module starts at structured JSON.** There is no OCR and no PDF parsing anywhere in it. Extraction
+from a document image is a real and separate problem, and pretending to solve it here would make every number
+downstream unfalsifiable.
 
 ## Limitations
 
-- **Synthetic data.** No real entity, account, employee, amount or policy appears anywhere in this repository. The
-  policies are illustrative documents written for the prototype, not accounting guidance.
-- **Labels are ground truth by construction**, derived from the scenario definitions, not from human review of
-  production exceptions. They validate the pipeline, not the finance judgement.
-- **Mock results measure the harness, not a model.** See the evaluation section.
-- **Bedrock has been run on two models; Vertex has not been run at all.** Sonnet was run twice and moved one case of
-  sixty, which bounds run-to-run drift loosely rather than establishing a confidence interval — two passes is not a
-  sample. Haiku was run once. The Vertex adapter is implemented and its row reads `not_run` until someone runs it
-  with their own project.
-- **Prototype, not production.** No authentication, no multi-tenancy, no ERP integration, no retention policy, no
-  monitoring, no change control over the policy corpus. [`docs/architecture.md`](docs/architecture.md) lists what
-  would have to change first.
-- **Decision support only.** Nothing here posts to a ledger, and no path in the code can. It is not financial,
-  accounting or audit advice.
-- **Not certified against anything.** No SOX, ISAE, ISO or GDPR claim is made or implied.
+- **Synthetic data, and labels that are ground truth by construction.** They validate the pipeline, not anyone's
+  finance judgement. Perfect classification scores mean the pipeline is intact, not that the problem is easy.
+- **The posting is simulated.** `auto_clear` names a decision, not an action. No code path writes to an ERP.
+- **Mock results measure the harness, not a model.** The mock is a rule engine wearing a chat-model interface. It
+  is labelled as such in the benchmark output and in its own docstring.
+- **Bedrock has been run on two models for the close module; Vertex has not been run at all. The invoice module has
+  been run only against the mock.** Those rows say `not_run` until somebody runs them.
+- **No ERP integration, no OCR, no authentication, no multi-tenancy, no retention policy, no monitoring, no change
+  control over the policy corpus.** [`docs/architecture.md`](docs/architecture.md) §10 lists what would have to
+  change before any of this went near a real ledger.
+- **Decision support only.** This is not financial, accounting or audit advice, and nothing here is certified
+  against SOX, ISAE, ISO or GDPR.
 
 ## Licence
 
-MIT. See [`docs/architecture.md`](docs/architecture.md) for the design rationale and
-[`docs/portfolio-copy.md`](docs/portfolio-copy.md) for a short case-study write-up.
+MIT. See [`docs/architecture.md`](docs/architecture.md) for the design rationale.
