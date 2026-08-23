@@ -157,31 +157,67 @@ def render(
 #: Colour per line, mirroring what the CLI prints in a terminal. Keyed on
 #: content rather than on ANSI codes: the fixture is captured through a pipe,
 #: where rich correctly emits no colour at all.
-def _line_colour(line: str) -> tuple[str, bool]:
+#: Character columns of the control table, as `presentation.py` lays it out.
+#: Colouring by column rather than by line is what keeps a severity from
+#: bleeding into the sentence beside it — the earlier version painted a whole
+#: CRITICAL row orange, so the first line of a detail was coloured and its
+#: continuation was not, which reads as a rendering fault rather than emphasis.
+_COL_SEVERITY = 33
+_COL_OBSERVED = 43
+
+AMBER = "#8a6a3a"
+
+
+def _segments(line: str) -> list[tuple[int, str, str, bool]]:
+    """Split one line into (start column, text, colour, bold) pieces."""
     stripped = line.strip()
-    if "CRITICAL" in line or stripped.startswith("Disposition") or "HUMAN REVIEW REQUIRED" in line:
-        return WARN, True
+
+    if line.startswith(("CHK-", "  CHK-")):
+        return [
+            (0, line[:_COL_SEVERITY].rstrip(), INK, False),
+            (
+                _COL_SEVERITY,
+                line[_COL_SEVERITY:_COL_OBSERVED].rstrip(),
+                WARN if "CRITICAL" in line else AMBER,
+                True,
+            ),
+            (_COL_OBSERVED, line[_COL_OBSERVED:].rstrip(), MUTED, False),
+        ]
+
+    if stripped.startswith("Disposition"):
+        return [
+            (0, "Disposition", INK, True),
+            (12, line[12:].rstrip(), WARN, True),
+        ]
+
     if stripped.startswith(">"):
-        return ACCENT, False
-    if "WARNING" in line:
-        return "#8a6a3a", False
+        return [(0, line.rstrip(), ACCENT, False)]
+
     if stripped.startswith(("Exception ", "Risk ", "Deterministic controls", "Policy evidence")):
-        return INK, True
-    if stripped.startswith(("Finding", "Action", "Rationale")):
-        return INK, False
-    if line.startswith("bedrock:") or line.startswith("mock:"):
-        return MUTED, False
-    return MUTED if line.startswith(" ") else INK, False
+        return [(0, line.rstrip(), INK, True)]
+
+    if line.startswith(("bedrock:", "mock:", "vertex:")):
+        return [(0, line.rstrip(), MUTED, False)]
+
+    if line.startswith(("Finding", "Action", "Rationale")):
+        return [(0, line[:12], INK, True), (12, line[12:].rstrip(), INK, False)]
+
+    return [(0, line.rstrip(), MUTED if line.startswith(" ") else INK, False)]
 
 
 def render_review(source: Path | None = None, settings: Settings | None = None) -> Path:
     """Typeset a captured control review as an image.
 
     The text is the tool's own output, committed at ``docs/example-review.txt``
-    and reproduced verbatim apart from one marked abridgement. It is typeset
+    and reproduced verbatim apart from two marked abridgements. It is typeset
     rather than photographed because a terminal screenshot carries whatever
     font, theme and window chrome the machine happened to have, none of which
     is part of the work.
+
+    Capture it with a wide console (``FCCA_CONSOLE_WIDTH=150``). At terminal
+    width the wrap points fall mid-entry — a policy citation's file path lands
+    alone on the next line at column zero — which is ordinary wrapping in a
+    terminal and looks like a broken layout once it is set as an image.
     """
     import matplotlib
 
@@ -193,25 +229,29 @@ def render_review(source: Path | None = None, settings: Settings | None = None) 
     lines = source.read_text(encoding="utf-8").rstrip("\n").split("\n")
 
     char_w, line_h, size = 0.0088, 0.019, 10.5
-    width = max(len(line) for line in lines) * char_w + 0.06
-    height = len(lines) * line_h + 0.06
+    margin = 0.03
+    width = max(len(line) for line in lines) * char_w + 2 * margin
+    height = len(lines) * line_h + 2 * margin
 
     fig = plt.figure(figsize=(width * 10, height * 10), dpi=140)
     fig.patch.set_facecolor(BACKGROUND)
 
     for index, line in enumerate(lines):
-        colour, bold = _line_colour(line)
-        fig.text(
-            0.03,
-            1 - 0.03 - (index + 0.8) * (line_h / height),
-            line.rstrip(),
-            family="monospace",
-            fontsize=size,
-            color=colour,
-            fontweight="bold" if bold else "normal",
-            va="top",
-            ha="left",
-        )
+        y = 1 - margin - (index + 0.8) * (line_h / height)
+        for column, text, colour, bold in _segments(line):
+            if not text:
+                continue
+            fig.text(
+                margin + column * char_w / width,
+                y,
+                text,
+                family="monospace",
+                fontsize=size,
+                color=colour,
+                fontweight="bold" if bold else "normal",
+                va="top",
+                ha="left",
+            )
 
     destination = settings.results_dir / "example_review.png"
     settings.results_dir.mkdir(parents=True, exist_ok=True)
