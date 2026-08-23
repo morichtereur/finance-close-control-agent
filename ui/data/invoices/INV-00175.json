@@ -1,0 +1,552 @@
+{
+  "invoice_id": "INV-00175",
+  "invoice": {
+    "invoice_id": "INV-00175",
+    "vendor_id": "V-10010",
+    "company_code": "FR20",
+    "category": "MM",
+    "invoice_date": "2026-07-22",
+    "received_date": "2026-07-27",
+    "vendor_reference": "DE85371",
+    "currency": "EUR",
+    "lines": [
+      {
+        "line_no": 1,
+        "description": "Drive belt, toothed 1400mm",
+        "supplier_item_no": "HP-BELT-1400T",
+        "quantity": 358.0,
+        "uom": "PCE",
+        "price": {
+          "list_price": 94.2,
+          "price_unit": 1,
+          "discount_pct": [
+            3.93
+          ],
+          "surcharge_per_unit": 0.0
+        },
+        "tax_rate": 19.0,
+        "po_id": "PO-4500141",
+        "po_line": 10,
+        "gl_account": "415000",
+        "cost_center": "CC-7400"
+      },
+      {
+        "line_no": 2,
+        "description": "Drive belt, toothed 1400mm",
+        "supplier_item_no": "HP-BELT-1400T",
+        "quantity": 334.0,
+        "uom": "PCE",
+        "price": {
+          "list_price": 94.2,
+          "price_unit": 1,
+          "discount_pct": [],
+          "surcharge_per_unit": 0.0
+        },
+        "tax_rate": 7.0,
+        "po_id": "PO-4500141",
+        "po_line": 20,
+        "gl_account": "415000",
+        "cost_center": "CC-7400"
+      },
+      {
+        "line_no": 3,
+        "description": "Cleaning service, per hour",
+        "supplier_item_no": "MF-CLEAN-HR",
+        "quantity": 43.0,
+        "uom": "HR",
+        "price": {
+          "list_price": 32.0,
+          "price_unit": 1,
+          "discount_pct": [
+            4.89,
+            5.64
+          ],
+          "surcharge_per_unit": 0.0
+        },
+        "tax_rate": 19.0,
+        "po_id": "PO-4500141",
+        "po_line": 30,
+        "gl_account": "470000",
+        "cost_center": "CC-8200"
+      }
+    ],
+    "stated_bank_iban": "DE44500105175407324931",
+    "free_text": "",
+    "stated_total_net": 65095.96,
+    "stated_total_tax": 8592.7,
+    "stated_total_gross": 73688.66
+  },
+  "vendor": {
+    "vendor_id": "V-10010",
+    "name": "Nordwerk Industrieteile GmbH",
+    "country": "DE",
+    "currency": "EUR",
+    "payment_terms": "NT30",
+    "tax_id": "DE811907980",
+    "bank_iban": "DE44500105175407324931",
+    "bank_name": "Rheinische Handelsbank",
+    "is_blocked": false
+  },
+  "purchase_orders": {
+    "PO-4500141": {
+      "po_id": "PO-4500141",
+      "vendor_id": "V-10010",
+      "company_code": "FR20",
+      "po_date": "2026-07-05",
+      "currency": "EUR",
+      "lines": [
+        {
+          "po_line": 10,
+          "material_id": "MAT-400505",
+          "supplier_item_no": "HP-BELT-1400T",
+          "quantity": 358.0,
+          "uom": "PCE",
+          "price": {
+            "list_price": 94.2,
+            "price_unit": 1,
+            "discount_pct": [
+              3.93
+            ],
+            "surcharge_per_unit": 0.0
+          },
+          "tax_code": "V1",
+          "gl_account": "415000",
+          "cost_center": "CC-7400"
+        },
+        {
+          "po_line": 20,
+          "material_id": "MAT-400505",
+          "supplier_item_no": "HP-BELT-1400T",
+          "quantity": 334.0,
+          "uom": "PCE",
+          "price": {
+            "list_price": 94.2,
+            "price_unit": 1,
+            "discount_pct": [],
+            "surcharge_per_unit": 0.0
+          },
+          "tax_code": "V2",
+          "gl_account": "415000",
+          "cost_center": "CC-7400"
+        },
+        {
+          "po_line": 30,
+          "material_id": "MAT-900001",
+          "supplier_item_no": "MF-CLEAN-HR",
+          "quantity": 43.0,
+          "uom": "HR",
+          "price": {
+            "list_price": 32.0,
+            "price_unit": 1,
+            "discount_pct": [
+              4.89,
+              5.64
+            ],
+            "surcharge_per_unit": 0.0
+          },
+          "tax_code": "V1",
+          "gl_account": "470000",
+          "cost_center": "CC-8200"
+        }
+      ]
+    }
+  },
+  "goods_receipts": [
+    {
+      "gr_id": "GR-5000279",
+      "po_id": "PO-4500141",
+      "po_line": 10,
+      "receipt_date": "2026-07-18",
+      "quantity": 139.99,
+      "uom": "PCE"
+    },
+    {
+      "gr_id": "GR-5000280",
+      "po_id": "PO-4500141",
+      "po_line": 10,
+      "receipt_date": "2026-07-20",
+      "quantity": 218.01,
+      "uom": "PCE"
+    },
+    {
+      "gr_id": "GR-5000281",
+      "po_id": "PO-4500141",
+      "po_line": 20,
+      "receipt_date": "2026-07-18",
+      "quantity": 103.796,
+      "uom": "PCE"
+    },
+    {
+      "gr_id": "GR-5000282",
+      "po_id": "PO-4500141",
+      "po_line": 20,
+      "receipt_date": "2026-07-20",
+      "quantity": 230.204,
+      "uom": "PCE"
+    },
+    {
+      "gr_id": "GR-5000283",
+      "po_id": "PO-4500141",
+      "po_line": 30,
+      "receipt_date": "2026-07-18",
+      "quantity": 17.6,
+      "uom": "HR"
+    },
+    {
+      "gr_id": "GR-5000284",
+      "po_id": "PO-4500141",
+      "po_line": 30,
+      "receipt_date": "2026-07-20",
+      "quantity": 25.4,
+      "uom": "HR"
+    }
+  ],
+  "result": {
+    "invoice_id": "INV-00175",
+    "category": "MM",
+    "document_value": 73688.66,
+    "currency": "EUR",
+    "resolutions": [
+      {
+        "line_no": 1,
+        "material_id": "MAT-400505",
+        "material_source": "supplier_item_no",
+        "tax_code": "V1",
+        "gl_account": "415000",
+        "gl_source": "stated",
+        "cost_center": "CC-7400",
+        "cost_center_source": "stated",
+        "price": {
+          "po_unit_price_normalised": 90.49794,
+          "invoice_unit_price_normalised": 90.49794,
+          "residual_abs": 0.0,
+          "residual_pct": 0.0,
+          "line_residual_abs": 0.0,
+          "naive_residual_abs": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 2.0,
+          "tolerance_abs": 25.0
+        },
+        "quantity": {
+          "invoiced_base_qty": 358.0,
+          "received_base_qty": 358.0,
+          "open_base_qty": 358.0,
+          "residual_base_qty": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 0.0
+        }
+      },
+      {
+        "line_no": 2,
+        "material_id": "MAT-400505",
+        "material_source": "supplier_item_no",
+        "tax_code": "V2",
+        "gl_account": "415000",
+        "gl_source": "stated",
+        "cost_center": "CC-7400",
+        "cost_center_source": "stated",
+        "price": {
+          "po_unit_price_normalised": 94.2,
+          "invoice_unit_price_normalised": 94.2,
+          "residual_abs": 0.0,
+          "residual_pct": 0.0,
+          "line_residual_abs": 0.0,
+          "naive_residual_abs": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 2.0,
+          "tolerance_abs": 25.0
+        },
+        "quantity": {
+          "invoiced_base_qty": 334.0,
+          "received_base_qty": 334.0,
+          "open_base_qty": 334.0,
+          "residual_base_qty": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 0.0
+        }
+      },
+      {
+        "line_no": 3,
+        "material_id": "MAT-900001",
+        "material_source": "supplier_item_no",
+        "tax_code": "V1",
+        "gl_account": "470000",
+        "gl_source": "stated",
+        "cost_center": "CC-8200",
+        "cost_center_source": "stated",
+        "price": {
+          "po_unit_price_normalised": 28.718655,
+          "invoice_unit_price_normalised": 28.718655,
+          "residual_abs": 0.0,
+          "residual_pct": 0.0,
+          "line_residual_abs": 0.0,
+          "naive_residual_abs": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 2.0,
+          "tolerance_abs": 25.0
+        },
+        "quantity": {
+          "invoiced_base_qty": 43.0,
+          "received_base_qty": 43.0,
+          "open_base_qty": 43.0,
+          "residual_base_qty": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 0.0
+        }
+      }
+    ],
+    "findings": [],
+    "duplicate_candidates": [],
+    "routing": {
+      "tier": "propose_and_approve",
+      "reasons": [
+        "Clean match, but document value 73,688.66 is at or above the auto-clear limit of 5,000.00."
+      ],
+      "deciding_reason": "Clean match, but document value 73,688.66 is at or above the auto-clear limit of 5,000.00.",
+      "model_confidence": null,
+      "document_value": 73688.66,
+      "exception_type": "no_exception"
+    },
+    "evaluated_at": "2026-08-23T06:51:32.182943Z"
+  },
+  "routing": {
+    "tier": "propose_and_approve",
+    "reasons": [
+      "Clean match, but document value 73,688.66 is at or above the auto-clear limit of 5,000.00."
+    ],
+    "deciding_reason": "Clean match, but document value 73,688.66 is at or above the auto-clear limit of 5,000.00.",
+    "model_confidence": null,
+    "document_value": 73688.66,
+    "exception_type": "no_exception"
+  },
+  "assessment": null,
+  "model_called": false,
+  "trace": [
+    {
+      "timestamp": "2026-08-23T06:51:32.181510Z",
+      "case_id": "INV-00175",
+      "module": "i2p",
+      "step_name": "intake",
+      "actor": "rule",
+      "input_hash": "1286cc8f92e17b0a",
+      "outcome": "loaded",
+      "summary": "Received INV-00175 from V-10010, EUR 73,688.66, 3 line(s).",
+      "rule_id": "I2P-S-01",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "vendor_reference": "DE85371",
+        "invoice_date": "2026-07-22",
+        "received_date": "2026-07-27",
+        "gross": 73688.66
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.181595Z",
+      "case_id": "INV-00175",
+      "module": "i2p",
+      "step_name": "classification",
+      "actor": "rule",
+      "input_hash": "d15e73ba7d91f678",
+      "outcome": "MM",
+      "summary": "Classified as MM. At least one line references a purchase order.",
+      "rule_id": "I2P-S-02",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.181701Z",
+      "case_id": "INV-00175",
+      "module": "i2p",
+      "step_name": "duplicate_check",
+      "actor": "rule",
+      "input_hash": "a743e04fb1b23af9",
+      "outcome": "unique",
+      "summary": "No match among 33 earlier invoice(s) from this vendor.",
+      "rule_id": "I2P-S-03",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "candidates": [],
+        "compared_against": 33
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.181785Z",
+      "case_id": "INV-00175",
+      "module": "i2p",
+      "step_name": "master_data_resolution",
+      "actor": "rule",
+      "input_hash": "fe039bda8b8de4f4",
+      "outcome": "resolved",
+      "summary": "Resolved 3 of 3 supplier item number(s) to material master.",
+      "rule_id": "I2P-S-04",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "materials": {
+          "1": "MAT-400505",
+          "2": "MAT-400505",
+          "3": "MAT-900001"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.181870Z",
+      "case_id": "INV-00175",
+      "module": "i2p",
+      "step_name": "tax_code",
+      "actor": "rule",
+      "input_hash": "6b84c00e77292875",
+      "outcome": "resolved",
+      "summary": "Tax codes: line 1: V1, line 2: V2, line 3: V1.",
+      "rule_id": "I2P-S-05",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "tax_codes": {
+          "1": "V1",
+          "2": "V2",
+          "3": "V1"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.181953Z",
+      "case_id": "INV-00175",
+      "module": "i2p",
+      "step_name": "gl_derivation",
+      "actor": "rule",
+      "input_hash": "cb76b51156beb715",
+      "outcome": "stated",
+      "summary": "GL account stated on every line.",
+      "rule_id": "I2P-S-06",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "gl_accounts": {
+          "1": [
+            "415000",
+            "stated"
+          ],
+          "2": [
+            "415000",
+            "stated"
+          ],
+          "3": [
+            "470000",
+            "stated"
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.182067Z",
+      "case_id": "INV-00175",
+      "module": "i2p",
+      "step_name": "cost_center_derivation",
+      "actor": "rule",
+      "input_hash": "a5f2b649f6fc05a4",
+      "outcome": "resolved",
+      "summary": "Cost centre resolved on every line.",
+      "rule_id": "I2P-S-07",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "cost_centers": {
+          "1": [
+            "CC-7400",
+            "stated"
+          ],
+          "2": [
+            "CC-7400",
+            "stated"
+          ],
+          "3": [
+            "CC-8200",
+            "stated"
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.182186Z",
+      "case_id": "INV-00175",
+      "module": "i2p",
+      "step_name": "three_way_match",
+      "actor": "rule",
+      "input_hash": "e86e42dba6978485",
+      "outcome": "matched",
+      "summary": "Three-way match applicable to 3 line(s): purchase order, goods receipt and invoice.",
+      "rule_id": "I2P-S-08",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.182299Z",
+      "case_id": "INV-00175",
+      "module": "i2p",
+      "step_name": "quantity_check",
+      "actor": "rule",
+      "input_hash": "c315ba2c39ed75c7",
+      "outcome": "computed",
+      "summary": "line 1: invoiced 358.000 of 358.000 available; line 2: invoiced 334.000 of 334.000 available; line 3: invoiced 43.000 of 43.000 available",
+      "rule_id": "I2P-S-09",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.182441Z",
+      "case_id": "INV-00175",
+      "module": "i2p",
+      "step_name": "price_check",
+      "actor": "rule",
+      "input_hash": "3b0cab9c991394bd",
+      "outcome": "computed",
+      "summary": "line 1: normalised 90.497940 vs 90.497940 (+0.00%), naive comparison would show +0.0000; line 2: normalised 94.200000 vs 94.200000 (+0.00%), naive comparison would show +0.0000; line 3: normalised 28.718655 vs 28.718655 (+0.00%), naive comparison would show +0.0000",
+      "rule_id": "I2P-S-10",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.182830Z",
+      "case_id": "INV-00175",
+      "module": "i2p",
+      "step_name": "tolerance_evaluation",
+      "actor": "rule",
+      "input_hash": "212c5cbb2a42ad97",
+      "outcome": "within_tolerance",
+      "summary": "All residuals inside tolerance (2.0% or 25.00).",
+      "rule_id": "I2P-S-11",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "breached_lines": []
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.182951Z",
+      "case_id": "INV-00175",
+      "module": "i2p",
+      "step_name": "routing_decision",
+      "actor": "rule",
+      "input_hash": "b9a4d5111fbc4dbe",
+      "outcome": "propose_and_approve",
+      "summary": "No finding. Invoice matches on price, quantity and coding. Rules alone route to propose_and_approve.",
+      "rule_id": "I2P-S-12",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "tier": "propose_and_approve",
+        "routing_reasons": [
+          "Clean match, but document value 73,688.66 is at or above the auto-clear limit of 5,000.00."
+        ],
+        "findings": []
+      }
+    }
+  ]
+}

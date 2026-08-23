@@ -1,0 +1,589 @@
+{
+  "invoice_id": "INV-00079",
+  "invoice": {
+    "invoice_id": "INV-00079",
+    "vendor_id": "V-10017",
+    "company_code": "FR20",
+    "category": "MM",
+    "invoice_date": "2026-07-01",
+    "received_date": "2026-07-06",
+    "vendor_reference": "FR75701",
+    "currency": "EUR",
+    "lines": [
+      {
+        "line_no": 1,
+        "description": "Buffer solution pH 7.00",
+        "supplier_item_no": "OK-BUF-700",
+        "quantity": 265.0,
+        "uom": "L",
+        "price": {
+          "list_price": 24.060092,
+          "price_unit": 1,
+          "discount_pct": [],
+          "surcharge_per_unit": 0.0
+        },
+        "tax_rate": 19.0,
+        "po_id": "PO-4500060",
+        "po_line": 10,
+        "gl_account": "420000",
+        "cost_center": "CC-7400"
+      },
+      {
+        "line_no": 2,
+        "description": "Servo controller board rev C",
+        "supplier_item_no": "DC-SRVC-REVC",
+        "quantity": 217.0,
+        "uom": "BOX",
+        "price": {
+          "list_price": 1595.110038,
+          "price_unit": 1,
+          "discount_pct": [],
+          "surcharge_per_unit": 0.0
+        },
+        "tax_rate": 7.0,
+        "po_id": "PO-4500060",
+        "po_line": 20,
+        "gl_account": "400200",
+        "cost_center": "CC-8200"
+      }
+    ],
+    "stated_bank_iban": "FR1420041010050500013M02606",
+    "free_text": "",
+    "stated_total_net": 352514.8,
+    "stated_total_tax": 25441.15,
+    "stated_total_gross": 377955.95
+  },
+  "vendor": {
+    "vendor_id": "V-10017",
+    "name": "Castellane Chimie SA",
+    "country": "FR",
+    "currency": "EUR",
+    "payment_terms": "NT60",
+    "tax_id": "FR89552081317",
+    "bank_iban": "FR1420041010050500013M02606",
+    "bank_name": "Banque de la Sarthe",
+    "is_blocked": false
+  },
+  "purchase_orders": {
+    "PO-4500060": {
+      "po_id": "PO-4500060",
+      "vendor_id": "V-10017",
+      "company_code": "FR20",
+      "po_date": "2026-06-07",
+      "currency": "EUR",
+      "lines": [
+        {
+          "po_line": 10,
+          "material_id": "MAT-500777",
+          "supplier_item_no": "OK-BUF-700",
+          "quantity": 265.0,
+          "uom": "L",
+          "price": {
+            "list_price": 18.9,
+            "price_unit": 1,
+            "discount_pct": [],
+            "surcharge_per_unit": 2.1147
+          },
+          "tax_code": "V1",
+          "gl_account": "420000",
+          "cost_center": "CC-7400"
+        },
+        {
+          "po_line": 20,
+          "material_id": "MAT-200310",
+          "supplier_item_no": "DC-SRVC-REVC",
+          "quantity": 217.0,
+          "uom": "BOX",
+          "price": {
+            "list_price": 1648.0,
+            "price_unit": 1,
+            "discount_pct": [
+              2.96,
+              7.08,
+              6.25
+            ],
+            "surcharge_per_unit": 0.0901
+          },
+          "tax_code": "V2",
+          "gl_account": "400200",
+          "cost_center": "CC-8200"
+        }
+      ]
+    }
+  },
+  "goods_receipts": [
+    {
+      "gr_id": "GR-5000124",
+      "po_id": "PO-4500060",
+      "po_line": 10,
+      "receipt_date": "2026-06-27",
+      "quantity": 115.593,
+      "uom": "L"
+    },
+    {
+      "gr_id": "GR-5000125",
+      "po_id": "PO-4500060",
+      "po_line": 10,
+      "receipt_date": "2026-06-29",
+      "quantity": 149.407,
+      "uom": "L"
+    },
+    {
+      "gr_id": "GR-5000126",
+      "po_id": "PO-4500060",
+      "po_line": 20,
+      "receipt_date": "2026-06-27",
+      "quantity": 217.0,
+      "uom": "BOX"
+    }
+  ],
+  "result": {
+    "invoice_id": "INV-00079",
+    "category": "MM",
+    "document_value": 377955.95,
+    "currency": "EUR",
+    "resolutions": [
+      {
+        "line_no": 1,
+        "material_id": "MAT-500777",
+        "material_source": "supplier_item_no",
+        "tax_code": "V1",
+        "gl_account": "420000",
+        "gl_source": "stated",
+        "cost_center": "CC-7400",
+        "cost_center_source": "stated",
+        "price": {
+          "po_unit_price_normalised": 21.0147,
+          "invoice_unit_price_normalised": 24.060092,
+          "residual_abs": 3.045392,
+          "residual_pct": 14.491722,
+          "line_residual_abs": 807.03,
+          "naive_residual_abs": 5.160092,
+          "within_tolerance": false,
+          "tolerance_pct": 2.0,
+          "tolerance_abs": 25.0
+        },
+        "quantity": {
+          "invoiced_base_qty": 265.0,
+          "received_base_qty": 265.0,
+          "open_base_qty": 265.0,
+          "residual_base_qty": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 0.0
+        }
+      },
+      {
+        "line_no": 2,
+        "material_id": "MAT-200310",
+        "material_source": "supplier_item_no",
+        "tax_code": "V2",
+        "gl_account": "400200",
+        "gl_source": "stated",
+        "cost_center": "CC-8200",
+        "cost_center_source": "stated",
+        "price": {
+          "po_unit_price_normalised": 348.302481,
+          "invoice_unit_price_normalised": 398.77751,
+          "residual_abs": 50.475029,
+          "residual_pct": 14.491722,
+          "line_residual_abs": 43812.33,
+          "naive_residual_abs": -52.889962,
+          "within_tolerance": false,
+          "tolerance_pct": 2.0,
+          "tolerance_abs": 25.0
+        },
+        "quantity": {
+          "invoiced_base_qty": 868.0,
+          "received_base_qty": 868.0,
+          "open_base_qty": 868.0,
+          "residual_base_qty": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 0.0
+        }
+      }
+    ],
+    "findings": [
+      {
+        "rule_id": "I2P-R-010",
+        "exception_type": "price_variance",
+        "line_no": 1,
+        "severity": "high",
+        "detail": "Normalised unit price 24.060092 against purchase order 21.014700: +14.49% (+807.03 on the line), outside a tolerance of 2.0% or 25.00.",
+        "evidence": {
+          "po_unit_price_normalised": 21.0147,
+          "invoice_unit_price_normalised": 24.060092,
+          "residual_abs": 3.045392,
+          "residual_pct": 14.491722,
+          "line_residual_abs": 807.03,
+          "naive_residual_abs": 5.160092,
+          "within_tolerance": false,
+          "tolerance_pct": 2.0,
+          "tolerance_abs": 25.0
+        }
+      },
+      {
+        "rule_id": "I2P-R-010",
+        "exception_type": "price_variance",
+        "line_no": 2,
+        "severity": "high",
+        "detail": "Normalised unit price 398.777510 against purchase order 348.302481: +14.49% (+43,812.33 on the line), outside a tolerance of 2.0% or 25.00.",
+        "evidence": {
+          "po_unit_price_normalised": 348.302481,
+          "invoice_unit_price_normalised": 398.77751,
+          "residual_abs": 50.475029,
+          "residual_pct": 14.491722,
+          "line_residual_abs": 43812.33,
+          "naive_residual_abs": -52.889962,
+          "within_tolerance": false,
+          "tolerance_pct": 2.0,
+          "tolerance_abs": 25.0
+        }
+      }
+    ],
+    "duplicate_candidates": [],
+    "routing": {
+      "tier": "escalate",
+      "reasons": [
+        "Exception 'price_variance' is rated high severity."
+      ],
+      "deciding_reason": "Exception 'price_variance' is rated high severity.",
+      "model_confidence": null,
+      "document_value": 377955.95,
+      "exception_type": "price_variance"
+    },
+    "evaluated_at": "2026-08-23T06:51:31.853872Z"
+  },
+  "routing": {
+    "tier": "escalate",
+    "reasons": [
+      "Exception 'price_variance' is rated high severity."
+    ],
+    "deciding_reason": "Exception 'price_variance' is rated high severity.",
+    "model_confidence": 0.88,
+    "document_value": 377955.95,
+    "exception_type": "price_variance"
+  },
+  "assessment": {
+    "assessment": {
+      "invoice_id": "INV-00079",
+      "classification": "price_variance",
+      "proposed_action": "block_for_price_review",
+      "rationale": "Normalised unit price 24.060092 against purchase order 21.014700: +14.49% (+807.03 on the line), outside a tolerance of 2.0% or 25.00. 1 further finding(s) on the same invoice.",
+      "evidence": [
+        {
+          "field_path": "finding[I2P-R-010].detail"
+        },
+        {
+          "field_path": "line[1].price.residual_pct"
+        },
+        {
+          "field_path": "line[1].price.line_residual_abs"
+        },
+        {
+          "field_path": "line[1].quantity.residual_base_qty"
+        }
+      ],
+      "confidence": 0.88,
+      "proposed_cost_center": null
+    },
+    "grounding": {
+      "total_citations": 4,
+      "grounded_citations": 4,
+      "ungrounded_citations": []
+    },
+    "run": {
+      "provider": "mock",
+      "model": "deterministic-stub-v1",
+      "latency_ms": 0,
+      "prompt_sha256": "b9dbf3cff8ebe7ebb63ec59823a5081f",
+      "input_tokens": null,
+      "output_tokens": null,
+      "estimated_cost_usd": null,
+      "parse_attempts": 1,
+      "structured_output_mode": "json_schema_prompt"
+    },
+    "raw_output": "{\n  \"invoice_id\": \"INV-00079\",\n  \"classification\": \"price_variance\",\n  \"proposed_action\": \"block_for_price_review\",\n  \"rationale\": \"Normalised unit price 24.060092 against purchase order 21.014700: +14.49% (+807.03 on the line), outside a tolerance of 2.0% or 25.00. 1 further finding(s) on the same invoice.\",\n  \"evidence\": [\n    {\n      \"field_path\": \"finding[I2P-R-010].detail\"\n    },\n    {\n      \"field_path\": \"line[1].price.residual_pct\"\n    },\n    {\n      \"field_path\": \"line[1].price.line_residual_abs\"\n    },\n    {\n      \"field_path\": \"line[1].quantity.residual_base_qty\"\n    }\n  ],\n  \"confidence\": 0.88,\n  \"proposed_cost_center\": null\n}"
+  },
+  "model_called": true,
+  "trace": [
+    {
+      "timestamp": "2026-08-23T06:51:31.851865Z",
+      "case_id": "INV-00079",
+      "module": "i2p",
+      "step_name": "intake",
+      "actor": "rule",
+      "input_hash": "dee8db93ea403a8e",
+      "outcome": "loaded",
+      "summary": "Received INV-00079 from V-10017, EUR 377,955.95, 2 line(s).",
+      "rule_id": "I2P-S-01",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "vendor_reference": "FR75701",
+        "invoice_date": "2026-07-01",
+        "received_date": "2026-07-06",
+        "gross": 377955.95
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.852067Z",
+      "case_id": "INV-00079",
+      "module": "i2p",
+      "step_name": "classification",
+      "actor": "rule",
+      "input_hash": "8c946d9fb45eb330",
+      "outcome": "MM",
+      "summary": "Classified as MM. At least one line references a purchase order.",
+      "rule_id": "I2P-S-02",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.852496Z",
+      "case_id": "INV-00079",
+      "module": "i2p",
+      "step_name": "duplicate_check",
+      "actor": "rule",
+      "input_hash": "73c00c80e089a6cb",
+      "outcome": "unique",
+      "summary": "No match among 25 earlier invoice(s) from this vendor.",
+      "rule_id": "I2P-S-03",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "candidates": [],
+        "compared_against": 25
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.852728Z",
+      "case_id": "INV-00079",
+      "module": "i2p",
+      "step_name": "master_data_resolution",
+      "actor": "rule",
+      "input_hash": "d1115f7f3dec4e20",
+      "outcome": "resolved",
+      "summary": "Resolved 2 of 2 supplier item number(s) to material master.",
+      "rule_id": "I2P-S-04",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "materials": {
+          "1": "MAT-500777",
+          "2": "MAT-200310"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.852966Z",
+      "case_id": "INV-00079",
+      "module": "i2p",
+      "step_name": "tax_code",
+      "actor": "rule",
+      "input_hash": "1a66b490774cad47",
+      "outcome": "resolved",
+      "summary": "Tax codes: line 1: V1, line 2: V2.",
+      "rule_id": "I2P-S-05",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "tax_codes": {
+          "1": "V1",
+          "2": "V2"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.853079Z",
+      "case_id": "INV-00079",
+      "module": "i2p",
+      "step_name": "gl_derivation",
+      "actor": "rule",
+      "input_hash": "a877de44ebf0eb5a",
+      "outcome": "stated",
+      "summary": "GL account stated on every line.",
+      "rule_id": "I2P-S-06",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "gl_accounts": {
+          "1": [
+            "420000",
+            "stated"
+          ],
+          "2": [
+            "400200",
+            "stated"
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.853188Z",
+      "case_id": "INV-00079",
+      "module": "i2p",
+      "step_name": "cost_center_derivation",
+      "actor": "rule",
+      "input_hash": "7edc99ff085c2f8a",
+      "outcome": "resolved",
+      "summary": "Cost centre resolved on every line.",
+      "rule_id": "I2P-S-07",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "cost_centers": {
+          "1": [
+            "CC-7400",
+            "stated"
+          ],
+          "2": [
+            "CC-8200",
+            "stated"
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.853316Z",
+      "case_id": "INV-00079",
+      "module": "i2p",
+      "step_name": "three_way_match",
+      "actor": "rule",
+      "input_hash": "52a5b8b46d67d73a",
+      "outcome": "matched",
+      "summary": "Three-way match applicable to 2 line(s): purchase order, goods receipt and invoice.",
+      "rule_id": "I2P-S-08",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.853438Z",
+      "case_id": "INV-00079",
+      "module": "i2p",
+      "step_name": "quantity_check",
+      "actor": "rule",
+      "input_hash": "39dd512caafd58fd",
+      "outcome": "computed",
+      "summary": "line 1: invoiced 265.000 of 265.000 available; line 2: invoiced 868.000 of 868.000 available",
+      "rule_id": "I2P-S-09",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.853577Z",
+      "case_id": "INV-00079",
+      "module": "i2p",
+      "step_name": "price_check",
+      "actor": "rule",
+      "input_hash": "4a637c8134c7bda4",
+      "outcome": "computed",
+      "summary": "line 1: normalised 24.060092 vs 21.014700 (+14.49%), naive comparison would show +5.1601; line 2: normalised 398.777510 vs 348.302481 (+14.49%), naive comparison would show -52.8900",
+      "rule_id": "I2P-S-10",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.853740Z",
+      "case_id": "INV-00079",
+      "module": "i2p",
+      "step_name": "tolerance_evaluation",
+      "actor": "rule",
+      "input_hash": "212c5cbb2a42ad97",
+      "outcome": "breach",
+      "summary": "Price tolerance breached on line(s) [1, 2].",
+      "rule_id": "I2P-S-11",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "breached_lines": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.853892Z",
+      "case_id": "INV-00079",
+      "module": "i2p",
+      "step_name": "routing_decision",
+      "actor": "rule",
+      "input_hash": "7b4d5d994d46bba6",
+      "outcome": "escalate",
+      "summary": "2 finding(s); primary exception price_variance. Rules alone route to escalate.",
+      "rule_id": "I2P-S-12",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "tier": "escalate",
+        "routing_reasons": [
+          "Exception 'price_variance' is rated high severity."
+        ],
+        "findings": [
+          {
+            "rule_id": "I2P-R-010",
+            "exception_type": "price_variance",
+            "line_no": 1,
+            "severity": "high",
+            "detail": "Normalised unit price 24.060092 against purchase order 21.014700: +14.49% (+807.03 on the line), outside a tolerance of 2.0% or 25.00."
+          },
+          {
+            "rule_id": "I2P-R-010",
+            "exception_type": "price_variance",
+            "line_no": 2,
+            "severity": "high",
+            "detail": "Normalised unit price 398.777510 against purchase order 348.302481: +14.49% (+43,812.33 on the line), outside a tolerance of 2.0% or 25.00."
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.854955Z",
+      "case_id": "INV-00079",
+      "module": "i2p",
+      "step_name": "exception_assessment",
+      "actor": "model",
+      "input_hash": "56255d6aea534d06",
+      "outcome": "price_variance",
+      "summary": "Classified as price_variance; proposes block_for_price_review at confidence 0.88, citing 4 field(s).",
+      "rule_id": null,
+      "model": "deterministic-stub-v1",
+      "prompt_version": "i2p-v1",
+      "detail": {
+        "proposed_action": "block_for_price_review",
+        "proposed_cost_center": null,
+        "confidence": 0.88,
+        "evidence": [
+          "finding[I2P-R-010].detail",
+          "line[1].price.residual_pct",
+          "line[1].price.line_residual_abs",
+          "line[1].quantity.residual_base_qty"
+        ],
+        "ungrounded": [],
+        "rationale": "Normalised unit price 24.060092 against purchase order 21.014700: +14.49% (+807.03 on the line), outside a tolerance of 2.0% or 25.00. 1 further finding(s) on the same invoice."
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.866980Z",
+      "case_id": "INV-00079",
+      "module": "i2p",
+      "step_name": "routing_decision",
+      "actor": "rule",
+      "input_hash": "a4396c019d9e562f",
+      "outcome": "escalate",
+      "summary": "Routed to escalate: Exception 'price_variance' is rated high severity.",
+      "rule_id": "I2P-S-12",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "reasons": [
+          "Exception 'price_variance' is rated high severity."
+        ],
+        "tier_before_model": "escalate"
+      }
+    }
+  ]
+}

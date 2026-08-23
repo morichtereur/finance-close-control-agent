@@ -1,0 +1,656 @@
+{
+  "invoice_id": "INV-00308",
+  "invoice": {
+    "invoice_id": "INV-00308",
+    "vendor_id": "V-10017",
+    "company_code": "DE10",
+    "category": "MM",
+    "invoice_date": "2026-06-04",
+    "received_date": "2026-06-07",
+    "vendor_reference": "FR43041",
+    "currency": "EUR",
+    "lines": [
+      {
+        "line_no": 1,
+        "description": "Drive belt, toothed 1400mm",
+        "supplier_item_no": "HP-BELT-1400T",
+        "quantity": 334.0,
+        "uom": "PCE",
+        "price": {
+          "list_price": 94.2,
+          "price_unit": 1,
+          "discount_pct": [
+            6.6,
+            5.65,
+            5.54
+          ],
+          "surcharge_per_unit": 0.0
+        },
+        "tax_rate": 19.0,
+        "po_id": "PO-4500250",
+        "po_line": 10,
+        "gl_account": "415000",
+        "cost_center": "CC-1100"
+      },
+      {
+        "line_no": 2,
+        "description": "Sealing ring 22mm NBR",
+        "supplier_item_no": "NW-RING-22N",
+        "quantity": 280.0,
+        "uom": "BOX",
+        "price": {
+          "list_price": 64.0,
+          "price_unit": 1,
+          "discount_pct": [
+            5.67,
+            3.67
+          ],
+          "surcharge_per_unit": 0.0
+        },
+        "tax_rate": 7.0,
+        "po_id": "PO-4500250",
+        "po_line": 20,
+        "gl_account": "400100",
+        "cost_center": "CC-1000"
+      },
+      {
+        "line_no": 3,
+        "description": "Servo controller board rev C",
+        "supplier_item_no": "DC-SRVC-REVC",
+        "quantity": 93.0,
+        "uom": "PCE",
+        "price": {
+          "list_price": 4120.0,
+          "price_unit": 10,
+          "discount_pct": [
+            1.47
+          ],
+          "surcharge_per_unit": 0.8197
+        },
+        "tax_rate": 19.0,
+        "po_id": "PO-4500250",
+        "po_line": 30,
+        "gl_account": "400200",
+        "cost_center": "CC-1100"
+      }
+    ],
+    "stated_bank_iban": "GB29NWBK09614033232354",
+    "free_text": "Updated banking details below \u2014 kindly use for this and all future payments.",
+    "stated_total_net": 80302.44,
+    "stated_total_tax": 13303.44,
+    "stated_total_gross": 93605.88
+  },
+  "vendor": {
+    "vendor_id": "V-10017",
+    "name": "Castellane Chimie SA",
+    "country": "FR",
+    "currency": "EUR",
+    "payment_terms": "NT60",
+    "tax_id": "FR89552081317",
+    "bank_iban": "FR1420041010050500013M02606",
+    "bank_name": "Banque de la Sarthe",
+    "is_blocked": false
+  },
+  "purchase_orders": {
+    "PO-4500250": {
+      "po_id": "PO-4500250",
+      "vendor_id": "V-10017",
+      "company_code": "DE10",
+      "po_date": "2026-05-15",
+      "currency": "EUR",
+      "lines": [
+        {
+          "po_line": 10,
+          "material_id": "MAT-400505",
+          "supplier_item_no": "HP-BELT-1400T",
+          "quantity": 334.0,
+          "uom": "PCE",
+          "price": {
+            "list_price": 94.2,
+            "price_unit": 1,
+            "discount_pct": [
+              6.6,
+              5.65,
+              5.54
+            ],
+            "surcharge_per_unit": 0.0
+          },
+          "tax_code": "V1",
+          "gl_account": "415000",
+          "cost_center": "CC-1100"
+        },
+        {
+          "po_line": 20,
+          "material_id": "MAT-100046",
+          "supplier_item_no": "NW-RING-22N",
+          "quantity": 280.0,
+          "uom": "BOX",
+          "price": {
+            "list_price": 64.0,
+            "price_unit": 1,
+            "discount_pct": [
+              5.67,
+              3.67
+            ],
+            "surcharge_per_unit": 0.0
+          },
+          "tax_code": "V2",
+          "gl_account": "400100",
+          "cost_center": "CC-1000"
+        },
+        {
+          "po_line": 30,
+          "material_id": "MAT-200310",
+          "supplier_item_no": "DC-SRVC-REVC",
+          "quantity": 93.0,
+          "uom": "PCE",
+          "price": {
+            "list_price": 4120.0,
+            "price_unit": 10,
+            "discount_pct": [
+              1.47
+            ],
+            "surcharge_per_unit": 0.8197
+          },
+          "tax_code": "V1",
+          "gl_account": "400200",
+          "cost_center": "CC-1100"
+        }
+      ]
+    }
+  },
+  "goods_receipts": [
+    {
+      "gr_id": "GR-5000505",
+      "po_id": "PO-4500250",
+      "po_line": 10,
+      "receipt_date": "2026-05-31",
+      "quantity": 334.0,
+      "uom": "PCE"
+    },
+    {
+      "gr_id": "GR-5000506",
+      "po_id": "PO-4500250",
+      "po_line": 20,
+      "receipt_date": "2026-05-31",
+      "quantity": 105.593,
+      "uom": "BOX"
+    },
+    {
+      "gr_id": "GR-5000507",
+      "po_id": "PO-4500250",
+      "po_line": 20,
+      "receipt_date": "2026-06-02",
+      "quantity": 174.407,
+      "uom": "BOX"
+    },
+    {
+      "gr_id": "GR-5000508",
+      "po_id": "PO-4500250",
+      "po_line": 30,
+      "receipt_date": "2026-05-31",
+      "quantity": 53.711,
+      "uom": "PCE"
+    },
+    {
+      "gr_id": "GR-5000509",
+      "po_id": "PO-4500250",
+      "po_line": 30,
+      "receipt_date": "2026-06-02",
+      "quantity": 39.289,
+      "uom": "PCE"
+    }
+  ],
+  "result": {
+    "invoice_id": "INV-00308",
+    "category": "MM",
+    "document_value": 93605.88,
+    "currency": "EUR",
+    "resolutions": [
+      {
+        "line_no": 1,
+        "material_id": "MAT-400505",
+        "material_source": "supplier_item_no",
+        "tax_code": "V1",
+        "gl_account": "415000",
+        "gl_source": "stated",
+        "cost_center": "CC-1100",
+        "cost_center_source": "stated",
+        "price": {
+          "po_unit_price_normalised": 78.41292,
+          "invoice_unit_price_normalised": 78.41292,
+          "residual_abs": 0.0,
+          "residual_pct": 0.0,
+          "line_residual_abs": 0.0,
+          "naive_residual_abs": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 2.0,
+          "tolerance_abs": 25.0
+        },
+        "quantity": {
+          "invoiced_base_qty": 334.0,
+          "received_base_qty": 334.0,
+          "open_base_qty": 334.0,
+          "residual_base_qty": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 0.0
+        }
+      },
+      {
+        "line_no": 2,
+        "material_id": "MAT-100046",
+        "material_source": "supplier_item_no",
+        "tax_code": "V2",
+        "gl_account": "400100",
+        "gl_source": "stated",
+        "cost_center": "CC-1000",
+        "cost_center_source": "stated",
+        "price": {
+          "po_unit_price_normalised": 0.116311,
+          "invoice_unit_price_normalised": 0.116311,
+          "residual_abs": 0.0,
+          "residual_pct": 0.0,
+          "line_residual_abs": 0.0,
+          "naive_residual_abs": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 2.0,
+          "tolerance_abs": 25.0
+        },
+        "quantity": {
+          "invoiced_base_qty": 140000.0,
+          "received_base_qty": 140000.0,
+          "open_base_qty": 140000.0,
+          "residual_base_qty": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 0.0
+        }
+      },
+      {
+        "line_no": 3,
+        "material_id": "MAT-200310",
+        "material_source": "supplier_item_no",
+        "tax_code": "V1",
+        "gl_account": "400200",
+        "gl_source": "stated",
+        "cost_center": "CC-1100",
+        "cost_center_source": "stated",
+        "price": {
+          "po_unit_price_normalised": 406.7633,
+          "invoice_unit_price_normalised": 406.7633,
+          "residual_abs": 0.0,
+          "residual_pct": 0.0,
+          "line_residual_abs": 0.0,
+          "naive_residual_abs": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 2.0,
+          "tolerance_abs": 25.0
+        },
+        "quantity": {
+          "invoiced_base_qty": 93.0,
+          "received_base_qty": 93.0,
+          "open_base_qty": 93.0,
+          "residual_base_qty": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 0.0
+        }
+      }
+    ],
+    "findings": [
+      {
+        "rule_id": "I2P-R-001",
+        "exception_type": "bank_details_mismatch",
+        "line_no": null,
+        "severity": "high",
+        "detail": "Bank details on the invoice differ from the vendor master record. Payment must not be made to the stated account without verification through an independently held contact.",
+        "evidence": {
+          "vendor_id": "V-10017",
+          "vendor_name": "Castellane Chimie SA",
+          "master_iban": "FR1420041010050500013M02606",
+          "stated_iban": "GB29NWBK09614033232354",
+          "free_text": "Updated banking details below \u2014 kindly use for this and all future payments."
+        }
+      }
+    ],
+    "duplicate_candidates": [],
+    "routing": {
+      "tier": "escalate",
+      "reasons": [
+        "Exception type 'bank_details_mismatch' always escalates as a fraud control, regardless of model confidence or document value: verification requires contacting the vendor on independently held details, which no automated check can perform."
+      ],
+      "deciding_reason": "Exception type 'bank_details_mismatch' always escalates as a fraud control, regardless of model confidence or document value: verification requires contacting the vendor on independently held details, which no automated check can perform.",
+      "model_confidence": null,
+      "document_value": 93605.88,
+      "exception_type": "bank_details_mismatch"
+    },
+    "evaluated_at": "2026-08-23T06:51:32.662507Z"
+  },
+  "routing": {
+    "tier": "escalate",
+    "reasons": [
+      "Exception type 'bank_details_mismatch' always escalates as a fraud control, regardless of model confidence or document value: verification requires contacting the vendor on independently held details, which no automated check can perform."
+    ],
+    "deciding_reason": "Exception type 'bank_details_mismatch' always escalates as a fraud control, regardless of model confidence or document value: verification requires contacting the vendor on independently held details, which no automated check can perform.",
+    "model_confidence": 0.93,
+    "document_value": 93605.88,
+    "exception_type": "bank_details_mismatch"
+  },
+  "assessment": {
+    "assessment": {
+      "invoice_id": "INV-00308",
+      "classification": "bank_details_mismatch",
+      "proposed_action": "refer_to_vendor_master_team",
+      "rationale": "Bank details on the invoice differ from the vendor master record. Payment must not be made to the stated account without verification through an independently held contact.",
+      "evidence": [
+        {
+          "field_path": "finding[I2P-R-001].detail"
+        },
+        {
+          "field_path": "invoice.stated_bank_iban"
+        },
+        {
+          "field_path": "vendor.bank_iban"
+        }
+      ],
+      "confidence": 0.93,
+      "proposed_cost_center": null
+    },
+    "grounding": {
+      "total_citations": 3,
+      "grounded_citations": 3,
+      "ungrounded_citations": []
+    },
+    "run": {
+      "provider": "mock",
+      "model": "deterministic-stub-v1",
+      "latency_ms": 0,
+      "prompt_sha256": "e38657b23cb99d4dd912457f80a50f33",
+      "input_tokens": null,
+      "output_tokens": null,
+      "estimated_cost_usd": null,
+      "parse_attempts": 1,
+      "structured_output_mode": "json_schema_prompt"
+    },
+    "raw_output": "{\n  \"invoice_id\": \"INV-00308\",\n  \"classification\": \"bank_details_mismatch\",\n  \"proposed_action\": \"refer_to_vendor_master_team\",\n  \"rationale\": \"Bank details on the invoice differ from the vendor master record. Payment must not be made to the stated account without verification through an independently held contact.\",\n  \"evidence\": [\n    {\n      \"field_path\": \"finding[I2P-R-001].detail\"\n    },\n    {\n      \"field_path\": \"invoice.stated_bank_iban\"\n    },\n    {\n      \"field_path\": \"vendor.bank_iban\"\n    }\n  ],\n  \"confidence\": 0.93,\n  \"proposed_cost_center\": null\n}"
+  },
+  "model_called": true,
+  "trace": [
+    {
+      "timestamp": "2026-08-23T06:51:32.649491Z",
+      "case_id": "INV-00308",
+      "module": "i2p",
+      "step_name": "intake",
+      "actor": "rule",
+      "input_hash": "f5916e016656d545",
+      "outcome": "loaded",
+      "summary": "Received INV-00308 from V-10017, EUR 93,605.88, 3 line(s).",
+      "rule_id": "I2P-S-01",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "vendor_reference": "FR43041",
+        "invoice_date": "2026-06-04",
+        "received_date": "2026-06-07",
+        "gross": 93605.88
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.649575Z",
+      "case_id": "INV-00308",
+      "module": "i2p",
+      "step_name": "classification",
+      "actor": "rule",
+      "input_hash": "a372dc3aacb01764",
+      "outcome": "MM",
+      "summary": "Classified as MM. At least one line references a purchase order.",
+      "rule_id": "I2P-S-02",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.649697Z",
+      "case_id": "INV-00308",
+      "module": "i2p",
+      "step_name": "duplicate_check",
+      "actor": "rule",
+      "input_hash": "40192085d88147e3",
+      "outcome": "unique",
+      "summary": "No match among 18 earlier invoice(s) from this vendor.",
+      "rule_id": "I2P-S-03",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "candidates": [],
+        "compared_against": 18
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.649782Z",
+      "case_id": "INV-00308",
+      "module": "i2p",
+      "step_name": "master_data_resolution",
+      "actor": "rule",
+      "input_hash": "7fa777b99d696e6e",
+      "outcome": "resolved",
+      "summary": "Resolved 3 of 3 supplier item number(s) to material master.",
+      "rule_id": "I2P-S-04",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "materials": {
+          "1": "MAT-400505",
+          "2": "MAT-100046",
+          "3": "MAT-200310"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.649867Z",
+      "case_id": "INV-00308",
+      "module": "i2p",
+      "step_name": "tax_code",
+      "actor": "rule",
+      "input_hash": "6b84c00e77292875",
+      "outcome": "resolved",
+      "summary": "Tax codes: line 1: V1, line 2: V2, line 3: V1.",
+      "rule_id": "I2P-S-05",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "tax_codes": {
+          "1": "V1",
+          "2": "V2",
+          "3": "V1"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.649960Z",
+      "case_id": "INV-00308",
+      "module": "i2p",
+      "step_name": "gl_derivation",
+      "actor": "rule",
+      "input_hash": "7e993a1fbb1846b7",
+      "outcome": "stated",
+      "summary": "GL account stated on every line.",
+      "rule_id": "I2P-S-06",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "gl_accounts": {
+          "1": [
+            "415000",
+            "stated"
+          ],
+          "2": [
+            "400100",
+            "stated"
+          ],
+          "3": [
+            "400200",
+            "stated"
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.650054Z",
+      "case_id": "INV-00308",
+      "module": "i2p",
+      "step_name": "cost_center_derivation",
+      "actor": "rule",
+      "input_hash": "bfe62595967c6cba",
+      "outcome": "resolved",
+      "summary": "Cost centre resolved on every line.",
+      "rule_id": "I2P-S-07",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "cost_centers": {
+          "1": [
+            "CC-1100",
+            "stated"
+          ],
+          "2": [
+            "CC-1000",
+            "stated"
+          ],
+          "3": [
+            "CC-1100",
+            "stated"
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.650384Z",
+      "case_id": "INV-00308",
+      "module": "i2p",
+      "step_name": "three_way_match",
+      "actor": "rule",
+      "input_hash": "e86e42dba6978485",
+      "outcome": "matched",
+      "summary": "Three-way match applicable to 3 line(s): purchase order, goods receipt and invoice.",
+      "rule_id": "I2P-S-08",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.661751Z",
+      "case_id": "INV-00308",
+      "module": "i2p",
+      "step_name": "quantity_check",
+      "actor": "rule",
+      "input_hash": "288cf90299401a94",
+      "outcome": "computed",
+      "summary": "line 1: invoiced 334.000 of 334.000 available; line 2: invoiced 140,000.000 of 140,000.000 available; line 3: invoiced 93.000 of 93.000 available",
+      "rule_id": "I2P-S-09",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.662188Z",
+      "case_id": "INV-00308",
+      "module": "i2p",
+      "step_name": "price_check",
+      "actor": "rule",
+      "input_hash": "fc80324712cbe861",
+      "outcome": "computed",
+      "summary": "line 1: normalised 78.412920 vs 78.412920 (+0.00%), naive comparison would show +0.0000; line 2: normalised 0.116311 vs 0.116311 (+0.00%), naive comparison would show +0.0000; line 3: normalised 406.763300 vs 406.763300 (+0.00%), naive comparison would show +0.0000",
+      "rule_id": "I2P-S-10",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.662368Z",
+      "case_id": "INV-00308",
+      "module": "i2p",
+      "step_name": "tolerance_evaluation",
+      "actor": "rule",
+      "input_hash": "212c5cbb2a42ad97",
+      "outcome": "within_tolerance",
+      "summary": "All residuals inside tolerance (2.0% or 25.00).",
+      "rule_id": "I2P-S-11",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "breached_lines": []
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.662526Z",
+      "case_id": "INV-00308",
+      "module": "i2p",
+      "step_name": "routing_decision",
+      "actor": "rule",
+      "input_hash": "a0c6ccc484501c4b",
+      "outcome": "escalate",
+      "summary": "1 finding(s); primary exception bank_details_mismatch. Rules alone route to escalate.",
+      "rule_id": "I2P-S-12",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "tier": "escalate",
+        "routing_reasons": [
+          "Exception type 'bank_details_mismatch' always escalates as a fraud control, regardless of model confidence or document value: verification requires contacting the vendor on independently held details, which no automated check can perform."
+        ],
+        "findings": [
+          {
+            "rule_id": "I2P-R-001",
+            "exception_type": "bank_details_mismatch",
+            "line_no": null,
+            "severity": "high",
+            "detail": "Bank details on the invoice differ from the vendor master record. Payment must not be made to the stated account without verification through an independently held contact."
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.663597Z",
+      "case_id": "INV-00308",
+      "module": "i2p",
+      "step_name": "exception_assessment",
+      "actor": "model",
+      "input_hash": "498826829e4bbe52",
+      "outcome": "bank_details_mismatch",
+      "summary": "Classified as bank_details_mismatch; proposes refer_to_vendor_master_team at confidence 0.93, citing 3 field(s).",
+      "rule_id": null,
+      "model": "deterministic-stub-v1",
+      "prompt_version": "i2p-v1",
+      "detail": {
+        "proposed_action": "refer_to_vendor_master_team",
+        "proposed_cost_center": null,
+        "confidence": 0.93,
+        "evidence": [
+          "finding[I2P-R-001].detail",
+          "invoice.stated_bank_iban",
+          "vendor.bank_iban"
+        ],
+        "ungrounded": [],
+        "rationale": "Bank details on the invoice differ from the vendor master record. Payment must not be made to the stated account without verification through an independently held contact."
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.663816Z",
+      "case_id": "INV-00308",
+      "module": "i2p",
+      "step_name": "routing_decision",
+      "actor": "rule",
+      "input_hash": "28f71e2e1d9c99e7",
+      "outcome": "escalate",
+      "summary": "Routed to escalate: Exception type 'bank_details_mismatch' always escalates as a fraud control, regardless of model confidence or document value: verification requires contacting the vendor on\u2026",
+      "rule_id": "I2P-S-12",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "reasons": [
+          "Exception type 'bank_details_mismatch' always escalates as a fraud control, regardless of model confidence or document value: verification requires contacting the vendor on independently held details, which no automated check can perform."
+        ],
+        "tier_before_model": "escalate"
+      }
+    }
+  ]
+}
