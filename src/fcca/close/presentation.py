@@ -6,6 +6,8 @@ severity, no boxes around boxes.
 
 from __future__ import annotations
 
+import os
+
 from rich.console import Console
 from rich.table import Table
 from rich.text import Text
@@ -20,7 +22,12 @@ SEVERITY_STYLE = {"critical": "red", "warning": "yellow", "info": "dim"}
 
 def console() -> Console:
     """A console with a stable width, so piped output is not silently truncated."""
-    return Console(highlight=False, width=118, soft_wrap=False)
+    # Width is fixed so piped output is not silently truncated, and overridable
+    # because one consumer needs a wider canvas than a terminal: the figure
+    # renderer typesets this output as an image, where a terminal's wrap points
+    # land mid-entry and read as a broken layout rather than as wrapping.
+    width = int(os.getenv("FCCA_CONSOLE_WIDTH", "118"))
+    return Console(highlight=False, width=width, soft_wrap=False)
 
 
 def _money(value: float) -> str:
