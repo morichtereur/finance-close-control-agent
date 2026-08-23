@@ -23,6 +23,10 @@ from fcca.shared.trace import TraceWriter, read_trace
 
 EXPECTED_STEPS = [
     "intake",
+    # Second, and unconditional: it writes its record even on synthetic data
+    # where there is nothing to gate, because a step that only appears when it
+    # fires is a step nobody can audit.
+    "extraction_confidence_gate",
     "classification",
     "duplicate_check",
     "master_data_resolution",

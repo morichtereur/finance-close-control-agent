@@ -1,13 +1,22 @@
 """The deterministic invoice-to-pay pipeline.
 
-Twelve named steps, in a fixed order, each appending one trace record:
+Thirteen named steps, in a fixed order, each appending one trace record:
 
 .. code-block:: text
 
-    intake -> classification -> duplicate_check -> master_data_resolution
-           -> tax_code -> gl_derivation -> cost_center_derivation
-           -> three_way_match -> quantity_check -> price_check
-           -> tolerance_evaluation -> routing_decision
+    intake -> extraction_confidence_gate -> classification -> duplicate_check
+           -> master_data_resolution -> tax_code -> gl_derivation
+           -> cost_center_derivation -> three_way_match -> quantity_check
+           -> price_check -> tolerance_evaluation -> routing_decision
+
+``extraction_confidence_gate`` is second because everything after it is
+arithmetic. A value read badly off a document is not a less accurate number, it
+is a number about nothing, and a tolerance evaluated against it answers a
+question the document never asked. Gating here means no such value reaches a
+comparison and no model is ever asked to explain one. On synthetic data the step
+is a no-op that says so — there is no document, so there is no confidence to
+gate on — and it still writes its record, because a step that only appears when
+it fires is a step nobody can audit.
 
 The order is fixed because in a control process the sequence of checks *is* the
 control design. Every invoice receives the same checks in the same order, or the
@@ -33,6 +42,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
 from fcca.i2p import checks
+from fcca.i2p.extraction import FieldProvenance, InvoiceSource, SyntheticSource
 from fcca.i2p.models import (
     EXCEPTION_PRECEDENCE,
     ExceptionFinding,
@@ -44,6 +54,7 @@ from fcca.i2p.models import (
     PurchaseOrderLine,
     QuantityComparison,
 )
+from fcca.i2p.posting import PostedKeyLedger, posting_key
 from fcca.i2p.repository import I2PRepository
 from fcca.shared.config import Settings, get_settings
 from fcca.shared.routing import route
@@ -55,17 +66,18 @@ logger = logging.getLogger(__name__)
 #: checks they call. A trace record must name something a reader can look up.
 STEP_RULES: dict[str, str] = {
     "intake": "I2P-S-01",
-    "classification": "I2P-S-02",
-    "duplicate_check": "I2P-S-03",
-    "master_data_resolution": "I2P-S-04",
-    "tax_code": "I2P-S-05",
-    "gl_derivation": "I2P-S-06",
-    "cost_center_derivation": "I2P-S-07",
-    "three_way_match": "I2P-S-08",
-    "quantity_check": "I2P-S-09",
-    "price_check": "I2P-S-10",
-    "tolerance_evaluation": "I2P-S-11",
-    "routing_decision": "I2P-S-12",
+    "extraction_confidence_gate": "I2P-S-02",
+    "classification": "I2P-S-03",
+    "duplicate_check": "I2P-S-04",
+    "master_data_resolution": "I2P-S-05",
+    "tax_code": "I2P-S-06",
+    "gl_derivation": "I2P-S-07",
+    "cost_center_derivation": "I2P-S-08",
+    "three_way_match": "I2P-S-09",
+    "quantity_check": "I2P-S-10",
+    "price_check": "I2P-S-11",
+    "tolerance_evaluation": "I2P-S-12",
+    "routing_decision": "I2P-S-13",
 }
 
 
@@ -77,9 +89,18 @@ class InvoiceEngine:
         repository: I2PRepository | None = None,
         settings: Settings | None = None,
         trace: TraceWriter | None = None,
+        source: InvoiceSource | None = None,
+        ledger: PostedKeyLedger | None = None,
     ) -> None:
         self.settings = settings or get_settings()
         self.repository = repository or I2PRepository(self.settings)
+        # The pipeline depends on the port, not the generator. Default is the
+        # synthetic source, so behaviour is unchanged unless a caller passes a
+        # document-backed one.
+        self.source: InvoiceSource = source or SyntheticSource(self.repository)
+        # Persists across runs on purpose: a duplicate control that forgets
+        # everything when the process restarts is not a control.
+        self.ledger = ledger or PostedKeyLedger(self.settings.i2p_posted_keys_path)
         self.trace = trace or TraceWriter(self.settings.i2p_trace_path, module="i2p")
         self.config = self.settings.i2p
 
@@ -111,7 +132,8 @@ class InvoiceEngine:
         findings: list[ExceptionFinding] = []
 
         # ------------------------------------------------------------ intake
-        invoice = repo.invoice(invoice_id)
+        invoice = self.source.invoice(invoice_id)
+        provenance: dict[str, FieldProvenance] = self.source.provenance(invoice_id)
         self._step(
             invoice_id,
             "intake",
@@ -127,6 +149,34 @@ class InvoiceEngine:
                 "invoice_date": invoice.invoice_date.isoformat(),
                 "received_date": invoice.received_date.isoformat(),
                 "gross": invoice.stated_total_gross,
+            },
+        )
+
+        # ------------------------------------------ extraction confidence gate
+        gate = checks.extraction_confidence_gate(
+            invoice,
+            provenance,
+            threshold=config.extraction_confidence_threshold,
+            load_bearing=config.load_bearing_fields,
+        )
+        self._step(
+            invoice_id,
+            "extraction_confidence_gate",
+            {
+                "threshold": config.extraction_confidence_threshold,
+                "load_bearing": list(config.load_bearing_fields),
+                "extracted": gate.fields_extracted,
+            },
+            "gated" if gate.gated else "pass",
+            gate.summary,
+            {
+                "gated": gate.gated,
+                "reasons": list(gate.reasons),
+                "weakest_field": gate.weakest_field,
+                "weakest_confidence": gate.weakest_confidence,
+                "fields_checked": gate.fields_checked,
+                "fields_extracted": gate.fields_extracted,
+                "threshold": gate.threshold,
             },
         )
 
@@ -149,10 +199,43 @@ class InvoiceEngine:
             findings.append(bank_finding)
 
         # --------------------------------------------------- duplicate check
+        # Two questions, not one. The population scan catches a vendor who sent
+        # the same document twice inside this dataset; the ledger catches the
+        # same document arriving after a previous run already cleared it. Only
+        # the second survives the batch boundary, and the second is the one that
+        # actually pays twice — a re-run of a failed job, a resubmitted file, a
+        # vendor chasing an unpaid invoice six weeks later.
         earlier = repo.earlier_invoices(invoice, config.duplicate_window_days)
         duplicates, duplicate_finding = checks.check_duplicate(invoice, earlier, config)
-        if duplicate_finding:
+
+        document_key = posting_key(
+            invoice.vendor_id, invoice.vendor_reference, invoice.invoice_date
+        )
+        already_posted = self.ledger.seen(document_key)
+        # A key claimed by this same invoice is a replay of the same document,
+        # not a duplicate of a different one — idempotency, working as intended.
+        if already_posted is not None and already_posted != invoice.invoice_id:
+            duplicates = list(dict.fromkeys([*duplicates, already_posted]))
+            if duplicate_finding is None:
+                duplicate_finding = ExceptionFinding(
+                    rule_id="I2P-C-03L",
+                    exception_type="duplicate_invoice",
+                    severity="high",
+                    detail=(
+                        f"Posting key {document_key} was already claimed by {already_posted}. "
+                        "The same vendor, document number and fiscal year have been "
+                        "posted before, in an earlier run."
+                    ),
+                    evidence={
+                        "posting_key": document_key,
+                        "claimed_by": already_posted,
+                        "source": "posted_key_ledger",
+                    },
+                )
             findings.append(duplicate_finding)
+        elif duplicate_finding:
+            findings.append(duplicate_finding)
+
         self._step(
             invoice_id,
             "duplicate_check",
@@ -160,14 +243,24 @@ class InvoiceEngine:
                 "vendor_reference": invoice.vendor_reference,
                 "gross": invoice.stated_total_gross,
                 "window_days": config.duplicate_window_days,
+                "posting_key": document_key,
             },
             "duplicate" if duplicates else "unique",
             (
                 f"Matches {len(duplicates)} earlier invoice(s): {', '.join(duplicates)}."
                 if duplicates
-                else f"No match among {len(earlier)} earlier invoice(s) from this vendor."
+                else (
+                    f"No match among {len(earlier)} earlier invoice(s) from this vendor, "
+                    "and the posting key is unclaimed."
+                )
             ),
-            {"candidates": duplicates, "compared_against": len(earlier)},
+            {
+                "candidates": list(duplicates),
+                "compared_against": len(earlier),
+                "posting_key": document_key,
+                "ledger_hit": already_posted,
+                "ledger_size": len(self.ledger.keys()),
+            },
         )
 
         # ------------------------------------------------------- line passes
@@ -423,6 +516,14 @@ class InvoiceEngine:
             auto_clear_min_confidence=config.auto_clear_min_confidence,
             model_confidence=None,
             severity=_primary_severity(findings, primary),
+            # A field we could not read is not an opinion the router weighs
+            # against the others — it forces escalation outright, and it does so
+            # before the agent layer is reached, so a gated invoice costs nothing
+            # and no model is asked about a number nobody trusts.
+            extra_escalations=[
+                f"Extraction confidence below {gate.threshold:.2f}: {reason}"
+                for reason in gate.reasons
+            ],
         )
 
         result = InvoiceResult(
@@ -434,6 +535,9 @@ class InvoiceEngine:
             findings=tuple(findings),
             duplicate_candidates=tuple(duplicates),
             routing=routing,
+            extraction_gated=gate.gated,
+            extraction_gate_reasons=gate.reasons,
+            provenance=provenance,
             evaluated_at=datetime.now(UTC),
         )
 

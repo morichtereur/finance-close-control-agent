@@ -120,6 +120,20 @@ i2p:
   # Routing limits. Value bands, not just confidence: a clean match on a small
   # invoice is a different risk from a clean match on a large one, and the
   # model's confidence says nothing about the size of the mistake.
+  # Extraction. A field read weakly is not a field: below this confidence a
+  # load-bearing value escalates before any model is consulted, because a
+  # tolerance computed on a misread number is arithmetic on fiction.
+  extraction_confidence_threshold: 0.80
+
+  # Noise the generator injects to demonstrate the gate. Both zero by default,
+  # so the shipped metrics are measured on clean structured data and the README
+  # claim about it stays literally true.
+  extraction_dropout_rate: 0.0
+  extraction_digit_confusion_rate: 0.0
+
+  # Posting. Both targets are dry-run only and neither can dispatch.
+  posting_target: simulated
+
   auto_clear_max_value: 5000.0
   auto_clear_min_confidence: 0.85
   propose_max_value: 50000.0

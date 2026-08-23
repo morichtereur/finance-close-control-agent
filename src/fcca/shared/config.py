@@ -143,6 +143,63 @@ class I2PConfig(BaseModel):
         ),
     )
 
+    # -------------------------------------------------------------- extraction
+    extraction_confidence_threshold: float = Field(
+        default=0.80,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Extraction confidence below which a load-bearing field forces escalation. "
+            "Applies only to fields an engine actually read; a synthetic or master-data "
+            "field has no confidence and is not gated."
+        ),
+    )
+    load_bearing_fields: tuple[str, ...] = Field(
+        default=(
+            "stated_total_gross",
+            "currency",
+            "vendor_id",
+            "stated_bank_iban",
+            "quantity",
+            "unit_price",
+            "po_reference",
+        ),
+        description=(
+            "Fields where a misread changes what gets paid, to whom, or how much. A weak "
+            "reading of any of them escalates before any model is called. Deliberately "
+            "short: gating on every field would escalate every document and the control "
+            "would be switched off within a week."
+        ),
+    )
+
+    # ---------------------------------------------------------------- posting
+    posting_target: str = Field(
+        default="simulated",
+        description=(
+            "Which posting adapter builds payloads for cleared invoices. Both available "
+            "targets are dry-run only; neither can dispatch."
+        ),
+    )
+
+    # ------------------------------------------------------- extraction noise
+    extraction_dropout_rate: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description="Share of extractable fields the engine fails to read at all.",
+    )
+    extraction_digit_confusion_rate: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Share of numeric fields misread in an OCR-plausible way — 0/8, 1/7, 5/6, or a "
+            "decimal separator shifted. Not random noise: these are the confusions a "
+            "character recogniser actually makes, and they are the ones that change an "
+            "amount by an order of magnitude rather than a rounding."
+        ),
+    )
+
     # ------------------------------------------------------------ routing limits
     auto_clear_max_value: float = Field(
         default=5_000.0,
@@ -462,6 +519,24 @@ class Settings(BaseSettings):
         modelling decision made for the storage format's convenience.
         """
         return self.raw_data_dir / "i2p"
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def i2p_posted_keys_path(self) -> Path:
+        """Posting keys already claimed, across runs.
+
+        Outside the dataset directory on purpose: `fcca i2p-generate-data`
+        rebuilds the dataset, and a duplicate control that forgets everything
+        whenever the data is regenerated is not a control. Clearing it is an
+        explicit act.
+        """
+        return self.processed_data_dir / "i2p_posted_keys.jsonl"
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def i2p_extraction_dir(self) -> Path:
+        """Extraction payload fixtures, standing in for an OCR engine's output."""
+        return self.base_dir / "data" / "fixtures" / "extraction"
 
     @computed_field  # type: ignore[prop-decorator]
     @property

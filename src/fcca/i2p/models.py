@@ -27,7 +27,7 @@ downstream unfalsifiable.
 from __future__ import annotations
 
 from datetime import date, datetime
-from typing import Literal
+from typing import Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -76,6 +76,90 @@ ResolutionAction = Literal[
 #: an unrecognised UoM must fail loudly, because silently treating CAR as PCE
 #: would multiply a price by twelve.
 UnitOfMeasure = Literal["PCE", "BOX", "CAR", "KG", "L", "M", "HR"]
+
+
+# ---------------------------------------------------------------------------
+# Provenance
+# ---------------------------------------------------------------------------
+
+#: Where a value on an invoice came from.
+#:
+#: ``synthetic``    the generator produced it; there was no document
+#: ``extracted``    an extraction engine read it off a document
+#: ``master_data``  looked up from a vendor / material / cost-centre record
+#: ``derived``      computed by a deterministic rule from other fields
+FieldSource = Literal["synthetic", "extracted", "master_data", "derived"]
+
+
+class BoundingBox(BaseModel):
+    """Where a value sits on the page, in normalised page coordinates.
+
+    Normalised to ``[0, 1]`` rather than pixels so a box means the same thing
+    whatever the scan resolution was, and so a fixture stays valid if the
+    underlying image is ever replaced.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    page: int = Field(ge=1)
+    x0: float = Field(ge=0.0, le=1.0)
+    y0: float = Field(ge=0.0, le=1.0)
+    x1: float = Field(ge=0.0, le=1.0)
+    y1: float = Field(ge=0.0, le=1.0)
+
+    @model_validator(mode="after")
+    def _ordered(self) -> Self:
+        if self.x1 <= self.x0 or self.y1 <= self.y0:
+            raise ValueError("bounding box must have positive width and height")
+        return self
+
+    def __str__(self) -> str:
+        return f"p{self.page} ({self.x0:.3f},{self.y0:.3f})-({self.x1:.3f},{self.y1:.3f})"
+
+
+class FieldProvenance(BaseModel):
+    """Where one value on an invoice came from, and how much to trust it.
+
+    Carried in a map keyed by field path rather than by boxing every value on
+    :class:`~fcca.i2p.models.Invoice` in a wrapper type. Boxing would put a
+    ``.value`` between every arithmetic expression and its operand — every price
+    calculation, every tolerance comparison, every test — to record something
+    that no arithmetic actually reads. The map gives a reviewer the same answer
+    for any field, and keeps the numbers as numbers.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    source: FieldSource
+    confidence: float | None = Field(
+        default=None, description="Extraction confidence; None unless source is 'extracted'."
+    )
+    bbox: BoundingBox | None = None
+    engine: str | None = None
+    raw_text: str | None = None
+
+    @model_validator(mode="after")
+    def _confidence_only_when_extracted(self) -> Self:
+        """Only an extracted field may carry a confidence.
+
+        A derived value has no measurement error to report — it is exactly as
+        good as the inputs it was computed from, and attaching a number to it
+        would invite someone to threshold on it.
+        """
+        if self.source != "extracted" and self.confidence is not None:
+            raise ValueError(f"source {self.source!r} must not carry an extraction confidence")
+        if self.source == "extracted" and self.confidence is None:
+            raise ValueError("source 'extracted' requires a confidence")
+        return self
+
+    @property
+    def label(self) -> str:
+        """Short rendering for the detail pane, next to the value it describes."""
+        if self.source == "extracted":
+            return (
+                f"extracted {self.confidence:.2f}" if self.confidence is not None else "extracted"
+            )
+        return self.source.replace("_", " ")
 
 
 # ---------------------------------------------------------------------------
@@ -423,11 +507,34 @@ class InvoiceResult(BaseModel):
     routing: RoutingDecision = Field(
         description="The tier the deterministic layer alone would assign, before any model."
     )
+    extraction_gated: bool = Field(
+        default=False,
+        description=(
+            "A load-bearing field was read too weakly to compute on. The invoice escalates "
+            "and no model is called — see fcca.i2p.checks.extraction_confidence_gate."
+        ),
+    )
+    extraction_gate_reasons: tuple[str, ...] = ()
+    provenance: dict[str, FieldProvenance] = Field(
+        default_factory=dict,
+        description="Where each field came from, keyed by field path.",
+    )
     evaluated_at: datetime
 
     @property
     def is_exception(self) -> bool:
         return bool(self.findings)
+
+    @property
+    def model_may_be_called(self) -> bool:
+        """Whether the agent layer may look at this invoice.
+
+        Two conditions, and the second is the new one: a clean invoice never
+        reaches a model, and neither does one whose numbers we do not trust.
+        Asking a model to explain a misread amount produces a fluent account of
+        a value that was never on the document.
+        """
+        return self.is_exception and not self.extraction_gated
 
     @property
     def primary_exception(self) -> ExceptionType:
@@ -464,9 +571,12 @@ EXCEPTION_PRECEDENCE: tuple[ExceptionType, ...] = (
 
 __all__ = [
     "EXCEPTION_PRECEDENCE",
+    "BoundingBox",
     "CostCenter",
     "ExceptionFinding",
     "ExceptionType",
+    "FieldProvenance",
+    "FieldSource",
     "GLAccount",
     "GoodsReceipt",
     "Invoice",

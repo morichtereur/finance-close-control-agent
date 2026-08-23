@@ -18,6 +18,9 @@ from __future__ import annotations
 import re
 from difflib import SequenceMatcher
 
+from pydantic import BaseModel, ConfigDict
+
+from fcca.i2p.extraction import FieldProvenance
 from fcca.i2p.masterdata import (
     COST_CENTERS,
     GL_BY_MATERIAL_GROUP,
@@ -542,3 +545,140 @@ __all__ = [
     "resolve_material",
     "resolve_tax_code",
 ]
+
+
+# ---------------------------------------------------------------------------
+# Extraction confidence
+# ---------------------------------------------------------------------------
+
+#: Logical load-bearing field names, expanded to the concrete paths they cover.
+#: Logical names because a controller reviewing the configuration should be able
+#: to read "unit_price" rather than "lines[3].price.list_price", and because the
+#: number of lines is a property of the document, not of the policy.
+LOAD_BEARING_EXPANSION: dict[str, tuple[str, ...]] = {
+    "stated_total_gross": ("stated_total_gross",),
+    "stated_total_net": ("stated_total_net",),
+    "stated_total_tax": ("stated_total_tax",),
+    "currency": ("currency",),
+    "vendor_id": ("vendor_id",),
+    "stated_bank_iban": ("stated_bank_iban",),
+    "vendor_reference": ("vendor_reference",),
+    "company_code": ("company_code",),
+}
+
+#: Load-bearing names that occur once per line rather than once per document.
+LOAD_BEARING_LINE_FIELDS: dict[str, str] = {
+    "quantity": "quantity",
+    "unit_price": "price.list_price",
+    "po_reference": "po_id",
+    "tax_rate": "tax_rate",
+}
+
+
+class ExtractionGateResult(BaseModel):
+    """Whether any load-bearing field was read too weakly to compute on.
+
+    Deliberately not an :class:`~fcca.i2p.models.ExceptionFinding`. A weak
+    reading is not a finding about the *invoice* — the vendor may have done
+    nothing wrong and the amounts may all be correct. It is a statement about
+    our own confidence in what we read, and conflating the two would put
+    "the scan was blurry" into the same confusion matrix as "the vendor
+    overcharged us", which measures nothing.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    gated: bool
+    reasons: tuple[str, ...] = ()
+    weakest_field: str | None = None
+    weakest_confidence: float | None = None
+    fields_checked: int = 0
+    fields_extracted: int = 0
+    threshold: float = 0.0
+
+    @property
+    def summary(self) -> str:
+        if not self.fields_extracted:
+            return (
+                f"No extracted fields; {self.fields_checked} load-bearing field(s) are "
+                "synthetic or master data and carry no confidence to gate on."
+            )
+        if not self.gated:
+            return (
+                f"All {self.fields_extracted} extracted load-bearing field(s) at or above "
+                f"{self.threshold:.2f}; weakest {self.weakest_field} at "
+                f"{self.weakest_confidence:.2f}."
+            )
+        return (
+            f"{len(self.reasons)} load-bearing field(s) below {self.threshold:.2f}; "
+            f"weakest {self.weakest_field} at {self.weakest_confidence:.2f}. "
+            "Escalated before any model call."
+        )
+
+
+def load_bearing_paths(invoice: Invoice, names: tuple[str, ...]) -> dict[str, str]:
+    """Concrete field paths to check, mapped back to their logical name.
+
+    Returns path -> logical name, because the reason a gate fires must name the
+    thing a person configured, not the index of the line it happened to hit.
+    """
+    paths: dict[str, str] = {}
+    for name in names:
+        for path in LOAD_BEARING_EXPANSION.get(name, ()):
+            paths[path] = name
+        line_field = LOAD_BEARING_LINE_FIELDS.get(name)
+        if line_field is not None:
+            for index in range(len(invoice.lines)):
+                paths[f"lines[{index}].{line_field}"] = name
+    return paths
+
+
+def extraction_confidence_gate(
+    invoice: Invoice,
+    provenance: dict[str, FieldProvenance],
+    threshold: float,
+    load_bearing: tuple[str, ...],
+) -> ExtractionGateResult:
+    """Refuse to compute on a value we did not read well enough.
+
+    The argument for gating *before* classification rather than after: every
+    step downstream — the three-way match, the price normalisation, the
+    tolerance evaluation — is arithmetic. Arithmetic on a misread number is not
+    less accurate, it is unrelated to the document, and a tolerance evaluated
+    against it produces a confident answer to a question nobody asked. Ordering
+    the gate second means no such number reaches a comparison, and no model is
+    ever asked to explain one.
+
+    Only *extracted* fields are gated. A synthetic or master-data value has no
+    confidence, and inventing one so that the gate has something to compare
+    would be exactly the kind of fabricated number this module exists to keep
+    out of the arithmetic.
+    """
+    paths = load_bearing_paths(invoice, load_bearing)
+    reasons: list[str] = []
+    weakest: tuple[str, float] | None = None
+    extracted = 0
+
+    for path in sorted(paths):
+        record = provenance.get(path)
+        if record is None or record.source != "extracted" or record.confidence is None:
+            continue
+        extracted += 1
+        if weakest is None or record.confidence < weakest[1]:
+            weakest = (paths[path], record.confidence)
+        if record.confidence < threshold:
+            reasons.append(f"low_confidence_field:{paths[path]}")
+
+    # Deduplicated and ordered: three weak line quantities are one reason to
+    # escalate, not three, and a reviewer reading the queue wants the field name
+    # rather than a count of how many lines it appeared on.
+    unique = tuple(sorted(set(reasons)))
+    return ExtractionGateResult(
+        gated=bool(unique),
+        reasons=unique,
+        weakest_field=weakest[0] if weakest else None,
+        weakest_confidence=weakest[1] if weakest else None,
+        fields_checked=len(paths),
+        fields_extracted=extracted,
+        threshold=threshold,
+    )
