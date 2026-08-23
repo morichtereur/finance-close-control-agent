@@ -125,6 +125,24 @@ class I2PConfig(BaseModel):
         ),
     )
 
+    # --------------------------------------------------------- grounding limit
+    max_ungrounded_citation_rate: float = Field(
+        default=0.25,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Share of model-assessed invoices that may cite a field the model was not "
+            "given, before the evaluation fails. Measured against invoices that received "
+            "a model call, not all invoices: the latter would fall as the exception mix "
+            "thins and would hide a worsening model behind a quieter dataset. Ungrounded "
+            "citations are stripped before use, so they cannot reach a routing decision "
+            "-- this limit exists because a rising rate is a signal about the model even "
+            "when the outcome stays correct. Not zero: a live model reaches for a "
+            "plausible field often enough that zero would fail every run and be switched "
+            "off within a week."
+        ),
+    )
+
     # ------------------------------------------------------------ routing limits
     auto_clear_max_value: float = Field(
         default=5_000.0,

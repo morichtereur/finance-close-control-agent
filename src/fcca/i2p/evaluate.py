@@ -58,6 +58,7 @@ def run_evaluation(
             "quantity_tolerance_pct": settings.i2p.quantity_tolerance_pct,
             "gr_grace_days": settings.i2p.gr_grace_days,
             "auto_clear_max_value": settings.i2p.auto_clear_max_value,
+            "max_ungrounded_citation_rate": settings.i2p.max_ungrounded_citation_rate,
             "auto_clear_min_confidence": settings.i2p.auto_clear_min_confidence,
             "propose_max_value": settings.i2p.propose_max_value,
             "duplicate_window_days": settings.i2p.duplicate_window_days,
@@ -132,6 +133,20 @@ def main(argv: list[str] | None = None) -> int:
             f"\nFAILED: {report.false_auto_post_count} invoice(s) were cleared without a "
             f"person that ground truth says were exceptions: "
             f"{', '.join(report.false_auto_post_ids)}",
+        )
+        return 1
+
+    # An ungrounded citation never reaches a decision -- it is stripped first. The
+    # limit is here because the rate is a measurement of the model, and a number
+    # that is only ever printed is a number nobody notices moving.
+    if not report.is_grounded:
+        limit = float(report.settings_snapshot["max_ungrounded_citation_rate"])
+        print(
+            f"\nFAILED: {report.ungrounded_citation_invoices} of "
+            f"{report.invoices_with_findings} assessed invoice(s) cited a field the model "
+            f"was not given ({report.ungrounded_citation_rate:.1%}, limit {limit:.0%}). "
+            f"The citations were stripped and routing is unaffected, but the rate is "
+            f"outside what this configuration accepts.",
         )
         return 1
     return 0

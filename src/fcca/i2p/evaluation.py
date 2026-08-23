@@ -140,6 +140,26 @@ class EvaluationReport(BaseModel):
     def is_safe(self) -> bool:
         return self.false_auto_post_count == 0
 
+    @property
+    def ungrounded_citation_rate(self) -> float:
+        """Ungrounded citations as a share of the invoices a model actually saw."""
+        if not self.invoices_with_findings:
+            return 0.0
+        return self.ungrounded_citation_invoices / self.invoices_with_findings
+
+    @property
+    def is_grounded(self) -> bool:
+        """Whether citation grounding stayed inside the configured limit.
+
+        Separate from ``is_safe`` on purpose. A false auto-post is money out of the
+        door; an ungrounded citation was removed before anything used it. Both fail
+        the run, but conflating them would let a reader assume the wrong severity.
+        """
+        limit = self.settings_snapshot.get("max_ungrounded_citation_rate")
+        if limit is None:  # report written before the limit existed
+            return True
+        return self.ungrounded_citation_rate <= float(limit)
+
 
 def evaluate(
     resolved: list[ResolvedInvoice],
@@ -289,7 +309,12 @@ def render_report(report: EvaluationReport) -> str:
     lines.append("Model usage")
     lines.append(f"  invoices with a finding      {report.invoices_with_findings}")
     lines.append(f"  model calls                  {report.model_calls}")
-    lines.append(f"  invoices citing missing data {report.ungrounded_citation_invoices}")
+    limit = report.settings_snapshot.get("max_ungrounded_citation_rate")
+    grounding = f"  invoices citing missing data {report.ungrounded_citation_invoices}"
+    if report.invoices_with_findings:
+        grounding += f" ({report.ungrounded_citation_rate:.1%} of assessed"
+        grounding += f", limit {float(limit):.0%})" if limit is not None else ")"
+    lines.append(grounding)
     if report.mean_confidence is not None:
         lines.append(f"  mean confidence              {report.mean_confidence:.3f}")
     return "\n".join(lines)
