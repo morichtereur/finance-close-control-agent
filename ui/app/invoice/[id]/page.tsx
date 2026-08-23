@@ -10,10 +10,16 @@ import {
   signed,
   unitPrice,
 } from "@/lib/format";
-import type { InvoiceDetail, LineResolution, PurchaseOrderLine } from "@/lib/types";
+import type {
+  FieldProvenance,
+  InvoiceDetail,
+  LineResolution,
+  PurchaseOrderLine,
+} from "@/lib/types";
 
 import { ToleranceBridge } from "./bridge";
 import { Disposition } from "./disposition";
+import { Posting } from "./posting";
 import { Trace } from "./trace";
 
 export function generateStaticParams() {
@@ -51,6 +57,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
           <Comparison detail={detail} />
           <Findings detail={detail} />
           <Reasoning detail={detail} />
+          {detail.posting && <Posting posting={detail.posting} />}
         </div>
       </div>
 
@@ -75,6 +82,27 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
 }
 
 /* ------------------------------------------------------------ case header */
+
+/**
+ * Provenance, rendered beside the value rather than in a separate panel.
+ *
+ * A reviewer asking "was that on the document or did we work it out?" is asking
+ * about one field, at the moment they are looking at it. Answering in a panel
+ * somewhere else means the question mostly goes unasked. Synthetic is not
+ * labelled: on this dataset it is every field, and a label on everything labels
+ * nothing.
+ */
+function Prov({ p }: { p: FieldProvenance | undefined }) {
+  if (!p || p.source === "synthetic") return null;
+  const weak = p.confidence !== null && p.confidence < 0.8;
+  return (
+    <span className={weak ? "prov prov-weak" : "prov"} title={p.engine ?? undefined}>
+      {p.source === "extracted"
+        ? `read ${p.confidence?.toFixed(2)}`
+        : p.source.replace("_", " ")}
+    </span>
+  );
+}
 
 function CaseHeader({ detail }: { detail: InvoiceDetail }) {
   const { invoice, vendor, routing, result } = detail;
@@ -107,6 +135,14 @@ function CaseHeader({ detail }: { detail: InvoiceDetail }) {
         <span className={`verdict-tier tier-${routing.tier}`}>{label(routing.tier)}</span>
         <span className="verdict-why">{routing.deciding_reason}</span>
       </div>
+
+      {result.extraction_gated && (
+        <p className="gate-note">
+          <strong>Extraction gate fired.</strong> {result.extraction_gate_reasons.join(", ")} — the
+          field was read too weakly to compute on, so this invoice escalated before any model was
+          called. Nothing downstream ran on the value.
+        </p>
+      )}
     </header>
   );
 }
@@ -115,6 +151,7 @@ function CaseHeader({ detail }: { detail: InvoiceDetail }) {
 
 function SourceDocument({ detail }: { detail: InvoiceDetail }) {
   const { invoice, vendor } = detail;
+  const prov = detail.result.provenance ?? {};
   const bankDiffers = vendor != null && invoice.stated_bank_iban !== vendor.bank_iban;
 
   return (
@@ -134,9 +171,15 @@ function SourceDocument({ detail }: { detail: InvoiceDetail }) {
           <dt>Tax</dt>
           <dd>{money(invoice.stated_total_tax, invoice.currency)}</dd>
           <dt>Gross</dt>
-          <dd>{money(invoice.stated_total_gross, invoice.currency)}</dd>
+          <dd>
+            {money(invoice.stated_total_gross, invoice.currency)}
+            <Prov p={prov["stated_total_gross"]} />
+          </dd>
           <dt>Bank stated</dt>
-          <dd className={bankDiffers ? "breach" : undefined}>{invoice.stated_bank_iban}</dd>
+          <dd className={bankDiffers ? "breach" : undefined}>
+            {invoice.stated_bank_iban}
+            <Prov p={prov["stated_bank_iban"]} />
+          </dd>
           {vendor && (
             <>
               <dt>Bank on file</dt>
@@ -175,9 +218,15 @@ function SourceDocument({ detail }: { detail: InvoiceDetail }) {
                   <td className="mono dim">{line.line_no}</td>
                   <td className="mono">{line.supplier_item_no}</td>
                   <td>{line.description}</td>
-                  <td className="num">{fmtQuantity(line.quantity)}</td>
+                  <td className="num">
+                    {fmtQuantity(line.quantity)}
+                    <Prov p={prov[`lines[${line.line_no - 1}].quantity`]} />
+                  </td>
                   <td className="mono dim">{line.uom}</td>
-                  <td className="num">{line.price.list_price}</td>
+                  <td className="num">
+                    {line.price.list_price}
+                    <Prov p={prov[`lines[${line.line_no - 1}].price.list_price`]} />
+                  </td>
                   <td className="mono dim">
                     {discountSchedule(line.price.discount_pct, line.price.surcharge_per_unit)}
                   </td>

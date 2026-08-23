@@ -127,6 +127,47 @@ export interface RoutingDecision {
   exception_type: string;
 }
 
+/** Where one value came from, and how much to trust it. */
+export type FieldSource = "synthetic" | "extracted" | "master_data" | "derived";
+
+export interface BoundingBox {
+  page: number;
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+export interface FieldProvenance {
+  source: FieldSource;
+  /** Extraction confidence. Null unless source is "extracted". */
+  confidence: number | null;
+  bbox: BoundingBox | null;
+  engine: string | null;
+  raw_text: string | null;
+}
+
+/** One field of the ERP payload, and the invoice field behind it. */
+export interface FieldMapping {
+  target_field: string;
+  source_path: string | null;
+  value: unknown;
+  source_value: unknown;
+  provenance: FieldProvenance | null;
+  note: string;
+}
+
+export interface PostingPayload {
+  invoice_id: string;
+  posting_key: string;
+  target: string;
+  service: string;
+  dry_run: boolean;
+  document: Record<string, unknown>;
+  mapping: FieldMapping[];
+  built_at: string;
+}
+
 export interface InvoiceResult {
   invoice_id: string;
   category: "MM" | "FI";
@@ -136,6 +177,9 @@ export interface InvoiceResult {
   findings: Finding[];
   duplicate_candidates: string[];
   routing: RoutingDecision;
+  extraction_gated: boolean;
+  extraction_gate_reasons: string[];
+  provenance: Record<string, FieldProvenance>;
   evaluated_at: string;
 }
 
@@ -219,6 +263,8 @@ export interface InvoiceDetail {
   routing: RoutingDecision;
   assessment: Assessment | null;
   model_called: boolean;
+  /** Present only for auto_clear invoices — nothing else produces a payload. */
+  posting: PostingPayload | null;
   trace: TraceRecord[];
 }
 
@@ -246,6 +292,7 @@ export interface Evaluation {
   per_class: ClassMetrics[];
   actual_counts: Record<string, number>;
   predicted_counts: Record<string, number>;
+  extraction_gated: number;
   model_calls: number;
   invoices_with_findings: number;
   exact_agreement: number;

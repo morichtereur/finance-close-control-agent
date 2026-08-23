@@ -108,6 +108,10 @@ def invoice_detail(
             item.assessment.model_dump(mode="json") if item.assessment is not None else None
         ),
         "model_called": item.model_called,
+        # The payload that would post, for auto_clear invoices only. None
+        # everywhere else, which is the point: it exists exactly where no person
+        # is going to look at the invoice.
+        "posting": item.posting.model_dump(mode="json") if item.posting is not None else None,
         "trace": trace,
     }
 

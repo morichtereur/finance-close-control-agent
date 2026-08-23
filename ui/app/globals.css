@@ -542,6 +542,35 @@ kbd {
   max-width: 92ch;
 }
 
+/* ------------------------------------------------------------- provenance */
+
+/* Sits beside the value it describes, quiet enough to ignore and close enough
+   to answer "was that on the document?" without moving your eye. */
+.prov {
+  font-family: var(--font-mono-stack);
+  font-size: var(--t-micro);
+  letter-spacing: 0.04em;
+  color: var(--ink-4);
+  margin-left: var(--s2);
+  white-space: nowrap;
+}
+
+/* A reading below the gate threshold. The one accent, because this is the
+   condition that stops the pipeline. */
+.prov-weak {
+  color: var(--signal);
+  font-weight: 600;
+}
+
+.gate-note {
+  margin: var(--s3) 0 0;
+  padding: var(--s2) var(--s3);
+  border-left: 3px solid var(--signal);
+  background: var(--signal-wash);
+  color: var(--ink-2);
+  max-width: 92ch;
+}
+
 /* --------------------------------------------------------- tolerance bridge */
 
 /* The signature element. A scaled band showing the agreed price, the tolerance

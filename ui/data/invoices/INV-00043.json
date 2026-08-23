@@ -278,7 +278,298 @@
       "document_value": 133029.42,
       "exception_type": "no_exception"
     },
-    "evaluated_at": "2026-08-23T06:51:31.720177Z"
+    "extraction_gated": false,
+    "extraction_gate_reasons": [],
+    "provenance": {
+      "vendor_id": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "company_code": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "invoice_date": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "received_date": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "vendor_reference": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "currency": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "stated_bank_iban": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "free_text": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "stated_total_net": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "stated_total_tax": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "stated_total_gross": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].description": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].supplier_item_no": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].quantity": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].uom": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].tax_rate": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].po_id": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].po_line": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].gl_account": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].cost_center": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].price.list_price": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].description": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].supplier_item_no": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].quantity": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].uom": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].tax_rate": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].po_id": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].po_line": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].gl_account": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].cost_center": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].price.list_price": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[2].description": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[2].supplier_item_no": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[2].quantity": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[2].uom": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[2].tax_rate": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[2].po_id": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[2].po_line": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[2].gl_account": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[2].cost_center": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[2].price.list_price": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      }
+    },
+    "evaluated_at": "2026-08-23T22:27:18.823539Z"
   },
   "routing": {
     "tier": "propose_and_approve",
@@ -292,9 +583,10 @@
   },
   "assessment": null,
   "model_called": false,
+  "posting": null,
   "trace": [
     {
-      "timestamp": "2026-08-23T06:51:31.718853Z",
+      "timestamp": "2026-08-23T22:27:18.822391Z",
       "case_id": "INV-00043",
       "module": "i2p",
       "step_name": "intake",
@@ -313,7 +605,29 @@
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:31.718959Z",
+      "timestamp": "2026-08-23T22:27:18.822461Z",
+      "case_id": "INV-00043",
+      "module": "i2p",
+      "step_name": "extraction_confidence_gate",
+      "actor": "rule",
+      "input_hash": "839360da0c32f825",
+      "outcome": "pass",
+      "summary": "No extracted fields; 13 load-bearing field(s) are synthetic or master data and carry no confidence to gate on.",
+      "rule_id": "I2P-S-02",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "gated": false,
+        "reasons": [],
+        "weakest_field": null,
+        "weakest_confidence": null,
+        "fields_checked": 13,
+        "fields_extracted": 0,
+        "threshold": 0.8
+      }
+    },
+    {
+      "timestamp": "2026-08-23T22:27:18.822520Z",
       "case_id": "INV-00043",
       "module": "i2p",
       "step_name": "classification",
@@ -321,30 +635,33 @@
       "input_hash": "ec26842a4c5e3a33",
       "outcome": "MM",
       "summary": "Classified as MM. At least one line references a purchase order.",
-      "rule_id": "I2P-S-02",
+      "rule_id": "I2P-S-03",
       "model": null,
       "prompt_version": null,
       "detail": {}
     },
     {
-      "timestamp": "2026-08-23T06:51:31.719101Z",
+      "timestamp": "2026-08-23T22:27:18.822895Z",
       "case_id": "INV-00043",
       "module": "i2p",
       "step_name": "duplicate_check",
       "actor": "rule",
-      "input_hash": "23bbb04ca1f6236d",
+      "input_hash": "9ef549240a283e03",
       "outcome": "unique",
-      "summary": "No match among 11 earlier invoice(s) from this vendor.",
-      "rule_id": "I2P-S-03",
+      "summary": "No match among 11 earlier invoice(s) from this vendor, and the posting key is unclaimed.",
+      "rule_id": "I2P-S-04",
       "model": null,
       "prompt_version": null,
       "detail": {
         "candidates": [],
-        "compared_against": 11
+        "compared_against": 11,
+        "posting_key": "V-10014|CH13658|2026",
+        "ledger_hit": null,
+        "ledger_size": 78
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:31.719202Z",
+      "timestamp": "2026-08-23T22:27:18.822979Z",
       "case_id": "INV-00043",
       "module": "i2p",
       "step_name": "master_data_resolution",
@@ -352,7 +669,7 @@
       "input_hash": "5aa7a42b8cb32ec7",
       "outcome": "resolved",
       "summary": "Resolved 3 of 3 supplier item number(s) to material master.",
-      "rule_id": "I2P-S-04",
+      "rule_id": "I2P-S-05",
       "model": null,
       "prompt_version": null,
       "detail": {
@@ -364,7 +681,7 @@
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:31.719293Z",
+      "timestamp": "2026-08-23T22:27:18.823038Z",
       "case_id": "INV-00043",
       "module": "i2p",
       "step_name": "tax_code",
@@ -372,7 +689,7 @@
       "input_hash": "afb6b6ab24870627",
       "outcome": "resolved",
       "summary": "Tax codes: line 1: V1, line 2: V1, line 3: V1.",
-      "rule_id": "I2P-S-05",
+      "rule_id": "I2P-S-06",
       "model": null,
       "prompt_version": null,
       "detail": {
@@ -384,7 +701,7 @@
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:31.719393Z",
+      "timestamp": "2026-08-23T22:27:18.823094Z",
       "case_id": "INV-00043",
       "module": "i2p",
       "step_name": "gl_derivation",
@@ -392,7 +709,7 @@
       "input_hash": "a1c12348e2f754cc",
       "outcome": "stated",
       "summary": "GL account stated on every line.",
-      "rule_id": "I2P-S-06",
+      "rule_id": "I2P-S-07",
       "model": null,
       "prompt_version": null,
       "detail": {
@@ -413,7 +730,7 @@
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:31.719498Z",
+      "timestamp": "2026-08-23T22:27:18.823154Z",
       "case_id": "INV-00043",
       "module": "i2p",
       "step_name": "cost_center_derivation",
@@ -421,7 +738,7 @@
       "input_hash": "edb71d5a42f92b28",
       "outcome": "resolved",
       "summary": "Cost centre resolved on every line.",
-      "rule_id": "I2P-S-07",
+      "rule_id": "I2P-S-08",
       "model": null,
       "prompt_version": null,
       "detail": {
@@ -442,7 +759,7 @@
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:31.719635Z",
+      "timestamp": "2026-08-23T22:27:18.823234Z",
       "case_id": "INV-00043",
       "module": "i2p",
       "step_name": "three_way_match",
@@ -450,13 +767,13 @@
       "input_hash": "e86e42dba6978485",
       "outcome": "matched",
       "summary": "Three-way match applicable to 3 line(s): purchase order, goods receipt and invoice.",
-      "rule_id": "I2P-S-08",
+      "rule_id": "I2P-S-09",
       "model": null,
       "prompt_version": null,
       "detail": {}
     },
     {
-      "timestamp": "2026-08-23T06:51:31.719767Z",
+      "timestamp": "2026-08-23T22:27:18.823309Z",
       "case_id": "INV-00043",
       "module": "i2p",
       "step_name": "quantity_check",
@@ -464,13 +781,13 @@
       "input_hash": "2c3cb6056f14abc2",
       "outcome": "computed",
       "summary": "line 1: invoiced 353.000 of 353.000 available; line 2: invoiced 87.000 of 87.000 available; line 3: invoiced 214.000 of 214.000 available",
-      "rule_id": "I2P-S-09",
+      "rule_id": "I2P-S-10",
       "model": null,
       "prompt_version": null,
       "detail": {}
     },
     {
-      "timestamp": "2026-08-23T06:51:31.719931Z",
+      "timestamp": "2026-08-23T22:27:18.823405Z",
       "case_id": "INV-00043",
       "module": "i2p",
       "step_name": "price_check",
@@ -478,13 +795,13 @@
       "input_hash": "01fdc40289bbabe0",
       "outcome": "computed",
       "summary": "line 1: normalised 86.623734 vs 85.930931 (+0.81%), naive comparison would show -9,333.3763; line 2: normalised 267.069731 vs 264.933750 (+0.81%), naive comparison would show -1.6803; line 3: normalised 270.916749 vs 268.750000 (+0.81%), naive comparison would show -2,416.5833",
-      "rule_id": "I2P-S-10",
+      "rule_id": "I2P-S-11",
       "model": null,
       "prompt_version": null,
       "detail": {}
     },
     {
-      "timestamp": "2026-08-23T06:51:31.720056Z",
+      "timestamp": "2026-08-23T22:27:18.823473Z",
       "case_id": "INV-00043",
       "module": "i2p",
       "step_name": "tolerance_evaluation",
@@ -492,7 +809,7 @@
       "input_hash": "212c5cbb2a42ad97",
       "outcome": "within_tolerance",
       "summary": "All residuals inside tolerance (2.0% or 25.00).",
-      "rule_id": "I2P-S-11",
+      "rule_id": "I2P-S-12",
       "model": null,
       "prompt_version": null,
       "detail": {
@@ -500,7 +817,7 @@
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:31.720187Z",
+      "timestamp": "2026-08-23T22:27:18.823554Z",
       "case_id": "INV-00043",
       "module": "i2p",
       "step_name": "routing_decision",
@@ -508,7 +825,7 @@
       "input_hash": "dfa286a7413efcc7",
       "outcome": "propose_and_approve",
       "summary": "No finding. Invoice matches on price, quantity and coding. Rules alone route to propose_and_approve.",
-      "rule_id": "I2P-S-12",
+      "rule_id": "I2P-S-13",
       "model": null,
       "prompt_version": null,
       "detail": {

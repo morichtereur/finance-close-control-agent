@@ -29,12 +29,43 @@ def run_evaluation(
     model_name: str | None = None,
     settings: Settings | None = None,
     limit: int | None = None,
+    with_extraction_noise: bool = False,
 ) -> tuple[EvaluationReport, list[ResolvedInvoice]]:
+    """Run the pipeline over the labelled population and score it.
+
+    ``with_extraction_noise`` swaps the synthetic source for a document source
+    whose readings are degraded at the rates in ``config/thresholds.yaml``. It
+    is off by default and the shipped metrics are measured without it, so the
+    README's "structured JSON, no OCR" claim stays literally true. Turning it on
+    is the demonstration: touchless rate falls, extraction_gated rises, and
+    false_auto_post stays at zero — noise costs throughput, not safety.
+    """
     settings = settings or get_settings()
     spec = describe_provider(provider, model_name, settings)
     repository = I2PRepository(settings)
+
+    source = None
+    if with_extraction_noise:
+        from fcca.i2p.degrade import build_payloads
+        from fcca.i2p.extraction import DocumentSource, SyntheticSource
+
+        base = SyntheticSource(repository)
+        source = DocumentSource(
+            build_payloads(
+                list(repository.invoices.values()),
+                seed=settings.random_seed,
+                dropout_rate=settings.i2p.extraction_dropout_rate,
+                digit_confusion_rate=settings.i2p.extraction_digit_confusion_rate,
+            ),
+            base,
+        )
+
     resolver = InvoiceResolver.build(
-        provider=provider, model_name=model_name, settings=settings, repository=repository
+        provider=provider,
+        model_name=model_name,
+        settings=settings,
+        repository=repository,
+        source=source,
     )
 
     labels = {

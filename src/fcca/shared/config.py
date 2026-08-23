@@ -174,7 +174,7 @@ class I2PConfig(BaseModel):
 
     # ---------------------------------------------------------------- posting
     posting_target: str = Field(
-        default="simulated",
+        default="sap-odata",
         description=(
             "Which posting adapter builds payloads for cleared invoices. Both available "
             "targets are dry-run only; neither can dispatch."

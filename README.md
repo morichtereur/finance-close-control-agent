@@ -29,7 +29,7 @@ DuckDB, policy retrieval through LlamaIndex with document and section preserved,
 validated Pydantic object, citation grounding against what was actually retrieved, and a deterministic review gate.
 It recommends; a named person decides.
 
-**Invoice-to-pay.** For one vendor invoice: twelve deterministic steps ending in a three-way match — purchase
+**Invoice-to-pay.** For one vendor invoice: thirteen deterministic steps ending in a three-way match — purchase
 order, goods receipt, invoice — with price and quantity normalised before anything is compared. Records the rules
 flag go to a model to classify, propose a resolution and cite evidence. Records the rules clear never reach a model
 at all.
@@ -66,7 +66,10 @@ flowchart TD
     end
 
     subgraph I2P["fcca/i2p — invoice-to-pay"]
-        I1["synthetic invoices (JSON)<br/>PO · GR · vendor · material"] --> I2["intake · classify · duplicates"]
+        I0["InvoiceSource port<br/>synthetic · document (fixtures)"] --> I1
+        I1["intake"] --> IG{"extraction<br/>confidence gate"}
+        IG -->|"load-bearing field<br/>read too weakly"| I9["escalate<br/>no model call"]
+        IG -->|pass| I2["classify · duplicates<br/>+ posted-key ledger"]
         I2 --> I3["master data · tax · GL · cost centre"]
         I3 --> I4["three-way match<br/>quantity check"]
         I4 --> I5["price check<br/>normalise both sides"]
@@ -79,6 +82,7 @@ flowchart TD
     CFG --> I6
     PROV --> C4
     PROV --> I7
+    ROUTE -->|auto_clear only| POST["PostingTarget port<br/>SAP OData payload · dry run<br/>cannot dispatch"]
     C6 --> ROUTE
     I7 --> ROUTE
     I8 --> ROUTE
@@ -465,6 +469,90 @@ call; at six it would be complexity without benefit.
 from a document image is a real and separate problem, and pretending to solve it here would make every number
 downstream unfalsifiable.
 
+What exists instead is the *seam*, on both sides — and the part of each problem that does not need the dependency.
+
+## Integration seams: OCR and ERP
+
+Two ports, with simulators behind them. Neither adds a dependency, and neither upgrades a claim made anywhere else
+in this README.
+
+**Document extraction** is an `InvoiceSource` port with two adapters: `SyntheticSource`, the generator as it always
+was, and `DocumentSource`, which assembles an invoice from an extraction payload — field, value, confidence, page,
+bounding box. No engine is bundled. The contract an adapter must satisfy is in
+[`docs/extraction-adapter.md`](docs/extraction-adapter.md), and `data/fixtures/extraction/` holds three payloads in
+exactly the shape a pytesseract or Azure DI adapter would emit, including deliberately degraded ones.
+
+The reason a port is worth more here than an implementation: what the pipeline depends on is not *how* a field was
+read, it is **how confident the reader was and what the pipeline does about it**. That is the thirteenth step, and
+it is the new one.
+
+> **Extraction confidence must never be a model-produced number.** It feeds a tolerance outcome, so a generated
+> token in that position would put a model inside the arithmetic through the side door — one layer removed, in
+> exactly the place the architecture claims it never happens. An OCR engine's confidence is a measurement against a
+> character set; a language model's stated confidence is a token it generated, and the two look identical.
+> `ExtractionPayload` refuses a payload whose engine name looks like a model, and a test asserts it.
+
+`extraction_confidence_gate` runs **second**, between intake and MM/FI classification, because everything after it
+is arithmetic — and arithmetic on a misread number is not less accurate, it is unrelated to the document. Any
+load-bearing field below the configured confidence (gross amount, currency, vendor, IBAN, quantity, unit price, PO
+reference) forces `escalate` with reason `low_confidence_field:<name>`, **before any model call**. On synthetic data
+the step is a no-op that says so, and still writes its trace record: a step that only appears when it fires is a
+step nobody can audit.
+
+**ERP posting** is a `PostingTarget` port. `SapODataTarget` maps an invoice to the shape
+`API_SUPPLIERINVOICE_PROCESS_SRV` expects — `A_SupplierInvoice` header fields, purchase-order references in
+`to_SuplrInvcItemPurOrdRef`, amounts typed as strings, dates as OData literals.
+
+> **The SAP adapter is payload-shape only and cannot dispatch.** `dry_run` is a read-only property, not a
+> constructor argument, not a setting and not in the YAML. There is no HTTP client, no credential handling and no
+> CSRF token fetch — not disabled, *absent*. A flag that can be flipped is a flag that gets flipped, so making this
+> real means deliberately writing the transport. Tests assert that `dispatch` raises and that `dry_run` has no
+> setter.
+
+The value is the mapping, not the connection. For each `auto_clear` invoice the interface shows the exact payload
+that would post, diffed field by field against the source document, so a reviewer who knows the target system can
+say "that is the wrong field". A payload is built **only** for `auto_clear` — checked by the resolver that knows the
+tier and again by the adapter that builds it, because this is the one place something happens to an invoice nobody
+will look at.
+
+**Idempotency** is what makes the duplicate control credible. Posting keys are vendor + document number + fiscal
+year — the triple the vendor controls end to end, so it survives our side re-reading or re-numbering the document —
+written to a ledger that persists across runs. `duplicate_check` consults the ledger as well as the population. The
+population scan catches a vendor who sent the same document twice in one file; the ledger catches the re-run after a
+failed job, the resubmission, and the chaser six weeks later, which are the cases that actually pay twice.
+
+### What noise does to it
+
+The generator can degrade an extraction the two ways a recogniser actually fails: dropout, and digit confusion on
+the glyph pairs that look alike at low resolution — 0/8, 1/7, 5/6 — plus the decimal separator, which is the
+expensive one. Measured over the same 334 invoices, mock provider:
+
+| | touchless | extraction-gated | model calls | **false auto-post** |
+|---|---|---|---|---|
+| clean (shipped) | **0.234** (78) | 0 | 114 | **0** |
+| 5% dropout, 15% confusion | 0.084 (28) | 216 | 58 | **0** |
+| 10% dropout, 35% confusion | 0.009 (3) | 304 | 20 | **0** |
+
+**Noise costs throughput and not safety, which is the whole claim.** Touchless rate collapses from 23.4% to 0.9%
+because the gate escalates everything it cannot vouch for. Model calls fall with it — a gated invoice never reaches
+a model, so degraded input gets cheaper rather than more expensive, which is the opposite of what an
+LLM-first design does. False auto-post stays at zero throughout, and that is a required-passing test at 15% and 40%
+confusion, not an observation.
+
+Both noise rates default to zero, so the shipped metrics above are measured on clean structured data and the "no
+OCR" statement stays literally true.
+
+**One honest caveat about that table.** The relationship between confidence and correctness in the generator is a
+*modelling assumption*, not a measurement: misreads are usually given low confidence, which is what lets the gate
+catch them. 15% of them are confidently wrong, because a demonstration in which the gate catches everything
+demonstrates nothing. These numbers describe how the pipeline behaves under this model of extraction error. They are
+not evidence about any particular engine.
+
+**And one real limitation the gate does not cover.** Line-item table extraction — row segmentation, column
+assignment — is the hard part of invoice OCR and none of it is addressed. A wrong row boundary produces a
+confidently-read value on the wrong line, and no confidence threshold catches that, because the confidence is
+genuinely high.
+
 ## Limitations
 
 - **Synthetic data, and labels that are ground truth by construction.** They validate the pipeline, not anyone's
@@ -474,7 +562,11 @@ downstream unfalsifiable.
   is labelled as such in the benchmark output and in its own docstring.
 - **Bedrock has been run on two models for the close module; Vertex has not been run at all. The invoice module has
   been run only against the mock.** Those rows say `not_run` until somebody runs them.
-- **No ERP integration, no OCR, no authentication, no multi-tenancy, no retention policy, no monitoring, no change
+- **No ERP integration and no OCR — ports with simulators behind them, which is not the same as an integration.**
+  The SAP adapter builds a payload and cannot send it; the extraction adapter consumes fixtures and bundles no
+  engine. What is real is the mapping, the confidence gate and the idempotency key. What is absent is every line of
+  transport and every pixel of a document.
+- **No authentication, no multi-tenancy, no retention policy, no monitoring, no change
   control over the policy corpus.** [`docs/architecture.md`](docs/architecture.md) §10 lists what would have to
   change before any of this went near a real ledger.
 - **Decision support only.** This is not financial, accounting or audit advice, and nothing here is certified

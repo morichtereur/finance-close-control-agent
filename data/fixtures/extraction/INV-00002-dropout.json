@@ -1,0 +1,125 @@
+{
+  "document_id": "DOC-INV-00002",
+  "invoice_id": "INV-00002",
+  "engine": "tesseract",
+  "engine_version": "5.3.4",
+  "fields": [
+    {
+      "field_path": "company_code",
+      "value": "NL30",
+      "confidence": 0.968,
+      "bbox": {
+        "page": 1,
+        "x0": 0.384,
+        "y0": 0.377,
+        "x1": 0.6,
+        "y1": 0.398
+      },
+      "raw_text": "NL30"
+    },
+    {
+      "field_path": "vendor_reference",
+      "value": "NL52410",
+      "confidence": 0.949,
+      "bbox": {
+        "page": 1,
+        "x0": 0.534,
+        "y0": 0.675,
+        "x1": 0.697,
+        "y1": 0.69
+      },
+      "raw_text": "NL52410"
+    },
+    {
+      "field_path": "stated_bank_iban",
+      "value": "NL39RABO0300065264",
+      "confidence": 0.958,
+      "bbox": {
+        "page": 1,
+        "x0": 0.293,
+        "y0": 0.476,
+        "x1": 0.422,
+        "y1": 0.497
+      },
+      "raw_text": "NL39RABO0300065264"
+    },
+    {
+      "field_path": "stated_total_tax",
+      "value": 1318.73,
+      "confidence": 0.964,
+      "bbox": {
+        "page": 1,
+        "x0": 0.186,
+        "y0": 0.128,
+        "x1": 0.339,
+        "y1": 0.152
+      },
+      "raw_text": "1318.73"
+    },
+    {
+      "field_path": "stated_total_gross",
+      "value": 8259.41,
+      "confidence": 0.941,
+      "bbox": {
+        "page": 1,
+        "x0": 0.269,
+        "y0": 0.821,
+        "x1": 0.386,
+        "y1": 0.835
+      },
+      "raw_text": "8259.41"
+    },
+    {
+      "field_path": "lines[0].quantity",
+      "value": 179.0,
+      "confidence": 0.941,
+      "bbox": {
+        "page": 1,
+        "x0": 0.357,
+        "y0": 0.424,
+        "x1": 0.584,
+        "y1": 0.452
+      },
+      "raw_text": "179.0"
+    },
+    {
+      "field_path": "lines[0].po_id",
+      "value": "PO-4500002",
+      "confidence": 0.945,
+      "bbox": {
+        "page": 1,
+        "x0": 0.571,
+        "y0": 0.43,
+        "x1": 0.789,
+        "y1": 0.457
+      },
+      "raw_text": "PO-4500002"
+    },
+    {
+      "field_path": "lines[0].price.list_price",
+      "value": 41.0,
+      "confidence": 0.971,
+      "bbox": {
+        "page": 1,
+        "x0": 0.38,
+        "y0": 0.828,
+        "x1": 0.597,
+        "y1": 0.849
+      },
+      "raw_text": "41.0"
+    },
+    {
+      "field_path": "lines[0].tax_rate",
+      "value": 19.0,
+      "confidence": 0.938,
+      "bbox": {
+        "page": 1,
+        "x0": 0.566,
+        "y0": 0.852,
+        "x1": 0.684,
+        "y1": 0.863
+      },
+      "raw_text": "19.0"
+    }
+  ]
+}

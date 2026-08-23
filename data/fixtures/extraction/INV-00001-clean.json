@@ -1,0 +1,281 @@
+{
+  "document_id": "DOC-INV-00001",
+  "invoice_id": "INV-00001",
+  "engine": "tesseract",
+  "engine_version": "5.3.4",
+  "fields": [
+    {
+      "field_path": "vendor_id",
+      "value": "V-10011",
+      "confidence": 0.992,
+      "bbox": {
+        "page": 1,
+        "x0": 0.558,
+        "y0": 0.447,
+        "x1": 0.784,
+        "y1": 0.461
+      },
+      "raw_text": "V-10011"
+    },
+    {
+      "field_path": "company_code",
+      "value": "FR20",
+      "confidence": 0.966,
+      "bbox": {
+        "page": 1,
+        "x0": 0.167,
+        "y0": 0.875,
+        "x1": 0.262,
+        "y1": 0.889
+      },
+      "raw_text": "FR20"
+    },
+    {
+      "field_path": "invoice_date",
+      "value": "2026-07-02",
+      "confidence": 0.935,
+      "bbox": {
+        "page": 1,
+        "x0": 0.309,
+        "y0": 0.327,
+        "x1": 0.529,
+        "y1": 0.345
+      },
+      "raw_text": "2026-07-02"
+    },
+    {
+      "field_path": "vendor_reference",
+      "value": "NL25680",
+      "confidence": 0.929,
+      "bbox": {
+        "page": 1,
+        "x0": 0.111,
+        "y0": 0.75,
+        "x1": 0.341,
+        "y1": 0.773
+      },
+      "raw_text": "NL25680"
+    },
+    {
+      "field_path": "currency",
+      "value": "EUR",
+      "confidence": 0.936,
+      "bbox": {
+        "page": 1,
+        "x0": 0.283,
+        "y0": 0.394,
+        "x1": 0.51,
+        "y1": 0.404
+      },
+      "raw_text": "EUR"
+    },
+    {
+      "field_path": "stated_bank_iban",
+      "value": "NL91ABNA0417164300",
+      "confidence": 0.933,
+      "bbox": {
+        "page": 1,
+        "x0": 0.062,
+        "y0": 0.649,
+        "x1": 0.144,
+        "y1": 0.67
+      },
+      "raw_text": "NL91ABNA0417164300"
+    },
+    {
+      "field_path": "stated_total_net",
+      "value": 33315.37,
+      "confidence": 0.917,
+      "bbox": {
+        "page": 1,
+        "x0": 0.086,
+        "y0": 0.178,
+        "x1": 0.317,
+        "y1": 0.203
+      },
+      "raw_text": "33315.37"
+    },
+    {
+      "field_path": "stated_total_tax",
+      "value": 6329.92,
+      "confidence": 0.945,
+      "bbox": {
+        "page": 1,
+        "x0": 0.324,
+        "y0": 0.795,
+        "x1": 0.472,
+        "y1": 0.822
+      },
+      "raw_text": "6329.92"
+    },
+    {
+      "field_path": "stated_total_gross",
+      "value": 39645.29,
+      "confidence": 0.901,
+      "bbox": {
+        "page": 1,
+        "x0": 0.096,
+        "y0": 0.077,
+        "x1": 0.252,
+        "y1": 0.106
+      },
+      "raw_text": "39645.29"
+    },
+    {
+      "field_path": "lines[0].quantity",
+      "value": 306.0,
+      "confidence": 0.911,
+      "bbox": {
+        "page": 1,
+        "x0": 0.438,
+        "y0": 0.708,
+        "x1": 0.696,
+        "y1": 0.734
+      },
+      "raw_text": "306.0"
+    },
+    {
+      "field_path": "lines[0].po_id",
+      "value": "PO-4500001",
+      "confidence": 0.975,
+      "bbox": {
+        "page": 1,
+        "x0": 0.456,
+        "y0": 0.809,
+        "x1": 0.634,
+        "y1": 0.837
+      },
+      "raw_text": "PO-4500001"
+    },
+    {
+      "field_path": "lines[0].price.list_price",
+      "value": 94.2,
+      "confidence": 0.984,
+      "bbox": {
+        "page": 1,
+        "x0": 0.236,
+        "y0": 0.107,
+        "x1": 0.437,
+        "y1": 0.131
+      },
+      "raw_text": "94.2"
+    },
+    {
+      "field_path": "lines[0].tax_rate",
+      "value": 19.0,
+      "confidence": 0.926,
+      "bbox": {
+        "page": 1,
+        "x0": 0.503,
+        "y0": 0.127,
+        "x1": 0.789,
+        "y1": 0.142
+      },
+      "raw_text": "19.0"
+    },
+    {
+      "field_path": "lines[1].quantity",
+      "value": 376.0,
+      "confidence": 0.993,
+      "bbox": {
+        "page": 1,
+        "x0": 0.546,
+        "y0": 0.321,
+        "x1": 0.647,
+        "y1": 0.344
+      },
+      "raw_text": "376.0"
+    },
+    {
+      "field_path": "lines[1].po_id",
+      "value": "PO-4500001",
+      "confidence": 0.96,
+      "bbox": {
+        "page": 1,
+        "x0": 0.521,
+        "y0": 0.44,
+        "x1": 0.726,
+        "y1": 0.466
+      },
+      "raw_text": "PO-4500001"
+    },
+    {
+      "field_path": "lines[1].price.list_price",
+      "value": 645.0,
+      "confidence": 0.963,
+      "bbox": {
+        "page": 1,
+        "x0": 0.354,
+        "y0": 0.505,
+        "x1": 0.508,
+        "y1": 0.534
+      },
+      "raw_text": "645.0"
+    },
+    {
+      "field_path": "lines[1].tax_rate",
+      "value": 19.0,
+      "confidence": 0.985,
+      "bbox": {
+        "page": 1,
+        "x0": 0.27,
+        "y0": 0.096,
+        "x1": 0.398,
+        "y1": 0.107
+      },
+      "raw_text": "19.0"
+    },
+    {
+      "field_path": "lines[2].quantity",
+      "value": 90.0,
+      "confidence": 0.933,
+      "bbox": {
+        "page": 1,
+        "x0": 0.253,
+        "y0": 0.43,
+        "x1": 0.479,
+        "y1": 0.454
+      },
+      "raw_text": "90.0"
+    },
+    {
+      "field_path": "lines[2].po_id",
+      "value": "PO-4500001",
+      "confidence": 0.963,
+      "bbox": {
+        "page": 1,
+        "x0": 0.352,
+        "y0": 0.158,
+        "x1": 0.552,
+        "y1": 0.174
+      },
+      "raw_text": "PO-4500001"
+    },
+    {
+      "field_path": "lines[2].price.list_price",
+      "value": 410.0,
+      "confidence": 0.923,
+      "bbox": {
+        "page": 1,
+        "x0": 0.289,
+        "y0": 0.437,
+        "x1": 0.434,
+        "y1": 0.448
+      },
+      "raw_text": "410.0"
+    },
+    {
+      "field_path": "lines[2].tax_rate",
+      "value": 19.0,
+      "confidence": 0.97,
+      "bbox": {
+        "page": 1,
+        "x0": 0.291,
+        "y0": 0.617,
+        "x1": 0.43,
+        "y1": 0.641
+      },
+      "raw_text": "19.0"
+    }
+  ]
+}

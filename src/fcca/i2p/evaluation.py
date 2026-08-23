@@ -122,6 +122,16 @@ class EvaluationReport(BaseModel):
     actual_counts: dict[str, int]
     predicted_counts: dict[str, int]
 
+    # ---- extraction
+    extraction_gated: int = Field(
+        default=0,
+        description=(
+            "Invoices escalated because a load-bearing field was read too weakly to "
+            "compute on. Zero on synthetic data, where there is no document and so no "
+            "confidence to gate."
+        ),
+    )
+
     # ---- model usage
     model_calls: int
     invoices_with_findings: int
@@ -177,6 +187,7 @@ def evaluate(
     confidences: list[float] = []
     model_calls = 0
     with_findings = 0
+    gated = 0
     ungrounded = 0
 
     for item in resolved:
@@ -190,6 +201,8 @@ def evaluate(
 
         if item.result.is_exception:
             with_findings += 1
+        if item.result.extraction_gated:
+            gated += 1
         if item.model_called:
             model_calls += 1
         if item.assessment is not None:
@@ -234,6 +247,7 @@ def evaluate(
         per_class=per_class,
         actual_counts=dict(actual_counts),
         predicted_counts=dict(predicted_counts),
+        extraction_gated=gated,
         model_calls=model_calls,
         invoices_with_findings=with_findings,
         ungrounded_citation_invoices=ungrounded,

@@ -225,7 +225,228 @@
       "document_value": 34934.83,
       "exception_type": "bank_details_mismatch"
     },
-    "evaluated_at": "2026-08-23T06:51:32.740042Z"
+    "extraction_gated": false,
+    "extraction_gate_reasons": [],
+    "provenance": {
+      "vendor_id": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "company_code": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "invoice_date": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "received_date": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "vendor_reference": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "currency": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "stated_bank_iban": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "free_text": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "stated_total_net": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "stated_total_tax": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "stated_total_gross": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].description": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].supplier_item_no": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].quantity": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].uom": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].tax_rate": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].po_id": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].po_line": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].gl_account": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].cost_center": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[0].price.list_price": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].description": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].supplier_item_no": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].quantity": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].uom": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].tax_rate": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].po_id": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].po_line": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].gl_account": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].cost_center": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      },
+      "lines[1].price.list_price": {
+        "source": "synthetic",
+        "confidence": null,
+        "bbox": null,
+        "engine": null,
+        "raw_text": null
+      }
+    },
+    "evaluated_at": "2026-08-23T22:27:19.249955Z"
   },
   "routing": {
     "tier": "escalate",
@@ -265,7 +486,7 @@
     "run": {
       "provider": "mock",
       "model": "deterministic-stub-v1",
-      "latency_ms": 10,
+      "latency_ms": 0,
       "prompt_sha256": "4c15fbf0eb4274cb07ba0dd0f25c14a6",
       "input_tokens": null,
       "output_tokens": null,
@@ -276,9 +497,10 @@
     "raw_output": "{\n  \"invoice_id\": \"INV-00330\",\n  \"classification\": \"bank_details_mismatch\",\n  \"proposed_action\": \"refer_to_vendor_master_team\",\n  \"rationale\": \"Bank details on the invoice differ from the vendor master record. Payment must not be made to the stated account without verification through an independently held contact.\",\n  \"evidence\": [\n    {\n      \"field_path\": \"finding[I2P-R-001].detail\"\n    },\n    {\n      \"field_path\": \"invoice.stated_bank_iban\"\n    },\n    {\n      \"field_path\": \"vendor.bank_iban\"\n    }\n  ],\n  \"confidence\": 0.93,\n  \"proposed_cost_center\": null\n}"
   },
   "model_called": true,
+  "posting": null,
   "trace": [
     {
-      "timestamp": "2026-08-23T06:51:32.738945Z",
+      "timestamp": "2026-08-23T22:27:19.248709Z",
       "case_id": "INV-00330",
       "module": "i2p",
       "step_name": "intake",
@@ -297,7 +519,29 @@
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:32.739033Z",
+      "timestamp": "2026-08-23T22:27:19.248775Z",
+      "case_id": "INV-00330",
+      "module": "i2p",
+      "step_name": "extraction_confidence_gate",
+      "actor": "rule",
+      "input_hash": "839360da0c32f825",
+      "outcome": "pass",
+      "summary": "No extracted fields; 10 load-bearing field(s) are synthetic or master data and carry no confidence to gate on.",
+      "rule_id": "I2P-S-02",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "gated": false,
+        "reasons": [],
+        "weakest_field": null,
+        "weakest_confidence": null,
+        "fields_checked": 10,
+        "fields_extracted": 0,
+        "threshold": 0.8
+      }
+    },
+    {
+      "timestamp": "2026-08-23T22:27:19.248831Z",
       "case_id": "INV-00330",
       "module": "i2p",
       "step_name": "classification",
@@ -305,30 +549,33 @@
       "input_hash": "ec84b0df80de0eaf",
       "outcome": "MM",
       "summary": "Classified as MM. At least one line references a purchase order.",
-      "rule_id": "I2P-S-02",
+      "rule_id": "I2P-S-03",
       "model": null,
       "prompt_version": null,
       "detail": {}
     },
     {
-      "timestamp": "2026-08-23T06:51:32.739159Z",
+      "timestamp": "2026-08-23T22:27:19.249193Z",
       "case_id": "INV-00330",
       "module": "i2p",
       "step_name": "duplicate_check",
       "actor": "rule",
-      "input_hash": "7119ea5cda2126c6",
+      "input_hash": "a0ec4953c3cb08a2",
       "outcome": "unique",
-      "summary": "No match among 14 earlier invoice(s) from this vendor.",
-      "rule_id": "I2P-S-03",
+      "summary": "No match among 14 earlier invoice(s) from this vendor, and the posting key is unclaimed.",
+      "rule_id": "I2P-S-04",
       "model": null,
       "prompt_version": null,
       "detail": {
         "candidates": [],
-        "compared_against": 14
+        "compared_against": 14,
+        "posting_key": "V-10017|FR86065|2026",
+        "ledger_hit": null,
+        "ledger_size": 78
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:32.739250Z",
+      "timestamp": "2026-08-23T22:27:19.249272Z",
       "case_id": "INV-00330",
       "module": "i2p",
       "step_name": "master_data_resolution",
@@ -336,7 +583,7 @@
       "input_hash": "78a3b6f56b9f417e",
       "outcome": "resolved",
       "summary": "Resolved 2 of 2 supplier item number(s) to material master.",
-      "rule_id": "I2P-S-04",
+      "rule_id": "I2P-S-05",
       "model": null,
       "prompt_version": null,
       "detail": {
@@ -347,7 +594,7 @@
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:32.739336Z",
+      "timestamp": "2026-08-23T22:27:19.249341Z",
       "case_id": "INV-00330",
       "module": "i2p",
       "step_name": "tax_code",
@@ -355,7 +602,7 @@
       "input_hash": "9b7cb8d7b84b2f88",
       "outcome": "resolved",
       "summary": "Tax codes: line 1: V1, line 2: V0.",
-      "rule_id": "I2P-S-05",
+      "rule_id": "I2P-S-06",
       "model": null,
       "prompt_version": null,
       "detail": {
@@ -366,7 +613,7 @@
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:32.739419Z",
+      "timestamp": "2026-08-23T22:27:19.249406Z",
       "case_id": "INV-00330",
       "module": "i2p",
       "step_name": "gl_derivation",
@@ -374,7 +621,7 @@
       "input_hash": "e70495673597051d",
       "outcome": "stated",
       "summary": "GL account stated on every line.",
-      "rule_id": "I2P-S-06",
+      "rule_id": "I2P-S-07",
       "model": null,
       "prompt_version": null,
       "detail": {
@@ -391,7 +638,7 @@
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:32.739506Z",
+      "timestamp": "2026-08-23T22:27:19.249476Z",
       "case_id": "INV-00330",
       "module": "i2p",
       "step_name": "cost_center_derivation",
@@ -399,7 +646,7 @@
       "input_hash": "102925f7164df916",
       "outcome": "resolved",
       "summary": "Cost centre resolved on every line.",
-      "rule_id": "I2P-S-07",
+      "rule_id": "I2P-S-08",
       "model": null,
       "prompt_version": null,
       "detail": {
@@ -416,7 +663,7 @@
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:32.739610Z",
+      "timestamp": "2026-08-23T22:27:19.249569Z",
       "case_id": "INV-00330",
       "module": "i2p",
       "step_name": "three_way_match",
@@ -424,13 +671,13 @@
       "input_hash": "52a5b8b46d67d73a",
       "outcome": "matched",
       "summary": "Three-way match applicable to 2 line(s): purchase order, goods receipt and invoice.",
-      "rule_id": "I2P-S-08",
+      "rule_id": "I2P-S-09",
       "model": null,
       "prompt_version": null,
       "detail": {}
     },
     {
-      "timestamp": "2026-08-23T06:51:32.739722Z",
+      "timestamp": "2026-08-23T22:27:19.249657Z",
       "case_id": "INV-00330",
       "module": "i2p",
       "step_name": "quantity_check",
@@ -438,13 +685,13 @@
       "input_hash": "e3741473c0b0ec62",
       "outcome": "computed",
       "summary": "line 1: invoiced 46,000.000 of 46,000.000 available; line 2: invoiced 155.000 of 155.000 available",
-      "rule_id": "I2P-S-09",
+      "rule_id": "I2P-S-10",
       "model": null,
       "prompt_version": null,
       "detail": {}
     },
     {
-      "timestamp": "2026-08-23T06:51:32.739848Z",
+      "timestamp": "2026-08-23T22:27:19.249773Z",
       "case_id": "INV-00330",
       "module": "i2p",
       "step_name": "price_check",
@@ -452,13 +699,13 @@
       "input_hash": "a91c5fcd4a0f0285",
       "outcome": "computed",
       "summary": "line 1: normalised 0.380451 vs 0.380451 (+0.00%), naive comparison would show +0.0000; line 2: normalised 91.025460 vs 91.025460 (+0.00%), naive comparison would show +0.0000",
-      "rule_id": "I2P-S-10",
+      "rule_id": "I2P-S-11",
       "model": null,
       "prompt_version": null,
       "detail": {}
     },
     {
-      "timestamp": "2026-08-23T06:51:32.739942Z",
+      "timestamp": "2026-08-23T22:27:19.249852Z",
       "case_id": "INV-00330",
       "module": "i2p",
       "step_name": "tolerance_evaluation",
@@ -466,7 +713,7 @@
       "input_hash": "212c5cbb2a42ad97",
       "outcome": "within_tolerance",
       "summary": "All residuals inside tolerance (2.0% or 25.00).",
-      "rule_id": "I2P-S-11",
+      "rule_id": "I2P-S-12",
       "model": null,
       "prompt_version": null,
       "detail": {
@@ -474,7 +721,7 @@
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:32.740055Z",
+      "timestamp": "2026-08-23T22:27:19.249969Z",
       "case_id": "INV-00330",
       "module": "i2p",
       "step_name": "routing_decision",
@@ -482,7 +729,7 @@
       "input_hash": "c99103c35d8ee398",
       "outcome": "escalate",
       "summary": "1 finding(s); primary exception bank_details_mismatch. Rules alone route to escalate.",
-      "rule_id": "I2P-S-12",
+      "rule_id": "I2P-S-13",
       "model": null,
       "prompt_version": null,
       "detail": {
@@ -502,7 +749,7 @@
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:32.751388Z",
+      "timestamp": "2026-08-23T22:27:19.250585Z",
       "case_id": "INV-00330",
       "module": "i2p",
       "step_name": "exception_assessment",
@@ -527,7 +774,7 @@
       }
     },
     {
-      "timestamp": "2026-08-23T06:51:32.751805Z",
+      "timestamp": "2026-08-23T22:27:19.250680Z",
       "case_id": "INV-00330",
       "module": "i2p",
       "step_name": "routing_decision",

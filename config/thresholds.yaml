@@ -131,8 +131,12 @@ i2p:
   extraction_dropout_rate: 0.0
   extraction_digit_confusion_rate: 0.0
 
-  # Posting. Both targets are dry-run only and neither can dispatch.
-  posting_target: simulated
+  # Posting. Both targets are dry-run only and neither can dispatch. The SAP
+  # adapter is the default because the mapping is the part with review value:
+  # `simulated` records that a posting would have happened, `sap-odata` says
+  # exactly which field would have gone where, which is what someone who knows
+  # the target system can actually disagree with.
+  posting_target: sap-odata
 
   auto_clear_max_value: 5000.0
   auto_clear_min_confidence: 0.85

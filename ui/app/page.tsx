@@ -25,6 +25,10 @@ export default function QueuePage() {
           <dd>{report.model_calls}</dd>
         </div>
         <div className="stat">
+          <dt>Extraction gated</dt>
+          <dd>{report.extraction_gated}</dd>
+        </div>
+        <div className="stat">
           <dt>False auto-post</dt>
           <dd className="is-zero">{report.false_auto_post_count}</dd>
         </div>

@@ -116,6 +116,8 @@ class InvoiceResolver:
         settings: Settings | None = None,
         repository: I2PRepository | None = None,
         trace: TraceWriter | None = None,
+        source: InvoiceSource | None = None,
+        ledger: PostedKeyLedger | None = None,
     ) -> InvoiceResolver:
         settings = settings or get_settings()
         return cls(
@@ -123,6 +125,8 @@ class InvoiceResolver:
             settings=settings,
             agent=ExceptionAgent.build(provider, model_name, settings),
             trace=trace,
+            source=source,
+            ledger=ledger,
         )
 
     @property
