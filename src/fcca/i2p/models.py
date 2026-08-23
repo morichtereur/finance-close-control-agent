@@ -32,6 +32,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from fcca.shared.models import RiskLevel
+from fcca.shared.routing import RoutingDecision
 
 # ---------------------------------------------------------------------------
 # Vocabularies
@@ -419,6 +420,9 @@ class InvoiceResult(BaseModel):
     resolutions: tuple[LineResolution, ...]
     findings: tuple[ExceptionFinding, ...]
     duplicate_candidates: tuple[str, ...] = ()
+    routing: RoutingDecision = Field(
+        description="The tier the deterministic layer alone would assign, before any model."
+    )
     evaluated_at: datetime
 
     @property
