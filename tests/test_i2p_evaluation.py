@@ -94,6 +94,30 @@ class TestTheSafetyProperty:
         assert "return 1" in source
 
 
+def _report(**overrides: object) -> EvaluationReport:
+    """A minimal report whose only interesting fields are the ones under test."""
+    defaults: dict[str, object] = {
+        "provider": "mock",
+        "model": "stub",
+        "invoices": 334,
+        "tier_counts": {"auto_clear": 334},
+        "touchless_rate": 1.0,
+        "false_auto_post_count": 0,
+        "false_auto_post_ids": [],
+        "confusion": {a: dict.fromkeys(CLASSES, 0) for a in CLASSES},
+        "per_class": [],
+        "actual_counts": {},
+        "predicted_counts": {},
+        "model_calls": 0,
+        "invoices_with_findings": 0,
+        "ungrounded_citation_invoices": 0,
+        "mean_confidence": None,
+        "settings_snapshot": {},
+    }
+    defaults.update(overrides)
+    return EvaluationReport.model_validate(defaults)
+
+
 # ===========================================================================
 class TestTouchlessRate:
     def test_it_is_the_auto_clear_share_and_nothing_else(self, report: EvaluationReport) -> None:
@@ -117,8 +141,65 @@ class TestModelUsage:
         """The touchless rate is a property of the rules, not of a model."""
         assert report.model_calls == report.invoices_with_findings
 
-    def test_no_invoice_cited_evidence_it_was_not_given(self, report: EvaluationReport) -> None:
+    def test_the_stub_cites_only_what_it_was_handed(self, report: EvaluationReport) -> None:
+        """True of the stub by construction, and not a property of the system.
+
+        A rule engine can only cite the fields it was passed. A live model cannot
+        be held to this -- the first Bedrock run cited an absent field on 13% of
+        assessed invoices -- which is why the shipped gate is a rate limit and not
+        this assertion. Keeping both is the point: this pins the stub, the limit
+        governs everything else.
+        """
         assert report.ungrounded_citation_invoices == 0
+        assert report.is_grounded is True
+
+    def test_a_rate_above_the_limit_fails_the_run(self) -> None:
+        over = _report(
+            invoices_with_findings=100,
+            ungrounded_citation_invoices=26,
+            settings_snapshot={"max_ungrounded_citation_rate": 0.25},
+        )
+        assert over.ungrounded_citation_rate == pytest.approx(0.26)
+        assert over.is_grounded is False
+        assert over.is_safe is True, "grounding and safety are separate failures"
+
+    def test_the_limit_is_inclusive_at_its_boundary(self) -> None:
+        at = _report(
+            invoices_with_findings=100,
+            ungrounded_citation_invoices=25,
+            settings_snapshot={"max_ungrounded_citation_rate": 0.25},
+        )
+        assert at.is_grounded is True
+
+    def test_the_observed_live_rate_sits_inside_the_shipped_limit(self) -> None:
+        """15 of 114 on Sonnet 4.5. A limit that failed the run it was written
+        after would be a limit chosen to make a point rather than to catch drift."""
+        from fcca.shared.config import I2PConfig
+
+        live = _report(
+            invoices_with_findings=114,
+            ungrounded_citation_invoices=15,
+            settings_snapshot={
+                "max_ungrounded_citation_rate": I2PConfig().max_ungrounded_citation_rate
+            },
+        )
+        assert live.is_grounded is True
+
+    def test_a_report_written_before_the_limit_existed_still_reads(self) -> None:
+        """Old results/ files carry no limit; rereading one must not crash or lie."""
+        legacy = _report(
+            invoices_with_findings=114,
+            ungrounded_citation_invoices=99,
+            settings_snapshot={},
+        )
+        assert legacy.is_grounded is True
+
+    def test_the_cli_exits_nonzero_when_grounding_is_out_of_limit(self) -> None:
+        import inspect
+
+        from fcca.i2p import evaluate as module
+
+        assert "if not report.is_grounded" in inspect.getsource(module.main)
 
 
 # ===========================================================================
