@@ -6,6 +6,7 @@
     fcca evaluate --provider mock
     fcca i2p-generate-data
     fcca i2p-run --invoice INV-00001
+    fcca i2p-evaluate --provider mock
     fcca audit --exception EXC-0042
     fcca review --exception EXC-0042 --action approved --reviewer u.klein
     fcca trace --case EXC-0042
@@ -37,6 +38,7 @@ SUBCOMMANDS = {
     "evaluate": "fcca.close.evaluate",
     "i2p-generate-data": "fcca.i2p.generate_data",
     "i2p-run": "fcca.i2p.run_invoice",
+    "i2p-evaluate": "fcca.i2p.evaluate",
 }
 
 
