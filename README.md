@@ -306,6 +306,15 @@ the system. It was a property of the stub. A rule engine cites only what it was 
 occasionally reaches for a field it expects to exist. The check that catches it is code, which is why the
 count is reported rather than discovered.
 
+The rate is now bounded rather than merely printed. `i2p.max_ungrounded_citation_rate` defaults to 25% of
+the invoices that received a model call, and `fcca i2p-evaluate` exits nonzero above it. The denominator is
+the assessed invoices rather than all 334, because a share of the whole dataset would fall on its own as
+the exception mix thins and would hide a worsening model behind a quieter month. The limit is deliberately
+not zero: the observed 13.2% is what a strong model does on a first run, and a gate that fails every run is
+a gate somebody switches off. It sits separately from the false-auto-post gate, which has no acceptable
+nonzero value, because one of these is money leaving the building and the other is a citation that was
+deleted before anything read it.
+
 **Reading it honestly.** Every class scoring 1.000 measures pipeline integrity, not difficulty. The labels are
 derived from the same scenario definitions the generator works from, so this says the pipeline carries a known
 population through correctly. It is not evidence about a real ledger, and a 1.000 obtained from a real AP
