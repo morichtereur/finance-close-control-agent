@@ -1,0 +1,220 @@
+{
+  "provider": "mock",
+  "model": "deterministic-stub-v1",
+  "invoices": 334,
+  "tier_counts": {
+    "escalate": 91,
+    "propose_and_approve": 165,
+    "auto_clear": 78
+  },
+  "touchless_rate": 0.23353293413173654,
+  "false_auto_post_count": 0,
+  "false_auto_post_ids": [],
+  "confusion": {
+    "no_exception": {
+      "no_exception": 220,
+      "bank_details_mismatch": 0,
+      "duplicate_invoice": 0,
+      "price_variance": 0,
+      "quantity_variance": 0,
+      "missing_or_delayed_goods_receipt": 0,
+      "cost_center_missing": 0,
+      "gl_account_missing": 0
+    },
+    "bank_details_mismatch": {
+      "no_exception": 0,
+      "bank_details_mismatch": 12,
+      "duplicate_invoice": 0,
+      "price_variance": 0,
+      "quantity_variance": 0,
+      "missing_or_delayed_goods_receipt": 0,
+      "cost_center_missing": 0,
+      "gl_account_missing": 0
+    },
+    "duplicate_invoice": {
+      "no_exception": 0,
+      "bank_details_mismatch": 0,
+      "duplicate_invoice": 14,
+      "price_variance": 0,
+      "quantity_variance": 0,
+      "missing_or_delayed_goods_receipt": 0,
+      "cost_center_missing": 0,
+      "gl_account_missing": 0
+    },
+    "price_variance": {
+      "no_exception": 0,
+      "bank_details_mismatch": 0,
+      "duplicate_invoice": 0,
+      "price_variance": 24,
+      "quantity_variance": 0,
+      "missing_or_delayed_goods_receipt": 0,
+      "cost_center_missing": 0,
+      "gl_account_missing": 0
+    },
+    "quantity_variance": {
+      "no_exception": 0,
+      "bank_details_mismatch": 0,
+      "duplicate_invoice": 0,
+      "price_variance": 0,
+      "quantity_variance": 0,
+      "missing_or_delayed_goods_receipt": 0,
+      "cost_center_missing": 0,
+      "gl_account_missing": 0
+    },
+    "missing_or_delayed_goods_receipt": {
+      "no_exception": 0,
+      "bank_details_mismatch": 0,
+      "duplicate_invoice": 0,
+      "price_variance": 0,
+      "quantity_variance": 0,
+      "missing_or_delayed_goods_receipt": 32,
+      "cost_center_missing": 0,
+      "gl_account_missing": 0
+    },
+    "cost_center_missing": {
+      "no_exception": 0,
+      "bank_details_mismatch": 0,
+      "duplicate_invoice": 0,
+      "price_variance": 0,
+      "quantity_variance": 0,
+      "missing_or_delayed_goods_receipt": 0,
+      "cost_center_missing": 16,
+      "gl_account_missing": 0
+    },
+    "gl_account_missing": {
+      "no_exception": 0,
+      "bank_details_mismatch": 0,
+      "duplicate_invoice": 0,
+      "price_variance": 0,
+      "quantity_variance": 0,
+      "missing_or_delayed_goods_receipt": 0,
+      "cost_center_missing": 0,
+      "gl_account_missing": 16
+    }
+  },
+  "per_class": [
+    {
+      "exception_type": "no_exception",
+      "support": 220,
+      "predicted": 220,
+      "true_positives": 220,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "exception_type": "bank_details_mismatch",
+      "support": 12,
+      "predicted": 12,
+      "true_positives": 12,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "exception_type": "duplicate_invoice",
+      "support": 14,
+      "predicted": 14,
+      "true_positives": 14,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "exception_type": "price_variance",
+      "support": 24,
+      "predicted": 24,
+      "true_positives": 24,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "exception_type": "quantity_variance",
+      "support": 0,
+      "predicted": 0,
+      "true_positives": 0,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0
+    },
+    {
+      "exception_type": "missing_or_delayed_goods_receipt",
+      "support": 32,
+      "predicted": 32,
+      "true_positives": 32,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "exception_type": "cost_center_missing",
+      "support": 16,
+      "predicted": 16,
+      "true_positives": 16,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    {
+      "exception_type": "gl_account_missing",
+      "support": 16,
+      "predicted": 16,
+      "true_positives": 16,
+      "false_positives": 0,
+      "false_negatives": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    }
+  ],
+  "actual_counts": {
+    "missing_or_delayed_goods_receipt": 32,
+    "no_exception": 220,
+    "duplicate_invoice": 14,
+    "price_variance": 24,
+    "gl_account_missing": 16,
+    "cost_center_missing": 16,
+    "bank_details_mismatch": 12
+  },
+  "predicted_counts": {
+    "missing_or_delayed_goods_receipt": 32,
+    "no_exception": 220,
+    "duplicate_invoice": 14,
+    "price_variance": 24,
+    "gl_account_missing": 16,
+    "cost_center_missing": 16,
+    "bank_details_mismatch": 12
+  },
+  "model_calls": 114,
+  "invoices_with_findings": 114,
+  "ungrounded_citation_invoices": 0,
+  "mean_confidence": 0.8448245614035088,
+  "settings_snapshot": {
+    "price_tolerance_pct": 2.0,
+    "price_tolerance_abs": 25.0,
+    "quantity_tolerance_pct": 0.0,
+    "gr_grace_days": 3,
+    "auto_clear_max_value": 5000.0,
+    "max_ungrounded_citation_rate": 0.25,
+    "auto_clear_min_confidence": 0.85,
+    "propose_max_value": 50000.0,
+    "duplicate_window_days": 90,
+    "random_seed": 20260816
+  },
+  "exact_agreement": 1.0
+}

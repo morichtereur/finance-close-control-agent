@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from fcca.config import Settings
-from fcca.controls import journal_checks as jc
-from fcca.models import ControlDecision, GroundingReport, PolicyEvidence
-from fcca.workflow.gate import apply_gate, failed_case_gate
-from fcca.workflow.grounding import ground_citations
+from fcca.close.controls import journal_checks as jc
+from fcca.close.models import ControlDecision, GroundingReport, PolicyEvidence
+from fcca.close.workflow.gate import apply_gate, failed_case_gate
+from fcca.close.workflow.grounding import ground_citations
+from fcca.shared.config import Settings
 from tests.conftest import make_entry
 
 

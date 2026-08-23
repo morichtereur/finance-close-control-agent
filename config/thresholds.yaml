@@ -1,0 +1,125 @@
+# Business rules for both process modules.
+#
+# This file is the control configuration. Every number here changes what the
+# system flags, what it clears without a person, and what it escalates — so a
+# change to this file is a change to a control, and should be reviewed like one.
+#
+# Any value can be overridden for a single run with the matching environment
+# variable (shown in brackets), which is why the audit trail records the values
+# actually in force rather than a pointer to this file.
+#
+# Types and bounds are enforced in src/fcca/shared/config.py. A negative
+# tolerance or a confidence of 4.0 fails at start-up rather than silently
+# changing what gets approved.
+
+# ---------------------------------------------------------------------------
+# Record-to-report: month-end close
+# ---------------------------------------------------------------------------
+
+# Group materiality for the close cycle, in reporting currency. [FCCA_MATERIALITY_GROUP]
+materiality_group: 250000.0
+
+# Single-entry amount requiring documented second-level approval. [FCCA_JOURNAL_APPROVAL_THRESHOLD]
+journal_approval_threshold: 50000.0
+
+# Below this amount an item is not escalated on amount alone. [FCCA_TRIVIAL_THRESHOLD]
+trivial_threshold: 5000.0
+
+# Postings outside these hours are flagged as out-of-hours activity.
+# [FCCA_BUSINESS_HOURS_START] / [FCCA_BUSINESS_HOURS_END]
+business_hours_start: 7
+business_hours_end: 20
+
+# Days between document date and posting date that count as late. [FCCA_LATE_POSTING_DAYS]
+late_posting_days: 5
+
+# Accounts the control catalogue treats as inherently higher risk.
+# [FCCA_HIGH_RISK_ACCOUNTS]
+high_risk_accounts:
+  - "510000"
+  - "610000"
+  - "289000"
+  - "199000"
+  - "480000"
+
+# ---------------------------------------------------------------------------
+# Human-in-the-loop gate (close module)
+# ---------------------------------------------------------------------------
+
+# A recommendation below this confidence always goes to a person.
+# [FCCA_AUTO_APPROVE_MIN_CONFIDENCE]
+auto_approve_min_confidence: 0.80
+
+# Grounded policy citations required before a recommendation may stand
+# unreviewed. [FCCA_AUTO_APPROVE_MIN_EVIDENCE]
+auto_approve_min_evidence: 1
+
+# ---------------------------------------------------------------------------
+# Policy retrieval (close module)
+# ---------------------------------------------------------------------------
+
+retrieval_top_k: 4          # [FCCA_RETRIEVAL_TOP_K]
+retrieval_min_score: 0.05   # [FCCA_RETRIEVAL_MIN_SCORE]
+chunk_size: 900             # [FCCA_CHUNK_SIZE]
+chunk_overlap: 120          # [FCCA_CHUNK_OVERLAP]
+
+# ---------------------------------------------------------------------------
+# Synthetic data generation
+# ---------------------------------------------------------------------------
+#
+# The seed is what makes every number in the README reproducible. Changing it
+# changes the dataset, and therefore the measured metrics.
+
+random_seed: 20260816       # [FCCA_RANDOM_SEED]
+n_journal_entries: 800      # [FCCA_N_JOURNAL_ENTRIES]
+n_exceptions: 60            # [FCCA_N_EXCEPTIONS]
+
+# ---------------------------------------------------------------------------
+# Inference
+# ---------------------------------------------------------------------------
+
+temperature: 0.0            # [FCCA_TEMPERATURE]
+max_tokens: 1200            # [FCCA_MAX_TOKENS]
+request_timeout_s: 60       # [FCCA_REQUEST_TIMEOUT_S]
+max_parse_retries: 1        # [FCCA_MAX_PARSE_RETRIES]
+
+# 'json_schema_prompt' is identical on every provider; 'native_tools' delegates
+# to the provider's own structured-output API. [FCCA_STRUCTURED_OUTPUT_MODE]
+structured_output_mode: json_schema_prompt
+
+# ---------------------------------------------------------------------------
+# Invoice-to-pay: three-way match
+# ---------------------------------------------------------------------------
+#
+# These are the numbers that decide whether an invoice posts without a person
+# looking at it. Read them as a control, because that is what they are.
+
+i2p:
+  # A line passes the price check if the residual is inside EITHER limit. The
+  # percentage alone would block a 0.40 difference on a 1.20 unit price; the
+  # absolute alone would wave through 400 on a 20,000 line. Requiring both to
+  # be breached before flagging is what keeps the exception queue about real
+  # pricing disputes rather than rounding.
+  price_tolerance_pct: 2.0
+  price_tolerance_abs: 25.0
+
+  # Zero. Paying for more than was received is the specific failure this
+  # process exists to prevent, so there is no band in which it is acceptable.
+  quantity_tolerance_pct: 0.0
+
+  # Invoices routinely arrive before the receiving clerk has posted the goods
+  # receipt. Below this age that is ordinary timing, not an exception.
+  gr_grace_days: 3
+
+  # Duplicate detection. The reference similarity is fuzzy because "INV-4471"
+  # and "INV 4471" are the same document, and vendors are inconsistent.
+  duplicate_window_days: 90
+  duplicate_amount_tolerance: 0.01
+  duplicate_reference_similarity: 0.85
+
+  # Routing limits. Value bands, not just confidence: a clean match on a small
+  # invoice is a different risk from a clean match on a large one, and the
+  # model's confidence says nothing about the size of the mistake.
+  auto_clear_max_value: 5000.0
+  auto_clear_min_confidence: 0.85
+  propose_max_value: 50000.0

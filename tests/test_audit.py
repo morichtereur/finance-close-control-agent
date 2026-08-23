@@ -7,12 +7,12 @@ from pathlib import Path
 
 import pytest
 
-from fcca.audit.logger import AuditLog
-from fcca.config import Settings
-from fcca.errors import AuditError
-from fcca.evaluation.benchmark import load_labels
-from fcca.models import ReviewRecord
-from fcca.workflow.control_agent import ControlAgent
+from fcca.close.evaluation.benchmark import load_labels
+from fcca.close.models import ReviewRecord
+from fcca.close.workflow.control_agent import ControlAgent
+from fcca.shared.audit.logger import AuditLog
+from fcca.shared.config import Settings
+from fcca.shared.errors import AuditError
 
 REQUIRED_FIELDS = (
     "timestamp",

@@ -1,0 +1,460 @@
+{
+  "invoice_id": "INV-00314",
+  "invoice": {
+    "invoice_id": "INV-00314",
+    "vendor_id": "V-10013",
+    "company_code": "DE10",
+    "category": "MM",
+    "invoice_date": "2026-06-20",
+    "received_date": "2026-06-25",
+    "vendor_reference": "GB83798",
+    "currency": "GBP",
+    "lines": [
+      {
+        "line_no": 1,
+        "description": "Abrasive disc 125mm",
+        "supplier_item_no": "AR-AD125",
+        "quantity": 344.0,
+        "uom": "PCE",
+        "price": {
+          "list_price": 21.5,
+          "price_unit": 10,
+          "discount_pct": [
+            7.3,
+            4.37
+          ],
+          "surcharge_per_unit": 0.0
+        },
+        "tax_rate": 19.0,
+        "po_id": "PO-4500254",
+        "po_line": 10,
+        "gl_account": "400300",
+        "cost_center": "CC-1100"
+      }
+    ],
+    "stated_bank_iban": "GB29NWBK60161331926819",
+    "free_text": "",
+    "stated_total_net": 655.65,
+    "stated_total_tax": 124.57,
+    "stated_total_gross": 780.22
+  },
+  "vendor": {
+    "vendor_id": "V-10013",
+    "name": "Halstead Precision Ltd",
+    "country": "GB",
+    "currency": "GBP",
+    "payment_terms": "NT30",
+    "tax_id": "GB980780684",
+    "bank_iban": "GB29NWBK60161331926819",
+    "bank_name": "Northgate Commercial",
+    "is_blocked": false
+  },
+  "purchase_orders": {
+    "PO-4500254": {
+      "po_id": "PO-4500254",
+      "vendor_id": "V-10013",
+      "company_code": "DE10",
+      "po_date": "2026-06-07",
+      "currency": "GBP",
+      "lines": [
+        {
+          "po_line": 10,
+          "material_id": "MAT-300121",
+          "supplier_item_no": "AR-AD125",
+          "quantity": 344.0,
+          "uom": "PCE",
+          "price": {
+            "list_price": 21.5,
+            "price_unit": 10,
+            "discount_pct": [
+              7.3,
+              4.37
+            ],
+            "surcharge_per_unit": 0.0
+          },
+          "tax_code": "V1",
+          "gl_account": "400300",
+          "cost_center": "CC-1100"
+        }
+      ]
+    }
+  },
+  "goods_receipts": [],
+  "result": {
+    "invoice_id": "INV-00314",
+    "category": "MM",
+    "document_value": 780.22,
+    "currency": "GBP",
+    "resolutions": [
+      {
+        "line_no": 1,
+        "material_id": "MAT-300121",
+        "material_source": "supplier_item_no",
+        "tax_code": "V1",
+        "gl_account": "400300",
+        "gl_source": "stated",
+        "cost_center": "CC-1100",
+        "cost_center_source": "stated",
+        "price": {
+          "po_unit_price_normalised": 1.905954,
+          "invoice_unit_price_normalised": 1.905954,
+          "residual_abs": 0.0,
+          "residual_pct": 0.0,
+          "line_residual_abs": 0.0,
+          "naive_residual_abs": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 2.0,
+          "tolerance_abs": 25.0
+        },
+        "quantity": {
+          "invoiced_base_qty": 344.0,
+          "received_base_qty": 0.0,
+          "open_base_qty": 0.0,
+          "residual_base_qty": 344.0,
+          "within_tolerance": false,
+          "tolerance_pct": 0.0
+        }
+      }
+    ],
+    "findings": [
+      {
+        "rule_id": "I2P-R-007",
+        "exception_type": "missing_or_delayed_goods_receipt",
+        "line_no": 1,
+        "severity": "high",
+        "detail": "No goods receipt has been posted against this purchase-order line.",
+        "evidence": {
+          "received_by_cutoff": 0,
+          "received_total": 0,
+          "grace_days": 3,
+          "receipt_eventually_posted": false
+        }
+      }
+    ],
+    "duplicate_candidates": [],
+    "routing": {
+      "tier": "escalate",
+      "reasons": [
+        "Exception 'missing_or_delayed_goods_receipt' is rated high severity."
+      ],
+      "deciding_reason": "Exception 'missing_or_delayed_goods_receipt' is rated high severity.",
+      "model_confidence": null,
+      "document_value": 780.22,
+      "exception_type": "missing_or_delayed_goods_receipt"
+    },
+    "evaluated_at": "2026-08-23T06:51:32.682133Z"
+  },
+  "routing": {
+    "tier": "escalate",
+    "reasons": [
+      "Exception 'missing_or_delayed_goods_receipt' is rated high severity."
+    ],
+    "deciding_reason": "Exception 'missing_or_delayed_goods_receipt' is rated high severity.",
+    "model_confidence": 0.9,
+    "document_value": 780.22,
+    "exception_type": "missing_or_delayed_goods_receipt"
+  },
+  "assessment": {
+    "assessment": {
+      "invoice_id": "INV-00314",
+      "classification": "missing_or_delayed_goods_receipt",
+      "proposed_action": "request_goods_receipt",
+      "rationale": "No goods receipt has been posted against this purchase-order line.",
+      "evidence": [
+        {
+          "field_path": "finding[I2P-R-007].detail"
+        },
+        {
+          "field_path": "line[1].price.residual_pct"
+        },
+        {
+          "field_path": "line[1].price.line_residual_abs"
+        },
+        {
+          "field_path": "line[1].quantity.residual_base_qty"
+        }
+      ],
+      "confidence": 0.9,
+      "proposed_cost_center": null
+    },
+    "grounding": {
+      "total_citations": 4,
+      "grounded_citations": 4,
+      "ungrounded_citations": []
+    },
+    "run": {
+      "provider": "mock",
+      "model": "deterministic-stub-v1",
+      "latency_ms": 0,
+      "prompt_sha256": "12c687f394e4c4d05940dbe0f8f217b6",
+      "input_tokens": null,
+      "output_tokens": null,
+      "estimated_cost_usd": null,
+      "parse_attempts": 1,
+      "structured_output_mode": "json_schema_prompt"
+    },
+    "raw_output": "{\n  \"invoice_id\": \"INV-00314\",\n  \"classification\": \"missing_or_delayed_goods_receipt\",\n  \"proposed_action\": \"request_goods_receipt\",\n  \"rationale\": \"No goods receipt has been posted against this purchase-order line.\",\n  \"evidence\": [\n    {\n      \"field_path\": \"finding[I2P-R-007].detail\"\n    },\n    {\n      \"field_path\": \"line[1].price.residual_pct\"\n    },\n    {\n      \"field_path\": \"line[1].price.line_residual_abs\"\n    },\n    {\n      \"field_path\": \"line[1].quantity.residual_base_qty\"\n    }\n  ],\n  \"confidence\": 0.9,\n  \"proposed_cost_center\": null\n}"
+  },
+  "model_called": true,
+  "trace": [
+    {
+      "timestamp": "2026-08-23T06:51:32.680911Z",
+      "case_id": "INV-00314",
+      "module": "i2p",
+      "step_name": "intake",
+      "actor": "rule",
+      "input_hash": "5299ac8f4e09ce6b",
+      "outcome": "loaded",
+      "summary": "Received INV-00314 from V-10013, GBP 780.22, 1 line(s).",
+      "rule_id": "I2P-S-01",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "vendor_reference": "GB83798",
+        "invoice_date": "2026-06-20",
+        "received_date": "2026-06-25",
+        "gross": 780.22
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.681032Z",
+      "case_id": "INV-00314",
+      "module": "i2p",
+      "step_name": "classification",
+      "actor": "rule",
+      "input_hash": "399e26ee891471e7",
+      "outcome": "MM",
+      "summary": "Classified as MM. At least one line references a purchase order.",
+      "rule_id": "I2P-S-02",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.681195Z",
+      "case_id": "INV-00314",
+      "module": "i2p",
+      "step_name": "duplicate_check",
+      "actor": "rule",
+      "input_hash": "ba000e36a9cbe660",
+      "outcome": "unique",
+      "summary": "No match among 19 earlier invoice(s) from this vendor.",
+      "rule_id": "I2P-S-03",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "candidates": [],
+        "compared_against": 19
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.681316Z",
+      "case_id": "INV-00314",
+      "module": "i2p",
+      "step_name": "master_data_resolution",
+      "actor": "rule",
+      "input_hash": "a750376c1f9de585",
+      "outcome": "resolved",
+      "summary": "Resolved 1 of 1 supplier item number(s) to material master.",
+      "rule_id": "I2P-S-04",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "materials": {
+          "1": "MAT-300121"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.681417Z",
+      "case_id": "INV-00314",
+      "module": "i2p",
+      "step_name": "tax_code",
+      "actor": "rule",
+      "input_hash": "0043921710fdebfc",
+      "outcome": "resolved",
+      "summary": "Tax codes: line 1: V1.",
+      "rule_id": "I2P-S-05",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "tax_codes": {
+          "1": "V1"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.681509Z",
+      "case_id": "INV-00314",
+      "module": "i2p",
+      "step_name": "gl_derivation",
+      "actor": "rule",
+      "input_hash": "4026568205fb1f68",
+      "outcome": "stated",
+      "summary": "GL account stated on every line.",
+      "rule_id": "I2P-S-06",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "gl_accounts": {
+          "1": [
+            "400300",
+            "stated"
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.681604Z",
+      "case_id": "INV-00314",
+      "module": "i2p",
+      "step_name": "cost_center_derivation",
+      "actor": "rule",
+      "input_hash": "5c763b32d1f877b5",
+      "outcome": "resolved",
+      "summary": "Cost centre resolved on every line.",
+      "rule_id": "I2P-S-07",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "cost_centers": {
+          "1": [
+            "CC-1100",
+            "stated"
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.681713Z",
+      "case_id": "INV-00314",
+      "module": "i2p",
+      "step_name": "three_way_match",
+      "actor": "rule",
+      "input_hash": "1f301ccf1153d69f",
+      "outcome": "matched",
+      "summary": "Three-way match applicable to 1 line(s): purchase order, goods receipt and invoice.",
+      "rule_id": "I2P-S-08",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.681826Z",
+      "case_id": "INV-00314",
+      "module": "i2p",
+      "step_name": "quantity_check",
+      "actor": "rule",
+      "input_hash": "6a58a232514eb5b6",
+      "outcome": "computed",
+      "summary": "line 1: invoiced 344.000 of 0.000 available",
+      "rule_id": "I2P-S-09",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.681937Z",
+      "case_id": "INV-00314",
+      "module": "i2p",
+      "step_name": "price_check",
+      "actor": "rule",
+      "input_hash": "96a8ad0798370962",
+      "outcome": "computed",
+      "summary": "line 1: normalised 1.905954 vs 1.905954 (+0.00%), naive comparison would show +0.0000",
+      "rule_id": "I2P-S-10",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.682028Z",
+      "case_id": "INV-00314",
+      "module": "i2p",
+      "step_name": "tolerance_evaluation",
+      "actor": "rule",
+      "input_hash": "212c5cbb2a42ad97",
+      "outcome": "within_tolerance",
+      "summary": "All residuals inside tolerance (2.0% or 25.00).",
+      "rule_id": "I2P-S-11",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "breached_lines": []
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.682145Z",
+      "case_id": "INV-00314",
+      "module": "i2p",
+      "step_name": "routing_decision",
+      "actor": "rule",
+      "input_hash": "c6c6f8b893079965",
+      "outcome": "escalate",
+      "summary": "1 finding(s); primary exception missing_or_delayed_goods_receipt. Rules alone route to escalate.",
+      "rule_id": "I2P-S-12",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "tier": "escalate",
+        "routing_reasons": [
+          "Exception 'missing_or_delayed_goods_receipt' is rated high severity."
+        ],
+        "findings": [
+          {
+            "rule_id": "I2P-R-007",
+            "exception_type": "missing_or_delayed_goods_receipt",
+            "line_no": 1,
+            "severity": "high",
+            "detail": "No goods receipt has been posted against this purchase-order line."
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.682976Z",
+      "case_id": "INV-00314",
+      "module": "i2p",
+      "step_name": "exception_assessment",
+      "actor": "model",
+      "input_hash": "aa745396b5f67643",
+      "outcome": "missing_or_delayed_goods_receipt",
+      "summary": "Classified as missing_or_delayed_goods_receipt; proposes request_goods_receipt at confidence 0.90, citing 4 field(s).",
+      "rule_id": null,
+      "model": "deterministic-stub-v1",
+      "prompt_version": "i2p-v1",
+      "detail": {
+        "proposed_action": "request_goods_receipt",
+        "proposed_cost_center": null,
+        "confidence": 0.9,
+        "evidence": [
+          "finding[I2P-R-007].detail",
+          "line[1].price.residual_pct",
+          "line[1].price.line_residual_abs",
+          "line[1].quantity.residual_base_qty"
+        ],
+        "ungrounded": [],
+        "rationale": "No goods receipt has been posted against this purchase-order line."
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:32.683207Z",
+      "case_id": "INV-00314",
+      "module": "i2p",
+      "step_name": "routing_decision",
+      "actor": "rule",
+      "input_hash": "80a2bcfba5b7cada",
+      "outcome": "escalate",
+      "summary": "Routed to escalate: Exception 'missing_or_delayed_goods_receipt' is rated high severity.",
+      "rule_id": "I2P-S-12",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "reasons": [
+          "Exception 'missing_or_delayed_goods_receipt' is rated high severity."
+        ],
+        "tier_before_model": "escalate"
+      }
+    }
+  ]
+}

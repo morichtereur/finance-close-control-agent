@@ -46,10 +46,13 @@ jobs:
         env:
           LLM_PROVIDER: mock
         run: |
-          python -m fcca.generate_data
-          python -m fcca.ingest_policies --quiet
-          python -m fcca.run_case --exception EXC-0001 --provider mock
-          python -m fcca.evaluate --provider mock --quiet
+          python -m fcca.close.generate_data
+          python -m fcca.close.ingest_policies --quiet
+          python -m fcca.close.run_case --exception EXC-0001 --provider mock
+          python -m fcca.close.evaluate --provider mock --quiet
+          python -m fcca.cli trace --case EXC-0001
+          python -m fcca.i2p.generate_data --quiet
+          python -m fcca.i2p.evaluate --provider mock
 
       - name: Benchmark artefact
         if: matrix.python-version == '3.12'

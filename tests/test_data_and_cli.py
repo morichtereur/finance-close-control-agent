@@ -6,13 +6,13 @@ import hashlib
 import json
 from pathlib import Path
 
-from fcca.analytics import CloseAnalytics
 from fcca.cli import main as cli_main
-from fcca.config import Settings
-from fcca.evaluation.benchmark import load_labels
-from fcca.generate_data import SCENARIOS, generate
-from fcca.retrieval.retriever import PolicyRetrievalService
-from fcca.workflow.tools import build_control_tools, tool_catalogue
+from fcca.close.analytics import CloseAnalytics
+from fcca.close.evaluation.benchmark import load_labels
+from fcca.close.generate_data import SCENARIOS, generate
+from fcca.close.retrieval.retriever import PolicyRetrievalService
+from fcca.close.workflow.tools import build_control_tools, tool_catalogue
+from fcca.shared.config import Settings
 
 
 def _sha(path: Path) -> str:

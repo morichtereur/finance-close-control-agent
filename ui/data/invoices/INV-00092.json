@@ -1,0 +1,466 @@
+{
+  "invoice_id": "INV-00092",
+  "invoice": {
+    "invoice_id": "INV-00092",
+    "vendor_id": "V-10016",
+    "company_code": "NL30",
+    "category": "MM",
+    "invoice_date": "2026-06-13",
+    "received_date": "2026-06-13",
+    "vendor_reference": "NL43439",
+    "currency": "EUR",
+    "lines": [
+      {
+        "line_no": 1,
+        "description": "Cleaning service, per hour",
+        "supplier_item_no": "MF-CLEAN-HR",
+        "quantity": 124.0,
+        "uom": "HR",
+        "price": {
+          "list_price": 3200.0,
+          "price_unit": 100,
+          "discount_pct": [
+            2.79
+          ],
+          "surcharge_per_unit": 0.0
+        },
+        "tax_rate": 7.0,
+        "po_id": "PO-4500072",
+        "po_line": 10,
+        "gl_account": null,
+        "cost_center": "CC-6100"
+      }
+    ],
+    "stated_bank_iban": "NL39RABO0300065264",
+    "free_text": "",
+    "stated_total_net": 3857.29,
+    "stated_total_tax": 270.01,
+    "stated_total_gross": 4127.3
+  },
+  "vendor": {
+    "vendor_id": "V-10016",
+    "name": "Okabe Sensors Europe N.V.",
+    "country": "NL",
+    "currency": "EUR",
+    "payment_terms": "NT45",
+    "tax_id": "NL810876123B01",
+    "bank_iban": "NL39RABO0300065264",
+    "bank_name": "Amstel Zakenbank",
+    "is_blocked": false
+  },
+  "purchase_orders": {
+    "PO-4500072": {
+      "po_id": "PO-4500072",
+      "vendor_id": "V-10016",
+      "company_code": "NL30",
+      "po_date": "2026-05-23",
+      "currency": "EUR",
+      "lines": [
+        {
+          "po_line": 10,
+          "material_id": "MAT-900001",
+          "supplier_item_no": "MF-CLEAN-HR",
+          "quantity": 124.0,
+          "uom": "HR",
+          "price": {
+            "list_price": 3200.0,
+            "price_unit": 100,
+            "discount_pct": [
+              2.79
+            ],
+            "surcharge_per_unit": 0.0
+          },
+          "tax_code": "V2",
+          "gl_account": "470000",
+          "cost_center": "CC-6100"
+        }
+      ]
+    }
+  },
+  "goods_receipts": [
+    {
+      "gr_id": "GR-5000148",
+      "po_id": "PO-4500072",
+      "po_line": 10,
+      "receipt_date": "2026-06-09",
+      "quantity": 124.0,
+      "uom": "HR"
+    }
+  ],
+  "result": {
+    "invoice_id": "INV-00092",
+    "category": "MM",
+    "document_value": 4127.3,
+    "currency": "EUR",
+    "resolutions": [
+      {
+        "line_no": 1,
+        "material_id": "MAT-900001",
+        "material_source": "supplier_item_no",
+        "tax_code": "V2",
+        "gl_account": "470000",
+        "gl_source": "derived",
+        "cost_center": "CC-6100",
+        "cost_center_source": "stated",
+        "price": {
+          "po_unit_price_normalised": 31.1072,
+          "invoice_unit_price_normalised": 31.1072,
+          "residual_abs": 0.0,
+          "residual_pct": 0.0,
+          "line_residual_abs": 0.0,
+          "naive_residual_abs": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 2.0,
+          "tolerance_abs": 25.0
+        },
+        "quantity": {
+          "invoiced_base_qty": 124.0,
+          "received_base_qty": 124.0,
+          "open_base_qty": 124.0,
+          "residual_base_qty": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 0.0
+        }
+      }
+    ],
+    "findings": [
+      {
+        "rule_id": "I2P-R-005",
+        "exception_type": "gl_account_missing",
+        "line_no": 1,
+        "severity": "low",
+        "detail": "GL account not stated; derived 470000 from material group 9000.",
+        "evidence": {
+          "material_id": "MAT-900001",
+          "material_group": "9000",
+          "derived_gl_account": "470000"
+        }
+      }
+    ],
+    "duplicate_candidates": [],
+    "routing": {
+      "tier": "propose_and_approve",
+      "reasons": [
+        "Exception 'gl_account_missing' at 4,127.30 with a resolution the system can state; a named person approves or rejects it."
+      ],
+      "deciding_reason": "Exception 'gl_account_missing' at 4,127.30 with a resolution the system can state; a named person approves or rejects it.",
+      "model_confidence": null,
+      "document_value": 4127.3,
+      "exception_type": "gl_account_missing"
+    },
+    "evaluated_at": "2026-08-23T06:51:31.894398Z"
+  },
+  "routing": {
+    "tier": "propose_and_approve",
+    "reasons": [
+      "Exception 'gl_account_missing' at 4,127.30 with a resolution the system can state; a named person approves or rejects it."
+    ],
+    "deciding_reason": "Exception 'gl_account_missing' at 4,127.30 with a resolution the system can state; a named person approves or rejects it.",
+    "model_confidence": 0.94,
+    "document_value": 4127.3,
+    "exception_type": "gl_account_missing"
+  },
+  "assessment": {
+    "assessment": {
+      "invoice_id": "INV-00092",
+      "classification": "gl_account_missing",
+      "proposed_action": "derive_and_post",
+      "rationale": "GL account not stated; derived 470000 from material group 9000.",
+      "evidence": [
+        {
+          "field_path": "finding[I2P-R-005].detail"
+        },
+        {
+          "field_path": "line[1].price.residual_pct"
+        },
+        {
+          "field_path": "line[1].price.line_residual_abs"
+        },
+        {
+          "field_path": "line[1].quantity.residual_base_qty"
+        }
+      ],
+      "confidence": 0.94,
+      "proposed_cost_center": null
+    },
+    "grounding": {
+      "total_citations": 4,
+      "grounded_citations": 4,
+      "ungrounded_citations": []
+    },
+    "run": {
+      "provider": "mock",
+      "model": "deterministic-stub-v1",
+      "latency_ms": 0,
+      "prompt_sha256": "7dbceaf1c47cce08c255726e4e739348",
+      "input_tokens": null,
+      "output_tokens": null,
+      "estimated_cost_usd": null,
+      "parse_attempts": 1,
+      "structured_output_mode": "json_schema_prompt"
+    },
+    "raw_output": "{\n  \"invoice_id\": \"INV-00092\",\n  \"classification\": \"gl_account_missing\",\n  \"proposed_action\": \"derive_and_post\",\n  \"rationale\": \"GL account not stated; derived 470000 from material group 9000.\",\n  \"evidence\": [\n    {\n      \"field_path\": \"finding[I2P-R-005].detail\"\n    },\n    {\n      \"field_path\": \"line[1].price.residual_pct\"\n    },\n    {\n      \"field_path\": \"line[1].price.line_residual_abs\"\n    },\n    {\n      \"field_path\": \"line[1].quantity.residual_base_qty\"\n    }\n  ],\n  \"confidence\": 0.94,\n  \"proposed_cost_center\": null\n}"
+  },
+  "model_called": true,
+  "trace": [
+    {
+      "timestamp": "2026-08-23T06:51:31.893197Z",
+      "case_id": "INV-00092",
+      "module": "i2p",
+      "step_name": "intake",
+      "actor": "rule",
+      "input_hash": "380ccc68a1e68e6f",
+      "outcome": "loaded",
+      "summary": "Received INV-00092 from V-10016, EUR 4,127.30, 1 line(s).",
+      "rule_id": "I2P-S-01",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "vendor_reference": "NL43439",
+        "invoice_date": "2026-06-13",
+        "received_date": "2026-06-13",
+        "gross": 4127.3
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.893289Z",
+      "case_id": "INV-00092",
+      "module": "i2p",
+      "step_name": "classification",
+      "actor": "rule",
+      "input_hash": "9b6177e281ad15a7",
+      "outcome": "MM",
+      "summary": "Classified as MM. At least one line references a purchase order.",
+      "rule_id": "I2P-S-02",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.893432Z",
+      "case_id": "INV-00092",
+      "module": "i2p",
+      "step_name": "duplicate_check",
+      "actor": "rule",
+      "input_hash": "852aed95d33164af",
+      "outcome": "unique",
+      "summary": "No match among 28 earlier invoice(s) from this vendor.",
+      "rule_id": "I2P-S-03",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "candidates": [],
+        "compared_against": 28
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.893551Z",
+      "case_id": "INV-00092",
+      "module": "i2p",
+      "step_name": "master_data_resolution",
+      "actor": "rule",
+      "input_hash": "551c7b8cd4162581",
+      "outcome": "resolved",
+      "summary": "Resolved 1 of 1 supplier item number(s) to material master.",
+      "rule_id": "I2P-S-04",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "materials": {
+          "1": "MAT-900001"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.893647Z",
+      "case_id": "INV-00092",
+      "module": "i2p",
+      "step_name": "tax_code",
+      "actor": "rule",
+      "input_hash": "e8980b1b4ea755da",
+      "outcome": "resolved",
+      "summary": "Tax codes: line 1: V2.",
+      "rule_id": "I2P-S-05",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "tax_codes": {
+          "1": "V2"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.893763Z",
+      "case_id": "INV-00092",
+      "module": "i2p",
+      "step_name": "gl_derivation",
+      "actor": "rule",
+      "input_hash": "6563c2b9af51d12f",
+      "outcome": "derived",
+      "summary": "GL account derived from material group on line(s) [1].",
+      "rule_id": "I2P-S-06",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "gl_accounts": {
+          "1": [
+            "470000",
+            "derived"
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.893863Z",
+      "case_id": "INV-00092",
+      "module": "i2p",
+      "step_name": "cost_center_derivation",
+      "actor": "rule",
+      "input_hash": "2e2826b34785bef0",
+      "outcome": "resolved",
+      "summary": "Cost centre resolved on every line.",
+      "rule_id": "I2P-S-07",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "cost_centers": {
+          "1": [
+            "CC-6100",
+            "stated"
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.893985Z",
+      "case_id": "INV-00092",
+      "module": "i2p",
+      "step_name": "three_way_match",
+      "actor": "rule",
+      "input_hash": "1f301ccf1153d69f",
+      "outcome": "matched",
+      "summary": "Three-way match applicable to 1 line(s): purchase order, goods receipt and invoice.",
+      "rule_id": "I2P-S-08",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.894094Z",
+      "case_id": "INV-00092",
+      "module": "i2p",
+      "step_name": "quantity_check",
+      "actor": "rule",
+      "input_hash": "24cce9d143dd55d5",
+      "outcome": "computed",
+      "summary": "line 1: invoiced 124.000 of 124.000 available",
+      "rule_id": "I2P-S-09",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.894201Z",
+      "case_id": "INV-00092",
+      "module": "i2p",
+      "step_name": "price_check",
+      "actor": "rule",
+      "input_hash": "4e906eb4359bdfa0",
+      "outcome": "computed",
+      "summary": "line 1: normalised 31.107200 vs 31.107200 (+0.00%), naive comparison would show +0.0000",
+      "rule_id": "I2P-S-10",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.894296Z",
+      "case_id": "INV-00092",
+      "module": "i2p",
+      "step_name": "tolerance_evaluation",
+      "actor": "rule",
+      "input_hash": "212c5cbb2a42ad97",
+      "outcome": "within_tolerance",
+      "summary": "All residuals inside tolerance (2.0% or 25.00).",
+      "rule_id": "I2P-S-11",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "breached_lines": []
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.894412Z",
+      "case_id": "INV-00092",
+      "module": "i2p",
+      "step_name": "routing_decision",
+      "actor": "rule",
+      "input_hash": "080782c55443b57e",
+      "outcome": "propose_and_approve",
+      "summary": "1 finding(s); primary exception gl_account_missing. Rules alone route to propose_and_approve.",
+      "rule_id": "I2P-S-12",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "tier": "propose_and_approve",
+        "routing_reasons": [
+          "Exception 'gl_account_missing' at 4,127.30 with a resolution the system can state; a named person approves or rejects it."
+        ],
+        "findings": [
+          {
+            "rule_id": "I2P-R-005",
+            "exception_type": "gl_account_missing",
+            "line_no": 1,
+            "severity": "low",
+            "detail": "GL account not stated; derived 470000 from material group 9000."
+          }
+        ]
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.895226Z",
+      "case_id": "INV-00092",
+      "module": "i2p",
+      "step_name": "exception_assessment",
+      "actor": "model",
+      "input_hash": "434dccdb1d2d7643",
+      "outcome": "gl_account_missing",
+      "summary": "Classified as gl_account_missing; proposes derive_and_post at confidence 0.94, citing 4 field(s).",
+      "rule_id": null,
+      "model": "deterministic-stub-v1",
+      "prompt_version": "i2p-v1",
+      "detail": {
+        "proposed_action": "derive_and_post",
+        "proposed_cost_center": null,
+        "confidence": 0.94,
+        "evidence": [
+          "finding[I2P-R-005].detail",
+          "line[1].price.residual_pct",
+          "line[1].price.line_residual_abs",
+          "line[1].quantity.residual_base_qty"
+        ],
+        "ungrounded": [],
+        "rationale": "GL account not stated; derived 470000 from material group 9000."
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.895375Z",
+      "case_id": "INV-00092",
+      "module": "i2p",
+      "step_name": "routing_decision",
+      "actor": "rule",
+      "input_hash": "602453a7d6cd6fd0",
+      "outcome": "propose_and_approve",
+      "summary": "Routed to propose_and_approve: Exception 'gl_account_missing' at 4,127.30 with a resolution the system can state; a named person approves or rejects it.",
+      "rule_id": "I2P-S-12",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "reasons": [
+          "Exception 'gl_account_missing' at 4,127.30 with a resolution the system can state; a named person approves or rejects it."
+        ],
+        "tier_before_model": "propose_and_approve"
+      }
+    }
+  ]
+}

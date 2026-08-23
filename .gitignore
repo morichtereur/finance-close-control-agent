@@ -22,6 +22,7 @@ data/raw/
 data/processed/
 data/evaluation/
 audit.db
+*.jsonl.tmp
 
 # Audit exports may contain full case detail; benchmark results are committed on
 # purpose so the comparison table travels with the repository.
@@ -29,3 +30,9 @@ results/*.jsonl
 
 # OS
 .DS_Store
+
+# macOS/iCloud sync duplicates ("file 2.py"). Untracked, but a `git add -A`
+# would publish them; the pattern is never a legitimate filename here.
+* 2.*
+* 2
+* [0-9].py
