@@ -22,6 +22,7 @@ demo:
 
 eval:
 	$(PY) -m fcca.close.evaluate --provider mock
+	$(PY) -m fcca.i2p.evaluate --provider mock
 
 test:
 	$(PY) -m pytest
