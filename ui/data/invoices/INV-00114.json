@@ -1,0 +1,356 @@
+{
+  "invoice_id": "INV-00114",
+  "invoice": {
+    "invoice_id": "INV-00114",
+    "vendor_id": "V-10011",
+    "company_code": "FR20",
+    "category": "MM",
+    "invoice_date": "2026-07-26",
+    "received_date": "2026-07-26",
+    "vendor_reference": "NL44560",
+    "currency": "EUR",
+    "lines": [
+      {
+        "line_no": 1,
+        "description": "Buffer solution pH 7.00",
+        "supplier_item_no": "OK-BUF-700",
+        "quantity": 379.0,
+        "uom": "L",
+        "price": {
+          "list_price": 18.9,
+          "price_unit": 1,
+          "discount_pct": [],
+          "surcharge_per_unit": 0.0
+        },
+        "tax_rate": 19.0,
+        "po_id": "PO-4500089",
+        "po_line": 10,
+        "gl_account": "420000",
+        "cost_center": "CC-8200"
+      }
+    ],
+    "stated_bank_iban": "NL91ABNA0417164300",
+    "free_text": "",
+    "stated_total_net": 7163.1,
+    "stated_total_tax": 1360.99,
+    "stated_total_gross": 8524.09
+  },
+  "vendor": {
+    "vendor_id": "V-10011",
+    "name": "Delta Componenten B.V.",
+    "country": "NL",
+    "currency": "EUR",
+    "payment_terms": "NT45",
+    "tax_id": "NL004495445B01",
+    "bank_iban": "NL91ABNA0417164300",
+    "bank_name": "Amstel Zakenbank",
+    "is_blocked": false
+  },
+  "purchase_orders": {
+    "PO-4500089": {
+      "po_id": "PO-4500089",
+      "vendor_id": "V-10011",
+      "company_code": "FR20",
+      "po_date": "2026-07-05",
+      "currency": "EUR",
+      "lines": [
+        {
+          "po_line": 10,
+          "material_id": "MAT-500777",
+          "supplier_item_no": "OK-BUF-700",
+          "quantity": 379.0,
+          "uom": "L",
+          "price": {
+            "list_price": 189.0,
+            "price_unit": 10,
+            "discount_pct": [],
+            "surcharge_per_unit": 0.0
+          },
+          "tax_code": "V1",
+          "gl_account": "420000",
+          "cost_center": "CC-8200"
+        }
+      ]
+    }
+  },
+  "goods_receipts": [
+    {
+      "gr_id": "GR-5000181",
+      "po_id": "PO-4500089",
+      "po_line": 10,
+      "receipt_date": "2026-07-22",
+      "quantity": 379.0,
+      "uom": "L"
+    }
+  ],
+  "result": {
+    "invoice_id": "INV-00114",
+    "category": "MM",
+    "document_value": 8524.09,
+    "currency": "EUR",
+    "resolutions": [
+      {
+        "line_no": 1,
+        "material_id": "MAT-500777",
+        "material_source": "supplier_item_no",
+        "tax_code": "V1",
+        "gl_account": "420000",
+        "gl_source": "stated",
+        "cost_center": "CC-8200",
+        "cost_center_source": "stated",
+        "price": {
+          "po_unit_price_normalised": 18.9,
+          "invoice_unit_price_normalised": 18.9,
+          "residual_abs": 0.0,
+          "residual_pct": 0.0,
+          "line_residual_abs": 0.0,
+          "naive_residual_abs": -170.1,
+          "within_tolerance": true,
+          "tolerance_pct": 2.0,
+          "tolerance_abs": 25.0
+        },
+        "quantity": {
+          "invoiced_base_qty": 379.0,
+          "received_base_qty": 379.0,
+          "open_base_qty": 379.0,
+          "residual_base_qty": 0.0,
+          "within_tolerance": true,
+          "tolerance_pct": 0.0
+        }
+      }
+    ],
+    "findings": [],
+    "duplicate_candidates": [],
+    "routing": {
+      "tier": "propose_and_approve",
+      "reasons": [
+        "Clean match, but document value 8,524.09 is at or above the auto-clear limit of 5,000.00."
+      ],
+      "deciding_reason": "Clean match, but document value 8,524.09 is at or above the auto-clear limit of 5,000.00.",
+      "model_confidence": null,
+      "document_value": 8524.09,
+      "exception_type": "no_exception"
+    },
+    "evaluated_at": "2026-08-23T06:51:31.953800Z"
+  },
+  "routing": {
+    "tier": "propose_and_approve",
+    "reasons": [
+      "Clean match, but document value 8,524.09 is at or above the auto-clear limit of 5,000.00."
+    ],
+    "deciding_reason": "Clean match, but document value 8,524.09 is at or above the auto-clear limit of 5,000.00.",
+    "model_confidence": null,
+    "document_value": 8524.09,
+    "exception_type": "no_exception"
+  },
+  "assessment": null,
+  "model_called": false,
+  "trace": [
+    {
+      "timestamp": "2026-08-23T06:51:31.952744Z",
+      "case_id": "INV-00114",
+      "module": "i2p",
+      "step_name": "intake",
+      "actor": "rule",
+      "input_hash": "fb1a27619c960ac3",
+      "outcome": "loaded",
+      "summary": "Received INV-00114 from V-10011, EUR 8,524.09, 1 line(s).",
+      "rule_id": "I2P-S-01",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "vendor_reference": "NL44560",
+        "invoice_date": "2026-07-26",
+        "received_date": "2026-07-26",
+        "gross": 8524.09
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.952839Z",
+      "case_id": "INV-00114",
+      "module": "i2p",
+      "step_name": "classification",
+      "actor": "rule",
+      "input_hash": "2359b5ed2fa090e2",
+      "outcome": "MM",
+      "summary": "Classified as MM. At least one line references a purchase order.",
+      "rule_id": "I2P-S-02",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.952974Z",
+      "case_id": "INV-00114",
+      "module": "i2p",
+      "step_name": "duplicate_check",
+      "actor": "rule",
+      "input_hash": "5d5b6c9a2dd17148",
+      "outcome": "unique",
+      "summary": "No match among 31 earlier invoice(s) from this vendor.",
+      "rule_id": "I2P-S-03",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "candidates": [],
+        "compared_against": 31
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.953061Z",
+      "case_id": "INV-00114",
+      "module": "i2p",
+      "step_name": "master_data_resolution",
+      "actor": "rule",
+      "input_hash": "15c63c5f8cd323a5",
+      "outcome": "resolved",
+      "summary": "Resolved 1 of 1 supplier item number(s) to material master.",
+      "rule_id": "I2P-S-04",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "materials": {
+          "1": "MAT-500777"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.953144Z",
+      "case_id": "INV-00114",
+      "module": "i2p",
+      "step_name": "tax_code",
+      "actor": "rule",
+      "input_hash": "0043921710fdebfc",
+      "outcome": "resolved",
+      "summary": "Tax codes: line 1: V1.",
+      "rule_id": "I2P-S-05",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "tax_codes": {
+          "1": "V1"
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.953223Z",
+      "case_id": "INV-00114",
+      "module": "i2p",
+      "step_name": "gl_derivation",
+      "actor": "rule",
+      "input_hash": "c853f555c4469bc4",
+      "outcome": "stated",
+      "summary": "GL account stated on every line.",
+      "rule_id": "I2P-S-06",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "gl_accounts": {
+          "1": [
+            "420000",
+            "stated"
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.953309Z",
+      "case_id": "INV-00114",
+      "module": "i2p",
+      "step_name": "cost_center_derivation",
+      "actor": "rule",
+      "input_hash": "aa7e0d9349890b3c",
+      "outcome": "resolved",
+      "summary": "Cost centre resolved on every line.",
+      "rule_id": "I2P-S-07",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "cost_centers": {
+          "1": [
+            "CC-8200",
+            "stated"
+          ]
+        }
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.953407Z",
+      "case_id": "INV-00114",
+      "module": "i2p",
+      "step_name": "three_way_match",
+      "actor": "rule",
+      "input_hash": "1f301ccf1153d69f",
+      "outcome": "matched",
+      "summary": "Three-way match applicable to 1 line(s): purchase order, goods receipt and invoice.",
+      "rule_id": "I2P-S-08",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.953504Z",
+      "case_id": "INV-00114",
+      "module": "i2p",
+      "step_name": "quantity_check",
+      "actor": "rule",
+      "input_hash": "ae9b01c86d01ac86",
+      "outcome": "computed",
+      "summary": "line 1: invoiced 379.000 of 379.000 available",
+      "rule_id": "I2P-S-09",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.953612Z",
+      "case_id": "INV-00114",
+      "module": "i2p",
+      "step_name": "price_check",
+      "actor": "rule",
+      "input_hash": "28f159dd74811675",
+      "outcome": "computed",
+      "summary": "line 1: normalised 18.900000 vs 18.900000 (+0.00%), naive comparison would show -170.1000",
+      "rule_id": "I2P-S-10",
+      "model": null,
+      "prompt_version": null,
+      "detail": {}
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.953698Z",
+      "case_id": "INV-00114",
+      "module": "i2p",
+      "step_name": "tolerance_evaluation",
+      "actor": "rule",
+      "input_hash": "212c5cbb2a42ad97",
+      "outcome": "within_tolerance",
+      "summary": "All residuals inside tolerance (2.0% or 25.00).",
+      "rule_id": "I2P-S-11",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "breached_lines": []
+      }
+    },
+    {
+      "timestamp": "2026-08-23T06:51:31.953807Z",
+      "case_id": "INV-00114",
+      "module": "i2p",
+      "step_name": "routing_decision",
+      "actor": "rule",
+      "input_hash": "2c327a70d08f7280",
+      "outcome": "propose_and_approve",
+      "summary": "No finding. Invoice matches on price, quantity and coding. Rules alone route to propose_and_approve.",
+      "rule_id": "I2P-S-12",
+      "model": null,
+      "prompt_version": null,
+      "detail": {
+        "tier": "propose_and_approve",
+        "routing_reasons": [
+          "Clean match, but document value 8,524.09 is at or above the auto-clear limit of 5,000.00."
+        ],
+        "findings": []
+      }
+    }
+  ]
+}
