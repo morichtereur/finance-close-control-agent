@@ -15,6 +15,7 @@ install:
 data:
 	$(PY) -m fcca.close.generate_data
 	$(PY) -m fcca.close.ingest_policies
+	$(PY) -m fcca.i2p.generate_data --quiet
 
 demo:
 	$(PY) -m fcca.close.run_case --exception EXC-0001 --provider mock

@@ -31,7 +31,15 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import AliasChoices, Field, computed_field, field_validator
+from pydantic import (
+    AliasChoices,
+    BaseModel,
+    ConfigDict,
+    Field,
+    computed_field,
+    field_validator,
+    model_validator,
+)
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -50,6 +58,106 @@ REPO_ROOT = PACKAGE_ROOT.parents[2]
 #: The business-rule file. Overridable with ``FCCA_CONFIG_FILE`` so that tests
 #: and alternative deployments can point at their own tolerances.
 DEFAULT_CONFIG_FILE = REPO_ROOT / "config" / "thresholds.yaml"
+
+
+class I2PConfig(BaseModel):
+    """Invoice-to-pay tolerances, approval limits and routing rules.
+
+    Nested rather than flat because these are one coherent set of rules that a
+    process owner reads together, and because ``i2p.price_tolerance_pct`` says
+    which process it governs in a way that ``price_tolerance_pct`` does not.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    # --------------------------------------------------------------- tolerances
+    price_tolerance_pct: float = Field(
+        default=2.0,
+        ge=0.0,
+        le=100.0,
+        description="Permitted deviation of normalised net unit price, in percent.",
+    )
+    price_tolerance_abs: float = Field(
+        default=25.0,
+        ge=0.0,
+        description=(
+            "Permitted deviation per line in document currency. A line passes if it "
+            "is inside EITHER limit — see tolerance_evaluation for why."
+        ),
+    )
+    quantity_tolerance_pct: float = Field(
+        default=0.0,
+        ge=0.0,
+        le=100.0,
+        description=(
+            "Permitted over-delivery relative to goods received, in percent. Zero by "
+            "default: paying for more than was received is the failure this process exists "
+            "to prevent."
+        ),
+    )
+    gr_grace_days: int = Field(
+        default=3,
+        ge=0,
+        description=(
+            "Days an invoice may arrive ahead of its goods receipt before the missing "
+            "receipt is treated as an exception rather than ordinary timing."
+        ),
+    )
+
+    # ------------------------------------------------------------ duplicate check
+    duplicate_window_days: int = Field(
+        default=90,
+        gt=0,
+        description="Look-back window for duplicate candidates, in days.",
+    )
+    duplicate_amount_tolerance: float = Field(
+        default=0.01,
+        ge=0.0,
+        description="Amounts within this absolute difference count as equal.",
+    )
+    duplicate_reference_similarity: float = Field(
+        default=0.85,
+        ge=0.0,
+        le=1.0,
+        description=(
+            "Similarity above which two vendor references are treated as the same "
+            "reference. Fuzzy because 'INV-4471' and 'INV 4471' are the same document."
+        ),
+    )
+
+    # ------------------------------------------------------------ routing limits
+    auto_clear_max_value: float = Field(
+        default=5_000.0,
+        gt=0,
+        description=(
+            "Document value at or above which nothing is cleared without a person, "
+            "however clean the match and however confident the model."
+        ),
+    )
+    auto_clear_min_confidence: float = Field(
+        default=0.85,
+        ge=0.0,
+        le=1.0,
+        description="Model confidence below which a proposal always goes to a person.",
+    )
+    propose_max_value: float = Field(
+        default=50_000.0,
+        gt=0,
+        description=(
+            "Document value at or above which an exception is escalated rather than "
+            "offered to an approver as a proposal."
+        ),
+    )
+
+    @model_validator(mode="after")
+    def _limits_are_ordered(self) -> I2PConfig:
+        """A proposal limit below the auto-clear limit would make the tiers unreachable."""
+        if self.propose_max_value <= self.auto_clear_max_value:
+            raise ValueError(
+                "i2p.propose_max_value must exceed i2p.auto_clear_max_value; "
+                f"got {self.propose_max_value} <= {self.auto_clear_max_value}"
+            )
+        return self
 
 
 class Settings(BaseSettings):
@@ -221,6 +329,12 @@ class Settings(BaseSettings):
         ge=0,
     )
 
+    # ------------------------------------------------------------ invoice-to-pay
+    i2p: I2PConfig = Field(
+        default_factory=lambda: I2PConfig(),
+        description="Invoice-to-pay tolerances, approval limits and routing rules.",
+    )
+
     # ------------------------------------------------------------------- retrieval
     retrieval_top_k: int = Field(
         default=4, validation_alias=AliasChoices("FCCA_RETRIEVAL_TOP_K", "retrieval_top_k"), gt=0
@@ -319,6 +433,27 @@ class Settings(BaseSettings):
     def i2p_trace_path(self) -> Path:
         """Append-only step trace for the invoice-to-pay module."""
         return self.processed_data_dir / "i2p_trace.jsonl"
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def i2p_data_dir(self) -> Path:
+        """Structured JSON dataset for the invoice-to-pay module.
+
+        JSON rather than CSV because invoices are nested documents — header,
+        lines, cascading discounts — and flattening them into a table would be a
+        modelling decision made for the storage format's convenience.
+        """
+        return self.raw_data_dir / "i2p"
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def i2p_labels_path(self) -> Path:
+        return self.evaluation_dir / "i2p_labels.json"
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def i2p_results_path(self) -> Path:
+        return self.processed_data_dir / "i2p_results.json"
 
     @computed_field  # type: ignore[prop-decorator]
     @property
