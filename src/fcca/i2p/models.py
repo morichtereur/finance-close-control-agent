@@ -26,7 +26,7 @@ downstream unfalsifiable.
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
@@ -380,7 +380,86 @@ class ExceptionFinding(BaseModel):
     )
 
 
+class LineResolution(BaseModel):
+    """What the deterministic layer worked out about one invoice line.
+
+    Every field records not just the value but where it came from. ``stated``
+    means the vendor supplied it; ``derived`` means a rule computed it from
+    master data; ``unresolved`` means neither, which is an exception. A reviewer
+    reading the queue must be able to tell a value that was on the document from
+    one the system worked out.
+    """
+
+    model_config = ConfigDict(frozen=True)
+
+    line_no: int
+    material_id: str | None = None
+    material_source: Literal["supplier_item_no", "unresolved"] = "unresolved"
+    tax_code: str | None = None
+    gl_account: str | None = None
+    gl_source: Literal["stated", "derived", "unresolved"] = "unresolved"
+    cost_center: str | None = None
+    cost_center_source: Literal["stated", "derived_from_po", "unresolved"] = "unresolved"
+    price: PriceComparison | None = None
+    quantity: QuantityComparison | None = None
+
+
+class InvoiceResult(BaseModel):
+    """The complete deterministic outcome for one invoice.
+
+    This object is what the agent layer receives and what the UI renders. It
+    contains no model output: everything in it was computed, and the separation
+    is what lets the evaluation attribute a mistake to the right layer.
+    """
+
+    invoice_id: str
+    category: InvoiceCategory
+    document_value: float = Field(description="Gross value in document currency.")
+    currency: str
+    resolutions: tuple[LineResolution, ...]
+    findings: tuple[ExceptionFinding, ...]
+    duplicate_candidates: tuple[str, ...] = ()
+    evaluated_at: datetime
+
+    @property
+    def is_exception(self) -> bool:
+        return bool(self.findings)
+
+    @property
+    def primary_exception(self) -> ExceptionType:
+        """The finding that decides how the invoice is handled.
+
+        Where several rules fire, the most severe wins, and ties are broken by
+        the fixed order below rather than by whichever rule happened to run
+        first. Routing must not depend on iteration order.
+        """
+        if not self.findings:
+            return "no_exception"
+        severity_rank = {"high": 0, "medium": 1, "low": 2}
+        return min(
+            self.findings,
+            key=lambda f: (severity_rank[f.severity], EXCEPTION_PRECEDENCE.index(f.exception_type)),
+        ).exception_type
+
+
+#: Fixed tie-break order for :attr:`InvoiceResult.primary_exception`. Ordered by
+#: how much money a wrong answer costs: paying a fraudster outranks paying twice,
+#: which outranks paying too much, which outranks paying for goods not yet
+#: booked in. Coding gaps come last — they are wrong, but they are recoverable.
+EXCEPTION_PRECEDENCE: tuple[ExceptionType, ...] = (
+    "bank_details_mismatch",
+    "duplicate_invoice",
+    "quantity_variance",
+    "price_variance",
+    "missing_or_delayed_goods_receipt",
+    "cost_center_missing",
+    "gl_account_missing",
+    "no_exception",
+)
+
+
 __all__ = [
+    "EXCEPTION_PRECEDENCE",
     "CostCenter",
     "ExceptionFinding",
     "ExceptionType",
@@ -389,6 +468,8 @@ __all__ = [
     "Invoice",
     "InvoiceCategory",
     "InvoiceLine",
+    "InvoiceResult",
+    "LineResolution",
     "Material",
     "PriceComparison",
     "PriceElements",

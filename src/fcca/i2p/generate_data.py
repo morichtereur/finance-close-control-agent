@@ -182,7 +182,12 @@ class _Builder:
 
     # ------------------------------------------------------- purchase orders
     def build_purchase_order(
-        self, vendor_id: str, company_code: str, line_count: int, po_date: date
+        self,
+        vendor_id: str,
+        company_code: str,
+        line_count: int,
+        po_date: date,
+        min_line_value: float = 0.0,
     ) -> PurchaseOrder:
         vendor = VENDORS_BY_ID[vendor_id]
         cost_centres = cost_centers_for(company_code) or COST_CENTERS
@@ -197,12 +202,35 @@ class _Builder:
             list_price = round(
                 material.standard_price / material.price_unit * factor * price_unit, 4
             )
+            quantity = float(self.rng.randrange(5, 400))
+            if min_line_value > 0:
+                # Order enough of it that the line is worth something. Used by the
+                # outside-tolerance scenario: the configured rule clears a line
+                # inside EITHER limit, so a percentage breach on a line worth
+                # forty euros is correctly not an exception. Making the variance
+                # enormous instead would breach both limits but stop resembling a
+                # pricing dispute anyone has ever had.
+                per_unit = (
+                    normalise_unit_price(
+                        PriceElements(
+                            list_price=list_price,
+                            price_unit=price_unit,
+                            discount_pct=(),
+                            surcharge_per_unit=0.0,
+                        ),
+                        material.material_id,
+                        uom,
+                    )
+                    * factor
+                )
+                if per_unit > 0:
+                    quantity = max(quantity, min_line_value / per_unit)
             lines.append(
                 PurchaseOrderLine(
                     po_line=index * 10,
                     material_id=material.material_id,
                     supplier_item_no=SUPPLIER_ITEM_NUMBERS[material.material_id],
-                    quantity=float(self.rng.randrange(5, 400)),
+                    quantity=round(quantity, 3),
                     uom=uom,
                     price=PriceElements(
                         list_price=list_price,
@@ -399,6 +427,7 @@ def _mm_case(
     omit_cost_center: bool = False,
     free_text: str = "",
     bank_iban: str | None = None,
+    min_line_value: float = 0.0,
     notes: str = "",
 ) -> Invoice:
     """Build one PO-based invoice with its purchase order and goods receipts."""
@@ -410,6 +439,7 @@ def _mm_case(
         company_code,
         builder.rng.choices([1, 2, 3], weights=[55, 30, 15])[0],
         po_date,
+        min_line_value=min_line_value,
     )
     invoice_date = po_date + timedelta(days=builder.rng.randrange(7, 25))
     if post_gr:
@@ -539,7 +569,13 @@ def _build_scenario(builder: _Builder, scenario: str) -> None:
             scenario,
             restate=True,
             price_factor=factor,
-            notes=f"Price difference of {(factor - 1) * 100:.2f}%, outside tolerance.",
+            # Large enough that the smallest realistic percentage breach is also
+            # material in absolute terms, so the label holds under the OR rule.
+            min_line_value=settings.i2p.price_tolerance_abs * 60,
+            notes=(
+                f"Price difference of {(factor - 1) * 100:.2f}%, breaching both the "
+                "percentage and the absolute limit."
+            ),
         )
 
     elif scenario == "missing_goods_receipt":
