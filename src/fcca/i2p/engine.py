@@ -30,10 +30,11 @@ from __future__ import annotations
 
 import logging
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any, Literal
 
 from fcca.i2p import checks
 from fcca.i2p.models import (
+    EXCEPTION_PRECEDENCE,
     ExceptionFinding,
     Invoice,
     InvoiceLine,
@@ -45,6 +46,7 @@ from fcca.i2p.models import (
 )
 from fcca.i2p.repository import I2PRepository
 from fcca.shared.config import Settings, get_settings
+from fcca.shared.routing import route
 from fcca.shared.trace import TraceWriter
 
 logger = logging.getLogger(__name__)
@@ -406,6 +408,23 @@ class InvoiceEngine:
                 )
             )
 
+        # ------------------------------------------------- deterministic routing
+        # Routed here with no model input at all, so the trace records the tier
+        # the rules alone assign. The agent layer re-routes afterwards with the
+        # model's confidence added, and the two records side by side show what
+        # the model changed — which, by construction, can only be to tighten.
+        primary = _primary_exception(findings)
+        routing = route(
+            exception_type=primary,
+            is_exception=bool(findings),
+            document_value=invoice.stated_total_gross,
+            auto_clear_max_value=config.auto_clear_max_value,
+            propose_max_value=config.propose_max_value,
+            auto_clear_min_confidence=config.auto_clear_min_confidence,
+            model_confidence=None,
+            severity=_primary_severity(findings, primary),
+        )
+
         result = InvoiceResult(
             invoice_id=invoice.invoice_id,
             category=category,  # type: ignore[arg-type]
@@ -414,6 +433,7 @@ class InvoiceEngine:
             resolutions=tuple(resolutions),
             findings=tuple(findings),
             duplicate_candidates=tuple(duplicates),
+            routing=routing,
             evaluated_at=datetime.now(UTC),
         )
 
@@ -427,13 +447,21 @@ class InvoiceEngine:
                 "findings": [f.rule_id for f in findings],
                 "document_value": result.document_value,
             },
-            result.primary_exception,
+            routing.tier,
             (
-                f"{len(findings)} finding(s); primary exception {result.primary_exception}."
+                # The full reason is in `detail`; the summary is one line a
+                # reviewer scans, and the trace schema caps it deliberately.
+                f"{len(findings)} finding(s); primary exception "
+                f"{result.primary_exception}. Rules alone route to {routing.tier}."
                 if findings
-                else "No finding. Invoice matches on price, quantity and coding."
+                else (
+                    "No finding. Invoice matches on price, quantity and coding. "
+                    f"Rules alone route to {routing.tier}."
+                )
             ),
             {
+                "tier": routing.tier,
+                "routing_reasons": routing.reasons,
                 "findings": [
                     {
                         "rule_id": f.rule_id,
@@ -443,7 +471,7 @@ class InvoiceEngine:
                         "detail": f.detail,
                     }
                     for f in findings
-                ]
+                ],
             },
         )
         return result
@@ -460,6 +488,25 @@ class InvoiceEngine:
 
 def _by_line(invoice: Invoice) -> list[tuple[int, InvoiceLine]]:
     return [(line.line_no, line) for line in invoice.lines]
+
+
+def _primary_exception(findings: list[ExceptionFinding]) -> str:
+    """Same precedence the result object uses, available before it is built."""
+    if not findings:
+        return "no_exception"
+    rank = {"high": 0, "medium": 1, "low": 2}
+    return min(
+        findings,
+        key=lambda f: (rank[f.severity], EXCEPTION_PRECEDENCE.index(f.exception_type)),
+    ).exception_type
+
+
+def _primary_severity(
+    findings: list[ExceptionFinding], primary: str
+) -> Literal["low", "medium", "high"] | None:
+    """Severity of the finding that decides the routing, not the worst overall."""
+    match = next((f for f in findings if f.exception_type == primary), None)
+    return match.severity if match else None
 
 
 __all__ = ["STEP_RULES", "InvoiceEngine"]

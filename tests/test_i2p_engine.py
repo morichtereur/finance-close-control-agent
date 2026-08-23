@@ -261,7 +261,16 @@ class TestSpecificBehaviours:
         from datetime import UTC, datetime
 
         from fcca.i2p.models import ExceptionFinding, InvoiceResult
+        from fcca.shared.routing import route
 
+        routing = route(
+            exception_type="bank_details_mismatch",
+            is_exception=True,
+            document_value=1000.0,
+            auto_clear_max_value=sandbox.i2p.auto_clear_max_value,
+            propose_max_value=sandbox.i2p.propose_max_value,
+            auto_clear_min_confidence=sandbox.i2p.auto_clear_min_confidence,
+        )
         result = InvoiceResult(
             invoice_id="INV-TEST",
             category="MM",
@@ -282,6 +291,7 @@ class TestSpecificBehaviours:
                     detail="mismatch",
                 ),
             ),
+            routing=routing,
             evaluated_at=datetime.now(UTC),
         )
         assert result.primary_exception == "bank_details_mismatch"
