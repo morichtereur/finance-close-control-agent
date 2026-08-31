@@ -36,3 +36,6 @@ results/*.jsonl
 * 2.*
 * 2
 * [0-9].py
+
+# Local tooling config.
+.claude/
