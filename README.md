@@ -575,3 +575,7 @@ genuinely high.
 ## Licence
 
 MIT. See [`docs/architecture.md`](docs/architecture.md) for the design rationale.
+
+---
+
+Built by [Moritz Richter](https://www.linkedin.com/in/moritz-richter-28297119a/) · Finance & Strategy Consultant · Zürich · [Portfolio](https://morichtereur.github.io/)
